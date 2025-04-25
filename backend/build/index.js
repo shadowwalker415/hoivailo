@@ -1,18 +1,10 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const config_1 = __importDefault(require("./utils/config"));
-const mongoose_1 = __importDefault(require("mongoose"));
-if (!config_1.default.MONGODB_URI) {
-    throw new Error("Missing MongoDB URI in environment variable");
-}
-console.log("Connecting to MongoDB");
-mongoose_1.default
-    .connect(config_1.default.MONGODB_URI)
-    .then(() => console.log("Connected to MongoDB"))
-    .catch((err) => {
-    console.log(err.message);
-    process.exit(1);
-});
+// import config from "./utils/config";
+// import app from "./app";
+// // import mongoose from "mongoose";
+// app.listen(config.PORT, () => {
+//   console.log(`Server running on port ${config.PORT}`);
+// });
+const appointmentDate = new Date("1990-03-22");
+const isValidDate = /^(?:(?:19|20)\d{2})-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|02-(?:0[1-9]|1\d|2[0-8])|02-29(?=-(?:19|20)(?:[02468][048]|[13579][26])))$/.test("<script>1990-03-100</script>");
+console.log(isValidDate);

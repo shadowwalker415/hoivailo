@@ -1,6 +1,11 @@
 import { Document } from "mongoose";
+import { Request } from "express";
 
 export type AppointmentStatus = "confirmed" | "cancelled";
+
+export interface IAppointmentDate {
+  date: Date;
+}
 
 export type AppointmentServices =
   | "kotiapu"
@@ -39,4 +44,8 @@ export interface IAppointment extends Document {
   createdAt: Date;
   updatedAt: Date;
   toJSON(): IAppointmentJSON;
+}
+
+export interface CustomRequest extends Request {
+  availabilityDate?: string;
 }
