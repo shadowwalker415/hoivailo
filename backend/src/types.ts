@@ -1,28 +1,24 @@
-import { Document } from "mongoose";
 import { Request } from "express";
 
 export type AppointmentStatus = "confirmed" | "cancelled";
 
-export interface IAppointmentDate {
-  date: Date;
+export enum AppointmentServices {
+  kotiapu = "kotiapu",
+  kotihoito = "kotihoito",
+  kotisiivous = "kotisiivous",
+  yrityssiivous = "yrityssiivous",
+  lastenhoito = "lastenhoito"
 }
-
-export type AppointmentServices =
-  | "kotiapu"
-  | "kotihoito"
-  | "lastenhoito"
-  | "kotisiivous"
-  | "yrityssiivous";
 
 export interface IAppointmentJSON {
-  id: string;
+  _id: string;
   startTime: Date;
   endTime: Date;
   appointmentId: string;
   name: string;
   email: string;
   emailConfirmed: boolean;
-  phone?: string;
+  phone: string;
   service: AppointmentServices;
   notes?: string;
   status: AppointmentStatus;
@@ -30,22 +26,27 @@ export interface IAppointmentJSON {
   updatedAt: Date;
 }
 
-export interface IAppointment extends Document {
+export interface IAppointment {
   startTime: Date;
   endTime: Date;
-  appointmentId: string;
+  appointmentId?: string;
   name: string;
   email: string;
-  emailConfirmed: boolean;
-  phone?: string;
-  service: AppointmentServices;
+  emailConfirmed?: boolean;
+  phone: string;
+  service: string;
   notes?: string;
-  status: AppointmentStatus;
-  createdAt: Date;
-  updatedAt: Date;
-  toJSON(): IAppointmentJSON;
+  status?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface WorkingHours {
+  start: string;
+  end: string;
 }
 
 export interface CustomRequest extends Request {
   availabilityDate?: string;
+  availableSlots?: string[];
 }

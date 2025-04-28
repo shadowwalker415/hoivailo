@@ -1,6 +1,6 @@
 import mongoose, { Schema, model } from "mongoose";
 import { IAppointment } from "../types";
-import { nanoid } from "nanoid";
+import { v4 as uuidv4 } from "uuid";
 
 mongoose.set("strictQuery", false);
 
@@ -16,7 +16,7 @@ const appointmentSchema: Schema<IAppointment> = new Schema(
     },
     name: {
       type: String,
-      required: true
+      required: [true, "Name must be at least 3 characters long"]
     },
     email: {
       type: String,
@@ -61,7 +61,7 @@ const appointmentSchema: Schema<IAppointment> = new Schema(
       type: String,
       required: true,
       unique: true,
-      default: () => nanoid(10)
+      default: () => uuidv4()
     }
   },
   {
