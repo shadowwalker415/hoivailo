@@ -29,7 +29,7 @@ const appointmentSchema: Schema<IAppointment> = new Schema(
       },
       trim: true
     },
-    emailConfirmed: {
+    emailSent: {
       type: Boolean,
       default: false
     },

@@ -1,29 +1,31 @@
 import { Response, NextFunction } from "express";
 import { CustomRequest, WorkingHours } from "../types";
 import dateHelper from "../utils/dateHelper";
+import Appointment from "../model/appointment";
 import { parse, isBefore, format, addMinutes } from "date-fns";
+import { DateTime } from "luxon";
 import {
   WORKING_HOURS,
   SLOT_DURATION_MINUTES
 } from "../utils/availability.config";
 
 export const getAppointDate = async (
-  request: CustomRequest,
-  response: Response,
+  req: CustomRequest,
+  res: Response,
   next: NextFunction
 ) => {
   try {
     // converting data type of the request requery date to a string type
-    const dateParam = request.query.date as string;
+    const dateParam = req.query.date as string;
     // Checking if date is a valid date string
     if (!dateParam || !dateHelper.isValidDate(dateParam)) {
       throw new Error("Invalid date format!");
     }
     // Setting the date query to the request availabilityDate property
-    request.availabilityDate = dateParam;
+    req.availabilityDate = dateParam;
     next();
   } catch (err) {
-    response.status(401).json({ error: "Invalid date format" });
+    res.status(401).json({ error: "Invalid date format" });
   }
 };
 
@@ -57,6 +59,38 @@ const generateSlots = (
     current = addMinutes(current, durationMinutes);
   }
   return slots;
+};
+
+export const getExistingAppointments = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const dateStr = req.availabilityDate as string;
+    const start = DateTime.fromISO(dateStr, {
+      zone: "Europe/Helsinki"
+    }).startOf("day");
+    const end = start.plus({ days: 1 });
+
+    const startUTC = start.toUTC().toJSDate();
+    const endUTC = end.toUTC().toJSDate();
+
+    const appointments = await Appointment.find({
+      createdAt: {
+        $gte: startUTC,
+        $lt: endUTC
+      }
+    });
+    if (appointments) {
+      req.exisitingAppointments = appointments;
+    }
+    next();
+  } catch (err) {
+    let error;
+    if (err instanceof Error) error = err;
+    res.status(400).json({ error: error?.message });
+  }
 };
 
 export const generateAvailableSlots = async (

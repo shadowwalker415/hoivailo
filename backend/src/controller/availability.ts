@@ -2,7 +2,8 @@ import { Response, IRouter, Router } from "express";
 import { CustomRequest } from "../types";
 import {
   getAppointDate,
-  generateAvailableSlots
+  generateAvailableSlots,
+  getExistingAppointments
 } from "../middleware/availability";
 
 const availabilityRouter: IRouter = Router();
@@ -10,9 +11,10 @@ const availabilityRouter: IRouter = Router();
 availabilityRouter.get(
   "/",
   getAppointDate,
+  getExistingAppointments,
   generateAvailableSlots,
   async (req: CustomRequest, res: Response) => {
-    res.status(200).json({ slots: req.availableSlots });
+    res.status(200).json({ appoinents: req.exisitingAppointments });
   }
 );
 

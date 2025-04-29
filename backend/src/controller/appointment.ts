@@ -19,17 +19,4 @@ appointmentRouter.post("/", async (req: Request, res: Response) => {
   }
 });
 
-appointmentRouter.get("/", async (_req: Request, res: Response) => {
-  try {
-    const appointments = await Appointment.find({});
-    if (appointments) {
-      res.status(200).json({ data: appointments });
-    }
-  } catch (err) {
-    let error;
-    if (err instanceof Error) error = err;
-    res.status(400).json({ error: error?.message });
-  }
-});
-
 export default appointmentRouter;

@@ -72,7 +72,7 @@ export const validateRequestBody = (requestBody: unknown): IAppointment => {
       phone: parsePhoneNumber(requestBody.phone),
       service: parseService(requestBody.service)
     };
-    return newReqBody;
+    return newReqBody as IAppointment;
   }
   throw new Error("Request body missing some fields");
 };
