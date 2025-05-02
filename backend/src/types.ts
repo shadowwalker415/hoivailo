@@ -32,8 +32,13 @@ export interface WorkingHours {
   end: string;
 }
 
+export interface Slot {
+  start: Date;
+  end: Date;
+}
+
 export interface CustomRequest extends Request {
   availabilityDate?: string;
-  availableSlots?: string[];
+  availableSlots?: Slot[];
   exisitingAppointments?: IAppointment[];
 }

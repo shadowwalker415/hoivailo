@@ -1,4 +1,4 @@
-import { format, compareAsc, parseISO } from "date-fns";
+import { format, compareAsc, parse } from "date-fns";
 import { WORKING_DAYS, HOLIDAY_DATES } from "./availability.config";
 
 const isValidDate = (date_string: string): boolean => {
@@ -20,22 +20,26 @@ const isPastDate = (date_string: string): boolean => {
 const isWorkingDay = (date_string: string): boolean => {
   if (!isValidDate(date_string)) return false;
   const selectedDate = format(new Date(date_string), "MM-dd");
+  // Getting the day of the week from selected date, where 1 = monday.
   const weekDay = new Date(date_string).getDay();
+  // Checking if the selected date is one of the holiday dates or not a working day
   if (HOLIDAY_DATES.includes(selectedDate) || !WORKING_DAYS.includes(weekDay))
     return false;
   return true;
 };
 
-const hourFromISO = (date_string: Date): string => {
-  const isoDateString = date_string.toISOString();
-  const parsedDate = parseISO(isoDateString);
-  const formattedHour = format(parsedDate, "HH");
-  return formattedHour;
+const convertToHour = (date_string: string, time: string): Date => {
+  const convertTime = parse(
+    `${date_string} ${time}`,
+    "yyyy-MM-dd HH:mm",
+    new Date()
+  );
+  return convertTime;
 };
 
 export default {
   isValidDate,
   isPastDate,
   isWorkingDay,
-  hourFromISO
+  convertToHour
 };
