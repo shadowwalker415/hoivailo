@@ -40,5 +40,4 @@ export interface Slot {
 export interface CustomRequest extends Request {
   availabilityDate?: string;
   availableSlots?: Slot[];
-  exisitingAppointments?: IAppointment[];
 }

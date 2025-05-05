@@ -113,7 +113,7 @@ const generateAvailableSlots = async (
 
     return availableSlots;
   } catch (err: unknown) {
-    let error;
+    let error = undefined;
     if (err && err instanceof Error) {
       error = err;
     }
@@ -121,6 +121,23 @@ const generateAvailableSlots = async (
   }
 };
 
+const createNewAppointment = async (
+  appointmentInfo: IAppointment
+): Promise<IAppointment | Error> => {
+  try {
+    const newAppointment = new Appointment(appointmentInfo);
+    const savedAppointment = await newAppointment.save();
+    return savedAppointment;
+  } catch (err: unknown) {
+    let errorObject = undefined;
+    if (err instanceof Error) {
+      errorObject = err;
+    }
+    return errorObject as Error;
+  }
+};
+
 export default {
-  generateAvailableSlots
+  generateAvailableSlots,
+  createNewAppointment
 };
