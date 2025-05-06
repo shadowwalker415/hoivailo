@@ -28,6 +28,14 @@ const isWorkingDay = (date_string: string): boolean => {
   return true;
 };
 
+const getDateOfficial = (start_time: Date): string => {
+  return format(start_time, "d.M");
+};
+
+const getHourOfficial = (start_time: Date): string => {
+  return format(start_time, "HH:mm");
+};
+
 const convertToHour = (date_string: string, time: string): Date => {
   const convertTime = parse(
     `${date_string} ${time}`,
@@ -41,5 +49,7 @@ export default {
   isValidDate,
   isPastDate,
   isWorkingDay,
-  convertToHour
+  convertToHour,
+  getDateOfficial,
+  getHourOfficial
 };

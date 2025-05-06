@@ -121,6 +121,22 @@ const generateAvailableSlots = async (
   }
 };
 
+const confirmUserEmail = async (
+  appointment: IAppointment
+): Promise<IAppointment | Error> => {
+  try {
+    appointment.emailSent = true;
+    const emailConfirmedAppointment = await appointment.save();
+    return emailConfirmedAppointment;
+  } catch (err: unknown) {
+    let error = undefined;
+    if (err instanceof Error) {
+      error = err;
+    }
+    return error as Error;
+  }
+};
+
 const createNewAppointment = async (
   appointmentInfo: IAppointment
 ): Promise<IAppointment | Error> => {
@@ -139,5 +155,6 @@ const createNewAppointment = async (
 
 export default {
   generateAvailableSlots,
-  createNewAppointment
+  createNewAppointment,
+  confirmUserEmail
 };

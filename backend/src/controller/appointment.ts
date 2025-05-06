@@ -15,12 +15,19 @@ appointmentRouter.post("/", async (req: Request, res: Response) => {
     );
     if (savedAppointment instanceof Error)
       throw new Error(savedAppointment.message);
-    console.log(savedAppointment.name);
-    const emailResponse = await emailService.sendUserConfirmationEmail(
+
+    const sentUserEmail = await emailService.sendUserConfirmationEmail(
       savedAppointment as IAppointment
     );
-    if (!emailResponse) throw new Error("Failed to send email");
-    console.log("We got here");
+    if (!sentUserEmail) throw new Error("Failed to send email");
+    const confirmedAppointment = await appointmentService.confirmUserEmail(
+      savedAppointment as IAppointment
+    );
+    const sentAdminEmail = await emailService.sendAdminConfirmationEmail(
+      confirmedAppointment as IAppointment
+    );
+    console.log(sentAdminEmail);
+
     res.status(200).json({
       message: `Email successfully sent to ${savedAppointment.email}`
     });
