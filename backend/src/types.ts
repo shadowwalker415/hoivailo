@@ -1,7 +1,11 @@
 import { Request } from "express";
 import { Document } from "mongoose";
 
-export type AppointmentStatus = "confirmed" | "cancelled";
+// export type AppointmentStatus = "confirmed" | "cancelled";
+
+export type MessagePurpose = "confirmation" | "cancellation";
+
+export type Role = "user" | "admin";
 
 export enum AppointmentServices {
   kotiapu = "kotiapu",
@@ -9,6 +13,11 @@ export enum AppointmentServices {
   kotisiivous = "kotisiivous",
   yrityssiivous = "yrityssiivous",
   lastenhoito = "lastenhoito"
+}
+
+export interface IAppointmentCancel {
+  appointmentId: string;
+  reason: string;
 }
 
 export interface IAppointment extends Document {
@@ -39,5 +48,4 @@ export interface Slot {
 
 export interface CustomRequest extends Request {
   availabilityDate?: string;
-  availableSlots?: Slot[];
 }

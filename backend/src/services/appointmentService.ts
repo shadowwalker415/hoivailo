@@ -153,8 +153,34 @@ const createNewAppointment = async (
   }
 };
 
+const cancelAppointment = async (
+  appointmentID: string
+): Promise<IAppointment | Error> => {
+  try {
+    const appointment = await Appointment.findOne({
+      appointmentId: appointmentID
+    });
+    if (!appointment) throw new Error("Appointment not found");
+
+    // Checking if the appointment had already been cancelled.
+    // In a scenario where the user attempted to cancel an appointment
+    // but didn't get a UI update maybe due to loss of internet connection.
+    if (appointment.status === "cancelled") {
+      return appointment;
+    }
+    appointment.status = "cancelled";
+    const cancelledAppointment = await appointment.save();
+    return cancelledAppointment;
+  } catch (err: unknown) {
+    let error = undefined;
+    if (err instanceof Error) error = err;
+    return error as Error;
+  }
+};
+
 export default {
   generateAvailableSlots,
   createNewAppointment,
+  cancelAppointment,
   confirmUserEmail
 };
