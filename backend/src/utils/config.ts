@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
+import smtpTransport from "nodemailer-smtp-transport";
 dotenv.config();
-import SMTPTransport from "nodemailer/lib/smtp-transport";
-
 const MONGODB_URI = process.env.MONGODB_URI;
 const PORT = process.env.PORT;
 const SERVICE_USERNAME = process.env.SERVICE_USERNAME;
@@ -28,14 +27,14 @@ if (
   throw new Error("There's an invalid environment variable value");
 }
 
-const MAIL_OPTIONS: SMTPTransport.Options = {
+const MAIL_OPTIONS = smtpTransport({
   host: SMTP_HOST,
   port: SMTP_PORT,
   auth: {
     user: SERVICE_USERNAME,
     pass: SERVICE_PASSWORD
   }
-};
+});
 
 export default {
   MONGODB_URI,

@@ -1,8 +1,6 @@
 import { Request } from "express";
 import { Document } from "mongoose";
 
-// export type AppointmentStatus = "confirmed" | "cancelled";
-
 export type MessagePurpose = "confirmation" | "cancellation";
 
 export type Role = "user" | "admin";
@@ -34,6 +32,13 @@ export interface IAppointment extends Document {
   createdAt?: Date;
   updatedAt?: Date;
   toJSON(): IAppointment;
+}
+
+export interface IContact {
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
 }
 
 export interface WorkingHours {

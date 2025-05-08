@@ -1,17 +1,18 @@
-import nodemailer, { Transporter, SendMailOptions } from "nodemailer";
+import nodemailer, {
+  Transporter,
+  SendMailOptions,
+  SentMessageInfo
+} from "nodemailer";
 import config from "../utils/config";
-import { IAppointment, MessagePurpose, Role } from "../types";
+
+import { IAppointment, IContact, MessagePurpose, Role } from "../types";
 import { isRole, isMessagePurpose } from "../utils/parsers";
 import dateHelper from "../utils/dateHelper";
 
-// creating email transporter
-const transporter: Transporter = nodemailer.createTransport(
+// creating instance of email transporter
+const transporter: Transporter<SentMessageInfo> = nodemailer.createTransport(
   config.MAIL_OPTIONS
 );
-
-// const isSendSuccessful = (): boolean => {
-//   return;
-// };
 
 // Appointment notification message constructor
 const constructMessage = (
@@ -70,60 +71,60 @@ const constructMessage = (
 
 const sendUserConfirmationEmail = async (
   appointmentInfo: IAppointment
-): Promise<any | Error> => {
+): Promise<SentMessageInfo | Error> => {
   try {
     // message sample
     const message = constructMessage(appointmentInfo, "user", "confirmation");
     // mail options
-    const mailOptions: SendMailOptions = {
+    const mailOptions = {
       from: "No reply example@myname.io",
       to: "your_name@yahoo.com",
       subject: "Appointment confirmation",
       text: message
     };
     // sending email
-    const responseObj = await transporter.sendMail(mailOptions);
-    if (!responseObj) throw new Error("Something went wrong sending email");
+    const responseObj: SentMessageInfo = await transporter.sendMail(
+      mailOptions
+    );
     return responseObj;
   } catch (err: unknown) {
-    let error = undefined;
     if (err instanceof Error) {
-      error = err;
+      return err;
     }
-    return error as Error;
+    return new Error("Couldn't send email");
   }
 };
 
 const sendAdminConfirmationEmail = async (
   appointmentInfo: IAppointment
-): Promise<any | Error> => {
+): Promise<SentMessageInfo | Error> => {
   try {
     // message sample
     const message = constructMessage(appointmentInfo, "admin", "confirmation");
     // mail options
-    const mailOptions: SendMailOptions = {
+    const mailOptions = {
       from: "No reply example@myname.io",
       to: "admin_service@yahoo.com",
       subject: "New Appointment",
       text: message
     };
     // sending email
-    const responseObj = await transporter.sendMail(mailOptions);
-    if (!responseObj) throw new Error("Something went wrong sending email");
+    const responseObj: SentMessageInfo = await transporter.sendMail(
+      mailOptions
+    );
     return responseObj;
   } catch (err: unknown) {
-    let error = undefined;
     if (err instanceof Error) {
-      error = err;
+      return err;
     }
-    return error as Error;
+    return new Error("Couldn't send email");
   }
 };
 
 const sendCancellationEmailAdmin = async (
   appointmentInfo: IAppointment,
   reason: string
-) => {
+): Promise<SentMessageInfo | Error> => {
   try {
     // Message
     const message = constructMessage(
@@ -141,16 +142,22 @@ const sendCancellationEmailAdmin = async (
     };
 
     // sending email
-    const responseObj = await transporter.sendMail(mailOptions);
-    if (!responseObj) throw new Error("Something went wrong sending email");
+    const responseObj: SentMessageInfo = await transporter.sendMail(
+      mailOptions
+    );
     return responseObj;
-  } catch (err: unknown) {}
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      return err;
+    }
+    return new Error("Couldn't send email");
+  }
 };
 
 const sendCancellationEmailUser = async (
   appointmentInfo: IAppointment,
   reason: string
-) => {
+): Promise<SentMessageInfo | Error> => {
   try {
     // Message
     const message = constructMessage(
@@ -168,15 +175,50 @@ const sendCancellationEmailUser = async (
     };
 
     // sending email
-    const responseObj = await transporter.sendMail(mailOptions);
-    if (!responseObj) throw new Error("Something went wrong sending email");
+    const responseObj: SentMessageInfo = await transporter.sendMail(
+      mailOptions
+    );
     return responseObj;
-  } catch (err: unknown) {}
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      return err;
+    }
+    return new Error("Couldn't send email");
+  }
+};
+
+const sendContactNotificationEmail = async (
+  contactObj: IContact
+): Promise<SentMessageInfo | Error> => {
+  try {
+    // constructing message
+    const message = `Name: ${contactObj.name}\n Phone: ${contactObj.phone}\n Email: ${contactObj.email}\n Message:\n ${contactObj.message}`;
+
+    // mail options
+    const mailOptions: SendMailOptions = {
+      from: "No reply example@myname.io",
+      to: "your_name@yahoo.com",
+      subject: "New Contact Request",
+      text: message
+    };
+
+    // sending email
+    const responseObj: SentMessageInfo = await transporter.sendMail(
+      mailOptions
+    );
+    return responseObj;
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      return err;
+    }
+    return new Error("Couldn't send email");
+  }
 };
 
 export default {
   sendUserConfirmationEmail,
   sendAdminConfirmationEmail,
   sendCancellationEmailAdmin,
-  sendCancellationEmailUser
+  sendCancellationEmailUser,
+  sendContactNotificationEmail
 };

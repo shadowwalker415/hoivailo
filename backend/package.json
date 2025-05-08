@@ -20,7 +20,9 @@
     "@types/express": "^5.0.1",
     "@types/luxon": "^3.6.2",
     "@types/mongoose": "^5.11.97",
+    "@types/node": "^22.15.16",
     "@types/nodemailer": "^6.4.17",
+    "@types/nodemailer-smtp-transport": "^2.7.8",
     "@typescript-eslint/eslint-plugin": "^8.31.0",
     "@typescript-eslint/parser": "^8.31.0",
     "eslint": "^9.25.1",
@@ -35,8 +37,8 @@
     "express": "^5.1.0",
     "luxon": "^3.6.1",
     "mongoose": "^8.13.2",
-    "nanoid": "^5.1.5",
-    "nodemailer": "^7.0.2",
+    "nodemailer": "^7.0.3",
+    "nodemailer-smtp-transport": "^2.7.4",
     "uuid": "^11.1.0"
   }
 }

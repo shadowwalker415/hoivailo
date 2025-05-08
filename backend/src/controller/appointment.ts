@@ -73,11 +73,10 @@ appointmentRouter.post("/cancel", async (req: Request, res: Response) => {
 
     res.status(201).json({ message: "Appointment cancelled" });
   } catch (err: unknown) {
-    let error = undefined;
     if (err instanceof Error) {
-      error = err;
+      res.status(400).json({ error: err?.message });
     }
-    res.status(400).json({ error: error?.message });
+    res.status(500).json({ error: "Something went wrong" });
   }
 });
 

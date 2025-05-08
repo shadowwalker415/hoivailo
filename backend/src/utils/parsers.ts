@@ -3,7 +3,8 @@ import {
   AppointmentServices,
   IAppointmentCancel,
   MessagePurpose,
-  Role
+  Role,
+  IContact
 } from "../types";
 
 const isString = (text: unknown): text is string => {
@@ -26,46 +27,56 @@ const isValidID = (id: string): boolean => {
 
 const parseAppointmentID = (id: unknown): string => {
   if (!isString(id) || !isValidID(id)) {
-    throw new Error("Appointment id string is invalid");
+    throw new Error("Appointment id must be a valid appointment Id");
   }
   return id;
 };
 
 const isValidText = (text: string): boolean => {
-  return /^(?!.*<.*?>)[^<>]{1,500}$/.test(text);
+  return /^(?!.*<.*?>)[^<>]{1,2000}$/.test(text);
 };
 
-const parseReason = (text: unknown): string => {
+const isValidPhone = (phone: string): boolean => {
+  return /^\+358(4\d|5\d)\d{6,7}$|^\+358[- ]?(4\d|5\d)[- ]?\d{3}[- ]?\d{4}$/.test(
+    phone
+  );
+};
+
+const isValidEmail = (email: string): boolean => {
+  return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
+};
+
+const parseText = (text: unknown): string => {
   if (!isString(text) || !isValidText(text)) {
-    throw new Error("Reason text string is invalid");
+    throw new Error("Message or reason must be a valid string");
   }
   return text;
 };
 
 const parseTime = (time: unknown): Date => {
   if (!time || !isString(time) || !isDate(time)) {
-    throw new Error("Start and End time must be a valid date string");
+    throw new Error("Start and End time must be valid date time strings");
   }
   return new Date(time);
 };
 
 const parseName = (name: unknown): string => {
   if (!name || !isString(name)) {
-    throw new Error("Name must be a valid string");
+    throw new Error("Name must be a valid name");
   }
   return name;
 };
 
 const parseEmail = (email: unknown): string => {
-  if (!email || !isString(email)) {
-    throw new Error("Email must be a valid string");
+  if (!email || !isString(email) || !isValidEmail(email)) {
+    throw new Error("Email must be a valid Email address");
   }
   return email;
 };
 
 const parsePhoneNumber = (phoneNumber: unknown) => {
-  if (!phoneNumber || !isString(phoneNumber)) {
-    throw new Error("Phone number must be a valid string");
+  if (!phoneNumber || !isString(phoneNumber) || !isValidPhone(phoneNumber)) {
+    throw new Error("Phone number must be a valid phone number");
   }
   return phoneNumber;
 };
@@ -87,22 +98,6 @@ export const isMessagePurpose = (
 
 export const isRole = (role: unknown): role is Role => {
   return role === "user" || role == "admin";
-};
-
-export const validateAppointmentID = (
-  requestBody: unknown
-): IAppointmentCancel => {
-  if (!requestBody || typeof requestBody !== "object") {
-    throw new Error("Request body cannot be empty");
-  }
-  if ("appointmentId" in requestBody && "reason" in requestBody) {
-    const newReqBody = {
-      appointmentId: parseAppointmentID(requestBody.appointmentId),
-      reason: parseReason(requestBody.reason)
-    };
-    return newReqBody as IAppointmentCancel;
-  }
-  throw new Error("Request body is missing some fields");
 };
 
 export const validateAppointmentRequestBody = (
@@ -142,7 +137,28 @@ export const validateAppointmentCancellationBody = (
   if ("appointmentId" in body && "reason" in body) {
     const newBody = {
       appointmentId: parseAppointmentID(body.appointmentId),
-      reason: parseReason(body.reason)
+      reason: parseText(body.reason)
+    };
+    return newBody;
+  }
+  throw new Error("Request body missing some fields");
+};
+
+export const validateContactBody = (contactObj: unknown): IContact => {
+  if (!contactObj || typeof contactObj !== "object") {
+    throw new Error("Request body cannot be empty");
+  }
+  if (
+    "name" in contactObj &&
+    "phone" in contactObj &&
+    "email" in contactObj &&
+    "message" in contactObj
+  ) {
+    const newBody = {
+      name: parseName(contactObj.name),
+      phone: parsePhoneNumber(contactObj.phone),
+      email: parseEmail(contactObj.email),
+      message: parseText(contactObj.message)
     };
     return newBody;
   }
