@@ -3,19 +3,20 @@ import nodemailer, {
   SendMailOptions,
   SentMessageInfo
 } from "nodemailer";
+import pug from "pug";
 import config from "../utils/config";
 
 import { IAppointment, IContact, MessagePurpose, Role } from "../types";
 import { isRole, isMessagePurpose } from "../utils/parsers";
 import dateHelper from "../utils/dateHelper";
 
-// creating instance of email transporter
+// Creating instance of email transporter
 const transporter: Transporter<SentMessageInfo> = nodemailer.createTransport(
   config.MAIL_OPTIONS
 );
 
 // Appointment notification message constructor
-const constructMessage = (
+const constructHtmlMessage = (
   appointment: IAppointment,
   role: Role,
   purpose: MessagePurpose,
@@ -27,46 +28,43 @@ const constructMessage = (
       "The user role must be a valid role and the message purpose must be a valid message purpose"
     );
   }
-  let message = "";
+  let html = "";
+  let template;
+  const locals = {
+    date: dateHelper.getDateOfficial(appointment.startTime),
+    time: dateHelper.getHourOfficial(appointment.startTime),
+    service: appointment.service,
+    user: appointment.name,
+    phone: appointment.phone,
+    email: appointment.email,
+    id: appointment.appointmentId,
+    reason
+  };
   if (role === "admin" && purpose === "confirmation") {
     // Admin appointment confirmation, notification message.
-    message = `An appointment was booked for ${dateHelper.getDateOfficial(
-      appointment.startTime
-    )} from ${dateHelper.getHourOfficial(
-      appointment.startTime
-    )} with an appointment ID of ${
-      appointment.appointmentId
-    }.\n Appointment Details\n Customer name: ${appointment.name}\n Phone: ${
-      appointment.phone
-    }\n Email: ${appointment.email}\n End Time: ${dateHelper.getHourOfficial(
-      appointment.endTime
-    )}\n Service: ${appointment.service}`;
+    template = pug.compileFile(
+      `${__dirname}/../static/templates/adminAppointmentNotification.pug`
+    );
+    html = template(locals);
   } else if (role === "user" && purpose === "confirmation") {
     // User appointment confirmation notification message.
-    message = `Hei ${appointment.name},\n 
-  This is a confirmation email for your appointment on the ${dateHelper.getDateOfficial(
-    appointment.startTime
-  )} from ${dateHelper.getHourOfficial(appointment.startTime)}`;
+    template = pug.compileFile(
+      `${__dirname}/../static/templates/userAppointmentConfirmation.pug`
+    );
+    html = template(locals);
   } else if (role === "admin" && purpose === "cancellation") {
     // Admin appointment cancellation notification message.
-    message = `Hei,\n The appointment with appointment ID ${
-      appointment.appointmentId
-    }, 
-    on the ${dateHelper.getDateOfficial(
-      appointment.startTime
-    )}, at ${dateHelper.getHourOfficial(
-      appointment.startTime
-    )} has been cancelled.\n
-    Reason: ${reason ? reason : "N/A"}`;
+    template = pug.compileFile(
+      `${__dirname}/../static/templates/adminAppointmentCancellation.pug`
+    );
+    html = template(locals);
   } else {
-    // User appointment cancellation notification message.
-    message = `Hei,\n Your appointment on the ${dateHelper.getDateOfficial(
-      appointment.startTime
-    )} at ${dateHelper.getHourOfficial(
-      appointment.startTime
-    )} has been cancelled.\n Reason\n ${reason ? reason : "N/A"}`;
+    template = pug.compileFile(
+      `${__dirname}/../static/templates/userCancellationNotification.pug`
+    );
+    html = template(locals);
   }
-  return message;
+  return html;
 };
 
 const sendUserConfirmationEmail = async (
@@ -74,13 +72,13 @@ const sendUserConfirmationEmail = async (
 ): Promise<SentMessageInfo | Error> => {
   try {
     // message sample
-    const message = constructMessage(appointmentInfo, "user", "confirmation");
+    const html = constructHtmlMessage(appointmentInfo, "user", "confirmation");
     // mail options
     const mailOptions = {
       from: "No reply example@myname.io",
       to: "your_name@yahoo.com",
-      subject: "Appointment confirmation",
-      text: message
+      subject: "Ajanvaraus varattu",
+      html: html
     };
     // sending email
     const responseObj: SentMessageInfo = await transporter.sendMail(
@@ -100,13 +98,14 @@ const sendAdminConfirmationEmail = async (
 ): Promise<SentMessageInfo | Error> => {
   try {
     // message sample
-    const message = constructMessage(appointmentInfo, "admin", "confirmation");
+    const html = constructHtmlMessage(appointmentInfo, "admin", "confirmation");
+
     // mail options
     const mailOptions = {
       from: "No reply example@myname.io",
-      to: "admin_service@yahoo.com",
-      subject: "New Appointment",
-      text: message
+      to: `${appointmentInfo.email}`,
+      subject: "Uusi aika",
+      html: html
     };
     // sending email
     const responseObj: SentMessageInfo = await transporter.sendMail(
@@ -127,7 +126,7 @@ const sendCancellationEmailAdmin = async (
 ): Promise<SentMessageInfo | Error> => {
   try {
     // Message
-    const message = constructMessage(
+    const html = constructHtmlMessage(
       appointmentInfo,
       "admin",
       "cancellation",
@@ -136,9 +135,9 @@ const sendCancellationEmailAdmin = async (
     // mail option
     const mailOptions: SendMailOptions = {
       from: "No reply example@myname.io",
-      to: "your_name@yahoo.com",
-      subject: "Appointment has been cancelled!",
-      text: message
+      to: `${appointmentInfo.email}`,
+      subject: "Aika peruutettu",
+      html: html
     };
 
     // sending email
@@ -160,7 +159,7 @@ const sendCancellationEmailUser = async (
 ): Promise<SentMessageInfo | Error> => {
   try {
     // Message
-    const message = constructMessage(
+    const html = constructHtmlMessage(
       appointmentInfo,
       "user",
       "cancellation",
@@ -169,9 +168,9 @@ const sendCancellationEmailUser = async (
     // mail option
     const mailOptions: SendMailOptions = {
       from: "No reply example@myname.io",
-      to: "your_name@yahoo.com",
-      subject: "Your Appointment has been cancelled!",
-      text: message
+      to: `${appointmentInfo.email}`,
+      subject: "Ajanvarauksesi peruuttanut",
+      html: html
     };
 
     // sending email
@@ -192,14 +191,17 @@ const sendContactNotificationEmail = async (
 ): Promise<SentMessageInfo | Error> => {
   try {
     // constructing message
-    const message = `Name: ${contactObj.name}\n Phone: ${contactObj.phone}\n Email: ${contactObj.email}\n Message:\n ${contactObj.message}`;
+    const template = pug.compileFile(
+      `${__dirname}/../static/templates/newContactNotification.pug`
+    );
+    const html = template(contactObj);
 
     // mail options
     const mailOptions: SendMailOptions = {
-      from: "No reply example@myname.io",
-      to: "your_name@yahoo.com",
-      subject: "New Contact Request",
-      text: message
+      from: `No reply example@myname.io`,
+      to: `${contactObj.email}`,
+      subject: "Uusi viesti",
+      html: html
     };
 
     // sending email

@@ -40,11 +40,11 @@ const appointmentSchema: Schema<IAppointment> = new Schema(
       type: String,
       required: true,
       enum: [
-        "kotiapu",
-        "kotihoito",
-        "lastenhoito",
-        "kotisiivous",
-        "yrityssiivous"
+        "Kotiapu",
+        "Kotihoito",
+        "Lastenhoito",
+        "Kotisiivous",
+        "Yrityssiivous"
       ]
     },
     notes: {

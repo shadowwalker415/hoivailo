@@ -163,17 +163,20 @@ const cancelAppointment = async (
     if (!appointment) throw new Error("Appointment not found");
 
     // Checking if the appointment had already been cancelled.
-    // In a scenario where the user attempted to cancel an appointment
-    // but didn't get a UI update maybe due to loss of internet connection.
+    // In a scenario where the user attempts to cancel an appointment
+    // but didn't get a UI update maybe due to loss of internet connection
     if (appointment.status === "cancelled") {
-      return appointment;
+      throw new Error("Appointment had already been cancelled");
     }
     appointment.status = "cancelled";
     const cancelledAppointment = await appointment.save();
     return cancelledAppointment;
   } catch (err: unknown) {
     let error = undefined;
-    if (err instanceof Error) error = err;
+    if (err instanceof Error) {
+      error = err;
+      console.log(err.message);
+    }
     return error as Error;
   }
 };

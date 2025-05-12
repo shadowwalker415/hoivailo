@@ -84,7 +84,7 @@ const parsePhoneNumber = (phoneNumber: unknown) => {
 export const parseService = (service_type: unknown): string => {
   if (!service_type || !isString(service_type) || !isService(service_type)) {
     throw new Error(
-      "Service must be, either yrityssiivous, kotisiivous, kotihoito, kotiapu, lastenhoito"
+      "Service must be, either Yrityssiivous, Kotisiivous, Kotihoito, Kotiapu, Lastenhoito"
     );
   }
   return service_type;

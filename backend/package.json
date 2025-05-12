@@ -23,6 +23,7 @@
     "@types/node": "^22.15.16",
     "@types/nodemailer": "^6.4.17",
     "@types/nodemailer-smtp-transport": "^2.7.8",
+    "@types/pug": "^2.0.10",
     "@typescript-eslint/eslint-plugin": "^8.31.0",
     "@typescript-eslint/parser": "^8.31.0",
     "eslint": "^9.25.1",
@@ -38,7 +39,8 @@
     "luxon": "^3.6.1",
     "mongoose": "^8.13.2",
     "nodemailer": "^7.0.3",
-    "nodemailer-smtp-transport": "^2.7.4",
+    "nodemailer-smtp-transport": "^2.4.2",
+    "pug": "^3.0.3",
     "uuid": "^11.1.0"
   }
 }

@@ -5,7 +5,7 @@ import {
 } from "../utils/parsers";
 import appointmentService from "../services/appointmentService";
 import emailService from "../services/emailService";
-import { IAppointment } from "../types";
+// import { IAppointment } from "../types";
 
 const appointmentRouter: IRouter = Router();
 
@@ -23,18 +23,18 @@ appointmentRouter.post("/", async (req: Request, res: Response) => {
 
     // Sending appointment confirmation notification email to user
     const sentUserEmail = await emailService.sendUserConfirmationEmail(
-      savedAppointment as IAppointment
+      savedAppointment
     );
     if (!sentUserEmail) throw new Error("Failed to send email");
+
     //Confirming email notification has been sent to user
     const confirmedAppointment = await appointmentService.confirmUserEmail(
-      savedAppointment as IAppointment
+      savedAppointment
     );
+    if (confirmedAppointment instanceof Error)
+      throw new Error("User confirmation email failed to send");
     // Sending new appointment notification email to admin
-    const sentAdminEmail = await emailService.sendAdminConfirmationEmail(
-      confirmedAppointment as IAppointment
-    );
-    console.log(sentAdminEmail);
+    await emailService.sendAdminConfirmationEmail(confirmedAppointment);
 
     res.status(200).json({
       message: `Email successfully sent to ${savedAppointment.email}`
@@ -76,7 +76,6 @@ appointmentRouter.post("/cancel", async (req: Request, res: Response) => {
     if (err instanceof Error) {
       res.status(400).json({ error: err?.message });
     }
-    res.status(500).json({ error: "Something went wrong" });
   }
 });
 

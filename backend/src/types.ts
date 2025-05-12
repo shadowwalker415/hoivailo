@@ -6,11 +6,11 @@ export type MessagePurpose = "confirmation" | "cancellation";
 export type Role = "user" | "admin";
 
 export enum AppointmentServices {
-  kotiapu = "kotiapu",
-  kotihoito = "kotihoito",
-  kotisiivous = "kotisiivous",
-  yrityssiivous = "yrityssiivous",
-  lastenhoito = "lastenhoito"
+  kotiapu = "Kotiapu",
+  kotihoito = "Kotihoito",
+  kotisiivous = "Kotisiivous",
+  yrityssiivous = "Yrityssiivous",
+  lastenhoito = "Lastenhoito"
 }
 
 export interface IAppointmentCancel {
