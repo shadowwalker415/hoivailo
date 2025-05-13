@@ -1,11 +1,11 @@
-import { WorkingHours, Slot, IAppointment } from "../types";
+import { WorkingHours, Slot } from "../types";
 import {
   WORKING_HOURS,
   SLOT_DURATION_MINUTES
 } from "../utils/availability.config";
 import { parse, isBefore, format, addMinutes } from "date-fns";
 import dateHelper from "../utils/dateHelper";
-import Appointment from "../model/appointment";
+import Appointment, { IAppointment } from "../model/appointment";
 import { DateTime } from "luxon";
 
 function isSlotAvailable(
@@ -45,12 +45,13 @@ const generateSlots = (
     const slotStart = format(current, "HH:mm");
     const slotEnd = format(addMinutes(current, durationMinutes), "HH:mm");
     slots.push({
-      start: dateHelper.convertToHour(date_string, slotStart),
-      end: dateHelper.convertToHour(date_string, slotEnd)
+      start: dateHelper.convertToISO18601(date_string, slotStart),
+      end: dateHelper.convertToISO18601(date_string, slotEnd)
     });
 
     current = addMinutes(current, durationMinutes);
   }
+
   return slots;
 };
 
@@ -100,15 +101,11 @@ const generateAvailableSlots = async (
 
     const existingAppointments = await getExistingAppointments(date_string);
 
-    if (!existingAppointments)
+    if (existingAppointments instanceof Error)
       return new Error("An error occured in database server");
 
     const availableSlots = generatedSlots.filter((slot) =>
-      checkAvailable(
-        slot.start,
-        slot.end,
-        existingAppointments as IAppointment[]
-      )
+      checkAvailable(slot.start, slot.end, existingAppointments)
     );
 
     return availableSlots;

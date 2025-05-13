@@ -1,18 +1,36 @@
-import mongoose, { Schema, model } from "mongoose";
-import { IAppointment } from "../types";
+import mongoose, { Schema, model, Document } from "mongoose";
+
 import { v4 as uuidv4 } from "uuid";
 
 mongoose.set("strictQuery", false);
+
+export interface IAppointment extends Document {
+  startTime: Date;
+  endTime: Date;
+  appointmentId?: string;
+  name: string;
+  email: string;
+  emailSent?: boolean;
+  phone: string;
+  service: string;
+  notes?: string;
+  status?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  toJSON(): IAppointment;
+}
 
 const appointmentSchema: Schema<IAppointment> = new Schema(
   {
     startTime: {
       type: Date,
-      required: true
+      required: true,
+      unique: true
     },
     endTime: {
       type: Date,
-      required: true
+      required: true,
+      unique: true
     },
     name: {
       type: String,

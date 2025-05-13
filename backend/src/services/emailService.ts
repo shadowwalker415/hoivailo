@@ -6,7 +6,8 @@ import nodemailer, {
 import pug from "pug";
 import config from "../utils/config";
 
-import { IAppointment, IContact, MessagePurpose, Role } from "../types";
+import { IContact, MessagePurpose, Role } from "../types";
+import { IAppointment } from "../model/appointment";
 import { isRole, isMessagePurpose } from "../utils/parsers";
 import dateHelper from "../utils/dateHelper";
 

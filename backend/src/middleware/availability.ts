@@ -8,8 +8,10 @@ export const getAppointDate = async (
   next: NextFunction
 ) => {
   try {
-    // converting data type of the request requery date to a string type
-    const dateParam = req.query.date as string;
+    // Checking if type of the request date query is a string
+    if (typeof req.query.date !== "string")
+      throw new Error("Request query date must be a date-time string");
+    const dateParam = req.query.date;
     // Checking if date is a valid date string
     if (!dateParam || !dateHelper.isValidDate(dateParam)) {
       throw new Error("Invalid date format!");

@@ -5,7 +5,6 @@ import {
 } from "../utils/parsers";
 import appointmentService from "../services/appointmentService";
 import emailService from "../services/emailService";
-// import { IAppointment } from "../types";
 
 const appointmentRouter: IRouter = Router();
 
@@ -40,7 +39,6 @@ appointmentRouter.post("/", async (req: Request, res: Response) => {
       message: `Email successfully sent to ${savedAppointment.email}`
     });
   } catch (err: unknown) {
-    console.log("This is the error section");
     let error = undefined;
     if (err instanceof Error) error = err;
     res.status(400).json({ error: error?.message });

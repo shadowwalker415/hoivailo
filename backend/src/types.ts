@@ -1,5 +1,4 @@
 import { Request } from "express";
-import { Document } from "mongoose";
 
 export type MessagePurpose = "confirmation" | "cancellation";
 
@@ -16,22 +15,6 @@ export enum AppointmentServices {
 export interface IAppointmentCancel {
   appointmentId: string;
   reason: string;
-}
-
-export interface IAppointment extends Document {
-  startTime: Date;
-  endTime: Date;
-  appointmentId?: string;
-  name: string;
-  email: string;
-  emailSent?: boolean;
-  phone: string;
-  service: string;
-  notes?: string;
-  status?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-  toJSON(): IAppointment;
 }
 
 export interface IContact {

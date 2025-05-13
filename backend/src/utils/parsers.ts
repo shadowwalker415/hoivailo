@@ -1,11 +1,12 @@
 import {
-  IAppointment,
   AppointmentServices,
   IAppointmentCancel,
   MessagePurpose,
   Role,
   IContact
 } from "../types";
+import { IAppointment } from "../model/appointment";
+import dateHelper from "./dateHelper";
 
 const isString = (text: unknown): text is string => {
   return typeof text === "string" || text instanceof String;
@@ -21,21 +22,16 @@ const isService = (service: string): service is AppointmentServices => {
     .includes(service);
 };
 
+// Checking if ID is of format 491f16df-2c47-41c6-8b96-8eb4e54be91f for example
 const isValidID = (id: string): boolean => {
   return /^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$/.test(id);
-};
-
-const parseAppointmentID = (id: unknown): string => {
-  if (!isString(id) || !isValidID(id)) {
-    throw new Error("Appointment id must be a valid appointment Id");
-  }
-  return id;
 };
 
 const isValidText = (text: string): boolean => {
   return /^(?!.*<.*?>)[^<>]{1,2000}$/.test(text);
 };
 
+// Checking if phone number is a valid Finnish phone number for example +358408229831 or +358509310044
 const isValidPhone = (phone: string): boolean => {
   return /^\+358(4\d|5\d)\d{6,7}$|^\+358[- ]?(4\d|5\d)[- ]?\d{3}[- ]?\d{4}$/.test(
     phone
@@ -44,6 +40,18 @@ const isValidPhone = (phone: string): boolean => {
 
 const isValidEmail = (email: string): boolean => {
   return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
+};
+
+// Checking if the date of the appointment start or end time is the current date.
+const isNotCurrentDate = (date: Date): boolean => {
+  return dateHelper.getDateOfficial(date) !== dateHelper.getCurrentDate();
+};
+
+const parseAppointmentID = (id: unknown): string => {
+  if (!isString(id) || !isValidID(id)) {
+    throw new Error("Appointment id must be a valid appointment Id");
+  }
+  return id;
 };
 
 const parseText = (text: unknown): string => {
@@ -55,7 +63,30 @@ const parseText = (text: unknown): string => {
 
 const parseTime = (time: unknown): Date => {
   if (!time || !isString(time) || !isDate(time)) {
-    throw new Error("Start and End time must be valid date time strings");
+    throw new Error(
+      "Start and End time must be a valid ISO 18601 date time string"
+    );
+  }
+
+  if (!isNotCurrentDate(new Date(time)))
+    throw new Error("An Appointment can't be booked on the same day");
+
+  if (dateHelper.isPastDate(time))
+    throw new Error("Appointment start or end time cannot be a past date");
+
+  if (dateHelper.getDifferenceInMonths(new Date(time)) > 3)
+    throw new Error(
+      "Appointment start or end time cannot be a date more than 3 months away"
+    );
+  if (dateHelper.isBeforeOpeningHour(time)) {
+    throw new Error(
+      "Appointment start or end time cannot be a time before official opening hours"
+    );
+  }
+  if (dateHelper.isAfterClosingHour(time)) {
+    throw new Error(
+      "Appointment start or end time cannot be a time after official closing hours"
+    );
   }
   return new Date(time);
 };
@@ -123,6 +154,28 @@ export const validateAppointmentRequestBody = (
       phone: parsePhoneNumber(requestBody.phone),
       service: parseService(requestBody.service)
     };
+    if (
+      dateHelper.getDifference(newReqBody.startTime, newReqBody.endTime) < 2 ||
+      dateHelper.getDifference(newReqBody.startTime, newReqBody.endTime) > 2
+    ) {
+      throw new Error(
+        "The duration of an appointment cannot be less than an hour or exceed 2 hours"
+      );
+    }
+    if (
+      dateHelper.isEven(newReqBody.startTime) ||
+      dateHelper.isEven(newReqBody.endTime)
+    ) {
+      throw new Error(
+        "Appointment start or end time cannot be an even hour based on the official opening hours"
+      );
+    }
+    if (
+      !dateHelper.isZeroMinutes(newReqBody.startTime) ||
+      !dateHelper.isZeroMinutes(newReqBody.endTime)
+    ) {
+      throw new Error("Appointment start or end time must have 00 minutes");
+    }
     return newReqBody as IAppointment;
   }
   throw new Error("Request body missing some fields");
