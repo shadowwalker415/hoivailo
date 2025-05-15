@@ -63,10 +63,12 @@ const getHourOfficial = (start_time: Date): string => {
   return format(start_time, "HH:mm");
 };
 
+// Where format is for example 15:00
 const getCurrentTime = (): string => {
   return format(new Date(), "HH:mm");
 };
 
+// Where format is for example 02.05.2025
 const getCurrentDate = (): string => {
   return format(new Date(), "dd.MM.yyyy");
 };

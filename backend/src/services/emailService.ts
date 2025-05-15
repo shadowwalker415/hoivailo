@@ -76,8 +76,8 @@ const sendUserConfirmationEmail = async (
     const html = constructHtmlMessage(appointmentInfo, "user", "confirmation");
     // mail options
     const mailOptions = {
-      from: "No reply example@myname.io",
-      to: "your_name@yahoo.com",
+      from: "No reply noreply@hoivailo.fi",
+      to: `${appointmentInfo.email}`,
       subject: "Ajanvaraus varattu",
       html: html
     };
@@ -103,7 +103,7 @@ const sendAdminConfirmationEmail = async (
 
     // mail options
     const mailOptions = {
-      from: "No reply example@myname.io",
+      from: "No reply noreply@hoivailo.fi",
       to: `${appointmentInfo.email}`,
       subject: "Uusi aika",
       html: html
@@ -135,8 +135,8 @@ const sendCancellationEmailAdmin = async (
     );
     // mail option
     const mailOptions: SendMailOptions = {
-      from: "No reply example@myname.io",
-      to: `${appointmentInfo.email}`,
+      from: "No reply noreply@hoivailo.fi",
+      to: `Hoivailo Oy cancel@hoivailo.fi`,
       subject: "Aika peruutettu",
       html: html
     };
@@ -168,7 +168,7 @@ const sendCancellationEmailUser = async (
     );
     // mail option
     const mailOptions: SendMailOptions = {
-      from: "No reply example@myname.io",
+      from: "No reply noreply@hoivailo.fi",
       to: `${appointmentInfo.email}`,
       subject: "Ajanvarauksesi peruuttanut",
       html: html
@@ -199,8 +199,8 @@ const sendContactNotificationEmail = async (
 
     // mail options
     const mailOptions: SendMailOptions = {
-      from: `No reply example@myname.io`,
-      to: `${contactObj.email}`,
+      from: `No reply contact@hoivailo.fi`,
+      to: `Hoivailo Oy message@hoivailo.fi`,
       subject: "Uusi viesti",
       html: html
     };

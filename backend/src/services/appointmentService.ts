@@ -8,17 +8,17 @@ import dateHelper from "../utils/dateHelper";
 import Appointment, { IAppointment } from "../model/appointment";
 import { DateTime } from "luxon";
 
-function isSlotAvailable(
+const isSlotAvailable = (
   slotStart: Date,
   slotEnd: Date,
   appointments: IAppointment[]
-): boolean {
+): boolean => {
   return !appointments.some((appt) => {
     return slotStart < appt.endTime && slotEnd > appt.startTime;
   });
-}
+};
 
-// Slot generation helper function
+// Generating available appointment time slots in ISO 18601 date format
 const generateSlots = (
   date_string: string,
   workHours: WorkingHours,
@@ -74,8 +74,7 @@ const getExistingAppointments = async (
       createdAt: {
         $gte: startUTC,
         $lt: endUTC
-      },
-      status: "confirmed"
+      }
     });
     return appointments;
   } catch (err: unknown) {

@@ -4,7 +4,7 @@ import dateHelper from "../utils/dateHelper";
 
 export const getAppointDate = async (
   req: CustomRequest,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) => {
   try {
@@ -19,7 +19,11 @@ export const getAppointDate = async (
     // Setting the date query to the request availabilityDate property
     req.availabilityDate = dateParam;
     next();
-  } catch (err) {
-    res.status(401).json({ error: "Invalid date format" });
+  } catch (err: unknown) {
+    let error = undefined;
+    if (err instanceof Error) {
+      error = err;
+    }
+    next(error);
   }
 };

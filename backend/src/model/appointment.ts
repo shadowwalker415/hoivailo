@@ -34,7 +34,8 @@ const appointmentSchema: Schema<IAppointment> = new Schema(
     },
     name: {
       type: String,
-      required: [true, "Name must be at least 3 characters long"]
+      required: true,
+      minlength: [3, "Name must be a least 3 characters long"]
     },
     email: {
       type: String,
