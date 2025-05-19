@@ -9,7 +9,7 @@ import config from "../utils/config";
 import { IContact, MessagePurpose, Role } from "../types";
 import { IAppointment } from "../model/appointment";
 import { isRole, isMessagePurpose } from "../utils/parsers";
-import dateHelper from "../utils/dateHelper";
+import dateHelper from "../utils/helpers";
 
 // Creating instance of email transporter
 const transporter: Transporter<SentMessageInfo> = nodemailer.createTransport(

@@ -4,7 +4,7 @@ import {
   SLOT_DURATION_MINUTES
 } from "../utils/availability.config";
 import { parse, isBefore, format, addMinutes } from "date-fns";
-import dateHelper from "../utils/dateHelper";
+import dateHelper from "../utils/helpers";
 import Appointment, { IAppointment } from "../model/appointment";
 import { DateTime } from "luxon";
 

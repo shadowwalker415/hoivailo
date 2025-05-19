@@ -6,7 +6,7 @@ import {
   IContact
 } from "../types";
 import { IAppointment } from "../model/appointment";
-import dateHelper from "./dateHelper";
+import dateHelper from "./helpers";
 
 const isString = (text: unknown): text is string => {
   return typeof text === "string" || text instanceof String;

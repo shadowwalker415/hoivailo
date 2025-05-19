@@ -4,7 +4,10 @@ import {
   validateAppointmentRequestBody
 } from "../utils/parsers";
 import appointmentService from "../services/appointmentService";
-import emailService from "../services/emailService";
+import {
+  sendAppointmentEmails,
+  sendCancellationEmails
+} from "../tasks/sendAppointmentEmails";
 
 const appointmentRouter: IRouter = Router();
 
@@ -33,28 +36,7 @@ appointmentRouter.post(
       });
 
       // Async fire-and-forget with IIFE for emailing the user and admin about successful booked appointment.
-      (async () => {
-        try {
-          // Sending appointment confirmation notification email to user
-          const sentUserEmail = await emailService.sendUserConfirmationEmail(
-            savedAppointment
-          );
-          if (!sentUserEmail) throw new Error("Failed to send email");
-
-          //Confirming email notification has been sent to user
-          const confirmedAppointment =
-            await appointmentService.confirmUserEmail(savedAppointment);
-          if (confirmedAppointment instanceof Error)
-            throw new Error("User confirmation email failed to send");
-          // Sending new appointment notification email to admin
-          await emailService.sendAdminConfirmationEmail(confirmedAppointment);
-        } catch (err: unknown) {
-          if (err instanceof Error) {
-            throw new Error(err.message);
-          }
-          throw new Error("An error occured");
-        }
-      })();
+      (async () => sendAppointmentEmails(savedAppointment))();
     } catch (err: unknown) {
       let error = undefined;
       if (err instanceof Error) {
@@ -93,26 +75,8 @@ appointmentRouter.post(
       });
 
       // Async fire-and-forget with IIFE for emailing user and admin about appointment cancellation
-      (async () => {
-        try {
-          // Sending appointment cancellation notification email to user
-          await emailService.sendCancellationEmailUser(
-            cancelledAppointment,
-            validatedBody.reason
-          );
-
-          // Sending appointment cancellation notification email to admin
-          await emailService.sendCancellationEmailAdmin(
-            cancelledAppointment,
-            validatedBody.reason
-          );
-        } catch (err: unknown) {
-          if (err instanceof Error) {
-            throw new Error(err.message);
-          }
-          throw new Error("An error occured");
-        }
-      })();
+      (async () =>
+        sendCancellationEmails(cancelledAppointment, validatedBody.reason))();
     } catch (err: unknown) {
       let error = undefined;
       if (err instanceof Error) {

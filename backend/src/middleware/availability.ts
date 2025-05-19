@@ -1,6 +1,6 @@
 import { Response, NextFunction } from "express";
 import { CustomRequest } from "../types";
-import dateHelper from "../utils/dateHelper";
+import dateHelper from "../utils/helpers";
 
 export const getAppointDate = async (
   req: CustomRequest,
