@@ -3,6 +3,9 @@ import { CustomRequest } from "../types";
 import { getAppointDate } from "../middleware/availability";
 import dateHelper from "../utils/helpers";
 import appointmentService from "../services/appointmentService";
+import CustomError from "../errors/customError";
+import InternalServerError from "../errors/internalServerError";
+import ValidationError from "../errors/validationError";
 
 const availabilityRouter: IRouter = Router();
 
@@ -29,17 +32,28 @@ availabilityRouter.get(
         );
         // Checking if the slot generation operation failed due to
         // maybe an error with database query
-        if (availableSlots instanceof Error)
-          throw new Error("Something went really wrong");
-        res.status(200).json({ slots: availableSlots });
+        if (availableSlots instanceof Error) {
+          throw new CustomError({
+            message:
+              "An error occured on the database: Couldn't generate available slots",
+            statusCode: 500
+          });
+        }
+        res
+          .status(200)
+          .json({ success: true, code: 200, data: { slots: availableSlots } });
       }
     } catch (err: unknown) {
-      let error = undefined;
-      if (err instanceof Error) {
-        error = err;
-        next(error);
+      if (err instanceof Error || err instanceof ValidationError) {
+        next(err);
       } else {
-        next(new Error("unknown error"));
+        next(
+          new InternalServerError({
+            message: "An unknown error occurred",
+            statusCode: 500,
+            code: "INTERNAL_SERVER_ERROR"
+          })
+        );
       }
     }
   }

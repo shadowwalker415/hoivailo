@@ -4,10 +4,9 @@ import {
   validateAppointmentRequestBody
 } from "../utils/parsers";
 import appointmentService from "../services/appointmentService";
-import {
-  sendAppointmentEmails,
-  sendCancellationEmails
-} from "../tasks/sendAppointmentEmails";
+import { sendAppointmentEmails } from "../tasks/sendAppointmentEmails";
+import { sendCancellationEmails } from "../tasks/sendCancellationEmails";
+import CustomError from "../errors/customError";
 
 const appointmentRouter: IRouter = Router();
 
@@ -24,7 +23,10 @@ appointmentRouter.post(
         requestedAppointment
       );
       if (savedAppointment instanceof Error)
-        throw new Error(savedAppointment.message);
+        throw new CustomError({
+          message: "Failed to create appointment",
+          statusCode: 500
+        });
 
       // Sending response to client
       res.status(200).json({
@@ -43,7 +45,12 @@ appointmentRouter.post(
         error = err;
         next(error);
       } else {
-        next(new Error("unknown error"));
+        next(
+          new CustomError({
+            message: "An error occured on the server",
+            statusCode: 500
+          })
+        );
       }
     }
   }
@@ -62,7 +69,11 @@ appointmentRouter.post(
         validatedBody.appointmentId
       );
       if (cancelledAppointment instanceof Error) {
-        throw new Error("Couldn't cancel appointment");
+        throw new CustomError({
+          message:
+            "An error occured on the server. Couldn't cancel appointment",
+          statusCode: 500
+        });
       }
 
       // Sending response to client
@@ -83,7 +94,12 @@ appointmentRouter.post(
         error = err;
         next(error);
       } else {
-        next(new Error("unknown error"));
+        next(
+          new CustomError({
+            message: "An error occured on the server.",
+            statusCode: 500
+          })
+        );
       }
     }
   }

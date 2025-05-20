@@ -84,7 +84,7 @@ const getDifferenceInMonths = (start_time: Date): number => {
 };
 
 // Converting a date string to an ISO 18601 date format.
-const convertToISO18601 = (date_string: string, time: string): Date => {
+const convertToISO8601 = (date_string: string, time: string): Date => {
   const convertedTime = parse(
     `${date_string} ${time}`,
     "yyyy-MM-dd HH:mm",
@@ -97,7 +97,7 @@ export default {
   isValidDate,
   isPastDate,
   isWorkingDay,
-  convertToISO18601,
+  convertToISO8601,
   getDateOfficial,
   getHourOfficial,
   getCurrentTime,

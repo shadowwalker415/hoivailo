@@ -7,8 +7,8 @@
     "esModuleInterop": true, // Support default imports from CommonJS modules
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true, // Allow importing JSON files
-    "rootDir": "src", // Your TypeScript source folder
-    "outDir": "build", // Output folder for compiled JS
+    "rootDir": "src", // Our TypeScript source folder
+    "outDir": "build", // Our Output folder for compiled JS
     "strict": true, // Enable all strict checks
     "noImplicitAny": true,
     "noImplicitReturns": true,
@@ -19,5 +19,8 @@
     "types": ["node", "express"] // Add Node.js and Express types
   },
   "include": ["src"], // Include your source code
-  "exclude": ["node_modules", "build"] // Exclude compiled output and dependencies
+  "exclude": ["node_modules", "build"], // Exclude compiled output and dependencies
+  "ts-node": {
+    "files": true
+  } // Making xxxxx.d.ts files recognisible
 }

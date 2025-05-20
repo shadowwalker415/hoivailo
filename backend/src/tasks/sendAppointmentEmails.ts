@@ -1,6 +1,7 @@
 import { IAppointment } from "../model/appointment";
 import emailService from "../services/emailService";
 import appointmentService from "../services/appointmentService";
+import helpers from "../utils/helpers";
 
 // Async job that runs after an appointment is successfully booked
 export const sendAppointmentEmails = async (
@@ -11,35 +12,27 @@ export const sendAppointmentEmails = async (
     const sentUserEmail = await emailService.sendUserConfirmationEmail(
       appointment
     );
-    if (!sentUserEmail) throw new Error("Failed to send email");
+    // Checking if email was successfully sent to the user
+    if (!helpers.isEmailSent(sentUserEmail)) {
+      throw new Error("Failed to send email to user");
+    }
 
-    //Confirming email notification has been sent to user
+    //Updating the appointment emailSent field
     const confirmedAppointment = await appointmentService.confirmUserEmail(
       appointment
     );
+    // Checking if the update was successful
     if (confirmedAppointment instanceof Error)
-      throw new Error("User confirmation email failed to send");
+      throw new Error(
+        "An error occured on the database server: Couldn't confirm appointment email"
+      );
     // Sending new appointment notification email to admin
-    await emailService.sendAdminConfirmationEmail(confirmedAppointment);
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      throw new Error(err.message);
+    const adminEmail = await emailService.sendAdminConfirmationEmail(
+      confirmedAppointment
+    );
+    if (!helpers.isEmailSent(adminEmail)) {
+      throw new Error("Failed to send email to Admin");
     }
-    throw new Error("An error occured");
-  }
-};
-
-// Async job that runs after an appointment is successfully cancelled
-export const sendCancellationEmails = async (
-  appointment: IAppointment,
-  reason: string
-): Promise<void> => {
-  try {
-    // Sending appointment cancellation notification email to user
-    await emailService.sendCancellationEmailUser(appointment, reason);
-
-    // Sending appointment cancellation notification email to admin
-    await emailService.sendCancellationEmailAdmin(appointment, reason);
   } catch (err: unknown) {
     if (err instanceof Error) {
       throw new Error(err.message);

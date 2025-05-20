@@ -90,7 +90,7 @@ const sendUserConfirmationEmail = async (
     if (err instanceof Error) {
       return err;
     }
-    return new Error("Couldn't send email");
+    return new Error("An error occured on the server");
   }
 };
 
@@ -117,7 +117,7 @@ const sendAdminConfirmationEmail = async (
     if (err instanceof Error) {
       return err;
     }
-    return new Error("Couldn't send email");
+    return new Error("An error occured on the server");
   }
 };
 
@@ -150,7 +150,7 @@ const sendCancellationEmailAdmin = async (
     if (err instanceof Error) {
       return err;
     }
-    return new Error("Couldn't send email");
+    return new Error("An error occured on the server");
   }
 };
 
@@ -183,7 +183,7 @@ const sendCancellationEmailUser = async (
     if (err instanceof Error) {
       return err;
     }
-    return new Error("Couldn't send email");
+    return new Error("An error occured on the server");
   }
 };
 
@@ -214,7 +214,7 @@ const sendContactNotificationEmail = async (
     if (err instanceof Error) {
       return err;
     }
-    return new Error("Couldn't send email");
+    return new Error("An error occured on the server");
   }
 };
 
