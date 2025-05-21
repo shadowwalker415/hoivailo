@@ -24,7 +24,7 @@ appointmentRouter.post(
       );
       if (savedAppointment instanceof Error)
         throw new CustomError({
-          message: "Failed to create appointment",
+          message: savedAppointment.message,
           statusCode: 500
         });
 

@@ -87,7 +87,7 @@ const getExistingAppointments = async (
     if (err instanceof Error) {
       return err;
     }
-    return new CustomError({
+    return new InternalServerError({
       message: "An error occured on the server",
       statusCode: 500
     });
@@ -177,7 +177,7 @@ const cancelAppointment = async (
     if (!appointment)
       throw new EntityNotFoundError({
         message: "Appointment not found!",
-        statusCode: 400,
+        statusCode: 404,
         code: "NOT_FOUND"
       });
 

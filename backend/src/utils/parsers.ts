@@ -14,7 +14,10 @@ const isString = (text: unknown): text is string => {
 };
 
 const isDate = (date: string): date is string => {
-  return Boolean(Date.parse(date));
+  // Reqular expression testing if date string is of format yyyy-mm-dd or yyyy-mm-dd hh:mm
+  return (
+    /^\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?$/.test(date) && Boolean(Date.parse(date))
+  );
 };
 
 const isService = (service: string): service is AppointmentServices => {
@@ -41,11 +44,6 @@ const isValidPhone = (phone: string): boolean => {
 
 const isValidEmail = (email: string): boolean => {
   return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
-};
-
-// Checking if the date of the appointment start or end time is the current date.
-const isNotCurrentDate = (date: Date): boolean => {
-  return helpers.getDateOfficial(date) !== helpers.getCurrentDate();
 };
 
 export const isMessagePurpose = (
@@ -92,12 +90,21 @@ const parseTime = (time: unknown): Date => {
   }
 
   // Checking if appointment date time is same as current date.
-  if (!isNotCurrentDate(new Date(time)))
+  if (helpers.isCurrentDate(new Date(time)))
     throw new ValidationError({
       message: "An Appointment can't be booked on the same day",
       statusCode: 400,
       code: "VALIDATION_ERROR"
     });
+
+  // Checking if appointment date time is not work day
+  if (!helpers.isWorkingDay(time)) {
+    throw new ValidationError({
+      message: "Start or end time date must be a working day",
+      statusCode: 400,
+      code: "VALIDATION_ERROR"
+    });
+  }
 
   // Checking if appointment date time is a previous date.
   if (helpers.isPastDate(time))

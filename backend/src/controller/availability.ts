@@ -1,11 +1,11 @@
 import { Response, IRouter, Router, NextFunction } from "express";
 import { CustomRequest } from "../types";
 import { getAppointDate } from "../middleware/availability";
-import dateHelper from "../utils/helpers";
+import helpers from "../utils/helpers"; // Changes are needed on this module
 import appointmentService from "../services/appointmentService";
 import CustomError from "../errors/customError";
-import InternalServerError from "../errors/internalServerError";
 import ValidationError from "../errors/validationError";
+import InternalServerError from "../errors/internalServerError";
 
 const availabilityRouter: IRouter = Router();
 
@@ -14,21 +14,56 @@ availabilityRouter.get(
   getAppointDate,
   async (req: CustomRequest, res: Response, next: NextFunction) => {
     try {
+      // Checking if the request has a query parameter.
+      if (!req.availabilityDate) {
+        throw new ValidationError({
+          message: "Request is missing query parameter",
+          statusCode: 400,
+          code: "VALIDATION_ERROR"
+        });
+      }
       // checking if requested date is a previous date.
-      if (dateHelper.isPastDate(req.availabilityDate as string)) {
-        res.status(200).json({ slots: [] });
+      if (helpers.isPastDate(req.availabilityDate)) {
+        res.status(200).json({
+          success: true,
+          status: 200,
+          data: {
+            slot: []
+          }
+        });
         // checking if requested date is a working day.
-      } else if (!dateHelper.isWorkingDay(req.availabilityDate as string)) {
-        res.status(200).json({ slots: [] });
+      } else if (!helpers.isWorkingDay(req.availabilityDate)) {
+        res.status(200).json({
+          success: true,
+          status: 200,
+          data: {
+            slot: []
+          }
+        });
         // Checking if requested date is the current date.
       } else if (
-        dateHelper.getCurrentDate() ===
-        dateHelper.getDateOfficial(new Date(req.availabilityDate as string))
+        helpers.getCurrentDate() ===
+        helpers.getDateOfficial(new Date(req.availabilityDate))
       ) {
-        res.status(200).json({ slots: [] });
+        res.status(200).json({
+          success: true,
+          status: 200,
+          data: {
+            slot: []
+          }
+        });
+        // Checking if requested date is more than 3 months away.
+      } else if (helpers.isCurrentDate(new Date(req.availabilityDate))) {
+        res.status(200).json({
+          success: true,
+          status: 200,
+          data: {
+            slot: []
+          }
+        });
       } else {
         const availableSlots = await appointmentService.generateAvailableSlots(
-          req.availabilityDate as string
+          req.availabilityDate
         );
         // Checking if the slot generation operation failed due to
         // maybe an error with database query
@@ -49,7 +84,7 @@ availabilityRouter.get(
       } else {
         next(
           new InternalServerError({
-            message: "An unknown error occurred",
+            message: "An error occured. Check logs for more info",
             statusCode: 500,
             code: "INTERNAL_SERVER_ERROR"
           })

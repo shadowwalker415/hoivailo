@@ -4,8 +4,9 @@ import { SentMessageInfo } from "nodemailer";
 
 const isValidDate = (date_string: string): boolean => {
   // Regular expression for valid date string where date string format is yyyy-mm-dd
+  const date = format(date_string, "yyyy-MM-dd");
   return /^(?:(?:19|20)\d{2})-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|02-(?:0[1-9]|1\d|2[0-8])|02-29(?=-(?:19|20)(?:[02468][048]|[13579][26])))$/.test(
-    date_string
+    date
   );
 };
 
@@ -41,6 +42,11 @@ const isBeforeOpeningHour = (date_string: string): boolean => {
 // Checking if appointment start time is greater than the closing hour(18 in this case)
 const isAfterClosingHour = (date_string: string): boolean => {
   return Number(format(new Date(date_string), "H")) > 18;
+};
+
+// Checking if the date of the appointment start or end time is the current date.
+const isCurrentDate = (date: Date): boolean => {
+  return getDateOfficial(date) === getCurrentDate();
 };
 
 // Getting the difference in hours between two date times
@@ -108,5 +114,6 @@ export default {
   getDifference,
   isEven,
   isZeroMinutes,
-  isEmailSent
+  isEmailSent,
+  isCurrentDate
 };
