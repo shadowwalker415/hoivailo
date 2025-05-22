@@ -9,15 +9,23 @@ import config from "../utils/config";
 import { IContact, MessagePurpose, Role } from "../types";
 import { IAppointment } from "../model/appointment";
 import { isRole, isMessagePurpose } from "../utils/parsers";
-import dateHelper from "../utils/helpers";
+import {
+  getHourOfficial,
+  getDateOfficial,
+  isEmailSent
+} from "../utils/helpers";
+import CustomError from "../errors/customError";
+import InternalServerError from "../errors/internalServerError";
+import { ErrorCode } from "../errors/types";
+import ValidationError from "../errors/validationError";
 
-// Creating instance of email transporter
+// Creating instance of Nodemailer's email transporter
 const transporter: Transporter<SentMessageInfo> = nodemailer.createTransport(
   config.MAIL_OPTIONS
 );
 
-// Appointment notification message constructor
-const constructHtmlMessage = (
+// HTML template constructor funcion for sending appointment confirmation and cancellation emails
+const constructHtmlTemplate = (
   appointment: IAppointment,
   role: Role,
   purpose: MessagePurpose,
@@ -25,15 +33,17 @@ const constructHtmlMessage = (
 ): string => {
   // Checking if role is a valid role or if the email purpose is a valid purpose
   if (!isRole(role) || !isMessagePurpose(purpose)) {
-    throw new Error(
-      "The user role must be a valid role and the message purpose must be a valid message purpose"
-    );
+    throw new ValidationError({
+      message: "Function parameters role or purpose was invalide",
+      statusCode: 400,
+      code: "VALIDATION_ERROR"
+    });
   }
   let html = "";
   let template;
   const locals = {
-    date: dateHelper.getDateOfficial(appointment.startTime),
-    time: dateHelper.getHourOfficial(appointment.startTime),
+    date: getDateOfficial(appointment.startTime),
+    time: getHourOfficial(appointment.startTime),
     service: appointment.service,
     user: appointment.name,
     phone: appointment.phone,
@@ -42,24 +52,25 @@ const constructHtmlMessage = (
     reason
   };
   if (role === "admin" && purpose === "confirmation") {
-    // Admin appointment confirmation, notification message.
+    // Admin appointment confirmation, notification html template.
     template = pug.compileFile(
       `${__dirname}/../static/templates/adminAppointmentNotification.pug`
     );
     html = template(locals);
   } else if (role === "user" && purpose === "confirmation") {
-    // User appointment confirmation notification message.
+    // User appointment confirmation notification html template.
     template = pug.compileFile(
       `${__dirname}/../static/templates/userAppointmentConfirmation.pug`
     );
     html = template(locals);
   } else if (role === "admin" && purpose === "cancellation") {
-    // Admin appointment cancellation notification message.
+    // Admin appointment cancellation notification html template.
     template = pug.compileFile(
       `${__dirname}/../static/templates/adminAppointmentCancellation.pug`
     );
     html = template(locals);
   } else {
+    // User appointment cancellation notification html template.
     template = pug.compileFile(
       `${__dirname}/../static/templates/userCancellationNotification.pug`
     );
@@ -68,12 +79,18 @@ const constructHtmlMessage = (
   return html;
 };
 
-const sendUserConfirmationEmail = async (
+//User confirmation email helper function
+export const sendUserConfirmationEmail = async (
   appointmentInfo: IAppointment
-): Promise<SentMessageInfo | Error> => {
+): Promise<
+  | SentMessageInfo
+  | CustomError<ErrorCode>
+  | InternalServerError
+  | ValidationError
+> => {
   try {
     // message sample
-    const html = constructHtmlMessage(appointmentInfo, "user", "confirmation");
+    const html = constructHtmlTemplate(appointmentInfo, "user", "confirmation");
     // mail options
     const mailOptions = {
       from: "No reply noreply@hoivailo.fi",
@@ -85,26 +102,46 @@ const sendUserConfirmationEmail = async (
     const responseObj: SentMessageInfo = await transporter.sendMail(
       mailOptions
     );
+    if (!isEmailSent(responseObj)) {
+      throw new CustomError({
+        message: "Email failed to send",
+        statusCode: 400
+      });
+    }
     return responseObj;
   } catch (err: unknown) {
-    if (err instanceof Error) {
+    if (err instanceof CustomError || err instanceof ValidationError) {
       return err;
     }
-    return new Error("An error occured on the server");
+    return new InternalServerError({
+      message: "An error occured on server",
+      statusCode: 500,
+      code: "INTERNAL_SERVER_ERROR"
+    });
   }
 };
 
-const sendAdminConfirmationEmail = async (
+// Admin confirmation email helper function
+export const sendAdminConfirmationEmail = async (
   appointmentInfo: IAppointment
-): Promise<SentMessageInfo | Error> => {
+): Promise<
+  | SentMessageInfo
+  | CustomError<ErrorCode>
+  | InternalServerError
+  | ValidationError
+> => {
   try {
     // message sample
-    const html = constructHtmlMessage(appointmentInfo, "admin", "confirmation");
+    const html = constructHtmlTemplate(
+      appointmentInfo,
+      "admin",
+      "confirmation"
+    );
 
     // mail options
     const mailOptions = {
       from: "No reply noreply@hoivailo.fi",
-      to: `${appointmentInfo.email}`,
+      to: `Hoivailo Oy ${config.ADMIN_EMAIL}`,
       subject: "Uusi aika",
       html: html
     };
@@ -112,22 +149,38 @@ const sendAdminConfirmationEmail = async (
     const responseObj: SentMessageInfo = await transporter.sendMail(
       mailOptions
     );
+    if (!isEmailSent(responseObj)) {
+      throw new CustomError({
+        message: "Email failed to send",
+        statusCode: 400
+      });
+    }
     return responseObj;
   } catch (err: unknown) {
-    if (err instanceof Error) {
+    if (err instanceof CustomError || err instanceof ValidationError) {
       return err;
     }
-    return new Error("An error occured on the server");
+    return new InternalServerError({
+      message: "An error occured on server",
+      statusCode: 500,
+      code: "INTERNAL_SERVER_ERROR"
+    });
   }
 };
 
-const sendCancellationEmailAdmin = async (
+// Admin cancellation email helper function
+export const sendCancellationEmailAdmin = async (
   appointmentInfo: IAppointment,
   reason: string
-): Promise<SentMessageInfo | Error> => {
+): Promise<
+  | SentMessageInfo
+  | CustomError<ErrorCode>
+  | InternalServerError
+  | ValidationError
+> => {
   try {
     // Message
-    const html = constructHtmlMessage(
+    const html = constructHtmlTemplate(
       appointmentInfo,
       "admin",
       "cancellation",
@@ -136,7 +189,7 @@ const sendCancellationEmailAdmin = async (
     // mail option
     const mailOptions: SendMailOptions = {
       from: "No reply noreply@hoivailo.fi",
-      to: `Hoivailo Oy cancel@hoivailo.fi`,
+      to: `Hoivailo Oy ${config.ADMIN_EMAIL}`,
       subject: "Aika peruutettu",
       html: html
     };
@@ -145,22 +198,38 @@ const sendCancellationEmailAdmin = async (
     const responseObj: SentMessageInfo = await transporter.sendMail(
       mailOptions
     );
+    if (!isEmailSent(responseObj)) {
+      throw new CustomError({
+        message: "Email failed to send",
+        statusCode: 400
+      });
+    }
     return responseObj;
   } catch (err: unknown) {
-    if (err instanceof Error) {
+    if (err instanceof CustomError || err instanceof ValidationError) {
       return err;
     }
-    return new Error("An error occured on the server");
+    return new InternalServerError({
+      message: "An error occured on server",
+      statusCode: 500,
+      code: "INTERNAL_SERVER_ERROR"
+    });
   }
 };
 
-const sendCancellationEmailUser = async (
+// User cancellation email helper function
+export const sendCancellationEmailUser = async (
   appointmentInfo: IAppointment,
   reason: string
-): Promise<SentMessageInfo | Error> => {
+): Promise<
+  | SentMessageInfo
+  | CustomError<ErrorCode>
+  | InternalServerError
+  | ValidationError
+> => {
   try {
     // Message
-    const html = constructHtmlMessage(
+    const html = constructHtmlTemplate(
       appointmentInfo,
       "user",
       "cancellation",
@@ -169,7 +238,7 @@ const sendCancellationEmailUser = async (
     // mail option
     const mailOptions: SendMailOptions = {
       from: "No reply noreply@hoivailo.fi",
-      to: `${appointmentInfo.email}`,
+      to: `${appointmentInfo.name} ${appointmentInfo.email}`,
       subject: "Ajanvarauksesi peruuttanut",
       html: html
     };
@@ -178,18 +247,34 @@ const sendCancellationEmailUser = async (
     const responseObj: SentMessageInfo = await transporter.sendMail(
       mailOptions
     );
+    if (!isEmailSent(responseObj)) {
+      throw new CustomError({
+        message: "Email failed to send",
+        statusCode: 400
+      });
+    }
     return responseObj;
   } catch (err: unknown) {
-    if (err instanceof Error) {
+    if (err instanceof CustomError || err instanceof ValidationError) {
       return err;
     }
-    return new Error("An error occured on the server");
+    return new InternalServerError({
+      message: "An error occured on server",
+      statusCode: 500,
+      code: "INTERNAL_SERVER_ERROR"
+    });
   }
 };
 
-const sendContactNotificationEmail = async (
+// Contact-us email notification helper function
+export const sendContactNotificationEmail = async (
   contactObj: IContact
-): Promise<SentMessageInfo | Error> => {
+): Promise<
+  | SentMessageInfo
+  | CustomError<ErrorCode>
+  | InternalServerError
+  | ValidationError
+> => {
   try {
     // constructing message
     const template = pug.compileFile(
@@ -200,7 +285,7 @@ const sendContactNotificationEmail = async (
     // mail options
     const mailOptions: SendMailOptions = {
       from: `No reply contact@hoivailo.fi`,
-      to: `Hoivailo Oy message@hoivailo.fi`,
+      to: `Hoivailo Oy ${config.ADMIN_EMAIL}`,
       subject: "Uusi viesti",
       html: html
     };
@@ -209,19 +294,21 @@ const sendContactNotificationEmail = async (
     const responseObj: SentMessageInfo = await transporter.sendMail(
       mailOptions
     );
+    if (!isEmailSent(responseObj)) {
+      throw new CustomError({
+        message: "Email failed to send",
+        statusCode: 400
+      });
+    }
     return responseObj;
   } catch (err: unknown) {
-    if (err instanceof Error) {
+    if (err instanceof CustomError || err instanceof ValidationError) {
       return err;
     }
-    return new Error("An error occured on the server");
+    return new InternalServerError({
+      message: "An error occured on server",
+      statusCode: 500,
+      code: "INTERNAL_SERVER_ERROR"
+    });
   }
-};
-
-export default {
-  sendUserConfirmationEmail,
-  sendAdminConfirmationEmail,
-  sendCancellationEmailAdmin,
-  sendCancellationEmailUser,
-  sendContactNotificationEmail
 };

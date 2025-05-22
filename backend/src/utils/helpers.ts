@@ -2,7 +2,7 @@ import { format, compareAsc, parse, differenceInMonths } from "date-fns";
 import { WORKING_DAYS, HOLIDAY_DATES } from "./availability.config";
 import { SentMessageInfo } from "nodemailer";
 
-const isValidDate = (date_string: string): boolean => {
+export const isValidDate = (date_string: string): boolean => {
   // Regular expression for valid date string where date string format is yyyy-mm-dd
   const date = format(date_string, "yyyy-MM-dd");
   return /^(?:(?:19|20)\d{2})-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|02-(?:0[1-9]|1\d|2[0-8])|02-29(?=-(?:19|20)(?:[02468][048]|[13579][26])))$/.test(
@@ -10,11 +10,11 @@ const isValidDate = (date_string: string): boolean => {
   );
 };
 
-const isEmailSent = (emailResponse: SentMessageInfo): boolean => {
+export const isEmailSent = (emailResponse: SentMessageInfo): boolean => {
   return emailResponse.accepted.length > 0;
 };
 
-const isPastDate = (date_string: string): boolean => {
+export const isPastDate = (date_string: string): boolean => {
   const today = format(new Date(), "yyyy-MM-dd");
   const selectedDate = format(new Date(date_string), "yyyy-MM-dd");
   // Checking if the selected date is a previous date
@@ -23,7 +23,7 @@ const isPastDate = (date_string: string): boolean => {
   return false;
 };
 
-const isWorkingDay = (date_string: string): boolean => {
+export const isWorkingDay = (date_string: string): boolean => {
   if (!isValidDate(date_string)) return false;
   const selectedDate = format(new Date(date_string), "MM-dd");
   // Getting the day of the week from selected date, where 1 = monday.
@@ -35,85 +35,66 @@ const isWorkingDay = (date_string: string): boolean => {
 };
 
 // Checking if appointment start time is less than the normal opening hour(9 in this case)
-const isBeforeOpeningHour = (date_string: string): boolean => {
+export const isBeforeOpeningHour = (date_string: string): boolean => {
   return Number(format(new Date(date_string), "H")) < 9;
 };
 
 // Checking if appointment start time is greater than the closing hour(18 in this case)
-const isAfterClosingHour = (date_string: string): boolean => {
+export const isAfterClosingHour = (date_string: string): boolean => {
   return Number(format(new Date(date_string), "H")) > 18;
 };
 
 // Checking if the date of the appointment start or end time is the current date.
-const isCurrentDate = (date: Date): boolean => {
+export const isCurrentDate = (date: Date): boolean => {
   return getDateOfficial(date) === getCurrentDate();
 };
 
 // Getting the difference in hours between two date times
-const getDifference = (start: Date, end: Date): number => {
+export const getDifference = (start: Date, end: Date): number => {
   return Number(format(end, "H")) - Number(format(start, "H"));
 };
 
 // Checking if the appointment start or end time is an even hour. for example 10, 12, 14, 16, 18
-const isEven = (time: Date): boolean => {
+export const isEven = (time: Date): boolean => {
   return Number(format(time, "H")) % 2 == 0;
 };
 
 // Checking if appointment start or end time has any minutes
-const isZeroMinutes = (time: Date): boolean => {
+export const isZeroMinutes = (time: Date): boolean => {
   return time.getMinutes() == 0;
 };
 
 // Getting a date in the format 09.02.1980 for example
-const getDateOfficial = (start_time: Date): string => {
+export const getDateOfficial = (start_time: Date): string => {
   return format(start_time, "dd.MM.yyyy");
 };
 
 // Getting the hour from a date time time object in the format 09:00 for example
-const getHourOfficial = (start_time: Date): string => {
+export const getHourOfficial = (start_time: Date): string => {
   return format(start_time, "HH:mm");
 };
 
 // Where format is for example 15:00
-const getCurrentTime = (): string => {
+export const getCurrentTime = (): string => {
   return format(new Date(), "HH:mm");
 };
 
 // Where format is for example 02.05.2025
-const getCurrentDate = (): string => {
+export const getCurrentDate = (): string => {
   return format(new Date(), "dd.MM.yyyy");
 };
 
 // Getting the number of months between the date of the appointment start time and the current date
-const getDifferenceInMonths = (start_time: Date): number => {
+export const getDifferenceInMonths = (start_time: Date): number => {
   return differenceInMonths(start_time, new Date());
 };
 
 // Converting a date string to an ISO 18601 date format.
-const convertToISO8601 = (date_string: string, time: string): Date => {
+export const convertToISO8601 = (date_string: string, time: string): Date => {
   const convertedTime = parse(
     `${date_string} ${time}`,
     "yyyy-MM-dd HH:mm",
     new Date()
   );
   return convertedTime;
-};
-
-export default {
-  isValidDate,
-  isPastDate,
-  isWorkingDay,
-  convertToISO8601,
-  getDateOfficial,
-  getHourOfficial,
-  getCurrentTime,
-  getCurrentDate,
-  getDifferenceInMonths,
-  isBeforeOpeningHour,
-  isAfterClosingHour,
-  getDifference,
-  isEven,
-  isZeroMinutes,
-  isEmailSent,
-  isCurrentDate
 };

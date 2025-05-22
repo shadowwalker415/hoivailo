@@ -1,6 +1,6 @@
 import { Response, NextFunction } from "express";
 import { CustomRequest } from "../types";
-import dateHelper from "../utils/helpers";
+import { isValidDate } from "../utils/helpers";
 import ValidationError from "../errors/validationError";
 import InternalServerError from "../errors/internalServerError";
 
@@ -28,7 +28,7 @@ export const getAppointDate = async (
     }
 
     // Checking if date is a valid date string
-    if (!dateHelper.isValidDate(req.query.date)) {
+    if (!isValidDate(req.query.date)) {
       throw new ValidationError({
         message: "Invalid date format for request requery date paramter",
         statusCode: 400,

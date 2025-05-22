@@ -6,7 +6,17 @@ import {
   IContact
 } from "../types";
 import { IAppointment } from "../model/appointment";
-import helpers from "./helpers";
+import {
+  isCurrentDate,
+  isWorkingDay,
+  isPastDate,
+  getDifferenceInMonths,
+  isBeforeOpeningHour,
+  isAfterClosingHour,
+  getDifference,
+  isEven,
+  isZeroMinutes
+} from "./helpers";
 import ValidationError from "../errors/validationError";
 
 const isString = (text: unknown): text is string => {
@@ -90,7 +100,7 @@ const parseTime = (time: unknown): Date => {
   }
 
   // Checking if appointment date time is same as current date.
-  if (helpers.isCurrentDate(new Date(time)))
+  if (isCurrentDate(new Date(time)))
     throw new ValidationError({
       message: "An Appointment can't be booked on the same day",
       statusCode: 400,
@@ -98,7 +108,7 @@ const parseTime = (time: unknown): Date => {
     });
 
   // Checking if appointment date time is not work day
-  if (!helpers.isWorkingDay(time)) {
+  if (!isWorkingDay(time)) {
     throw new ValidationError({
       message: "Start or end time date must be a working day",
       statusCode: 400,
@@ -107,7 +117,7 @@ const parseTime = (time: unknown): Date => {
   }
 
   // Checking if appointment date time is a previous date.
-  if (helpers.isPastDate(time))
+  if (isPastDate(time))
     throw new ValidationError({
       message: "Appointment start or end time cannot be a past date",
       statusCode: 400,
@@ -115,7 +125,7 @@ const parseTime = (time: unknown): Date => {
     });
 
   // Checking if appointment date time is more than 3 months away.
-  if (helpers.getDifferenceInMonths(new Date(time)) > 3)
+  if (getDifferenceInMonths(new Date(time)) > 3)
     throw new ValidationError({
       message:
         "Appointment start or end time cannot be a date more than 3 months away",
@@ -124,7 +134,7 @@ const parseTime = (time: unknown): Date => {
     });
 
   // Checking if appointment start or end time is before the official opening hour.
-  if (helpers.isBeforeOpeningHour(time)) {
+  if (isBeforeOpeningHour(time)) {
     throw new ValidationError({
       message:
         "Appointment start or end time cannot be a time before official opening hours",
@@ -133,7 +143,7 @@ const parseTime = (time: unknown): Date => {
     });
   }
   // Checking if appointment start or end time is after the official closing hour.
-  if (helpers.isAfterClosingHour(time)) {
+  if (isAfterClosingHour(time)) {
     throw new ValidationError({
       message:
         "Appointment start or end time cannot be a time after official closing hours",
@@ -218,8 +228,8 @@ export const validateAppointmentRequestBody = (
     };
     // Checking if appointment duration is less than or more than 2 hours.
     if (
-      helpers.getDifference(newReqBody.startTime, newReqBody.endTime) < 2 ||
-      helpers.getDifference(newReqBody.startTime, newReqBody.endTime) > 2
+      getDifference(newReqBody.startTime, newReqBody.endTime) < 2 ||
+      getDifference(newReqBody.startTime, newReqBody.endTime) > 2
     ) {
       throw new ValidationError({
         message:
@@ -229,10 +239,7 @@ export const validateAppointmentRequestBody = (
       });
     }
     // Checking if appointment start and end time are the same hour.
-    if (
-      helpers.isEven(newReqBody.startTime) ||
-      helpers.isEven(newReqBody.endTime)
-    ) {
+    if (isEven(newReqBody.startTime) || isEven(newReqBody.endTime)) {
       throw new ValidationError({
         message: "Appointment start and end time cannot be the same hour",
         statusCode: 400,
@@ -241,8 +248,8 @@ export const validateAppointmentRequestBody = (
     }
     // Checking if appointment start or end time has any minute
     if (
-      !helpers.isZeroMinutes(newReqBody.startTime) ||
-      !helpers.isZeroMinutes(newReqBody.endTime)
+      !isZeroMinutes(newReqBody.startTime) ||
+      !isZeroMinutes(newReqBody.endTime)
     ) {
       throw new ValidationError({
         message: "Appointment start or end time must have 00 minutes",

@@ -4,11 +4,9 @@ import {
   SLOT_DURATION_MINUTES
 } from "../utils/availability.config";
 import { parse, isBefore, format, addMinutes } from "date-fns";
-import helpers from "../utils/helpers";
+import { convertToISO8601 } from "../utils/helpers";
 import Appointment, { IAppointment } from "../model/appointment";
 import { DateTime } from "luxon";
-import CustomError from "../errors/customError";
-import { ErrorCode } from "../errors/types";
 import InternalServerError from "../errors/internalServerError";
 import EntityNotFoundError from "../errors/entityNotFoundError";
 
@@ -51,8 +49,8 @@ const generateSlots = (
     const slotStart = format(current, "HH:mm");
     const slotEnd = format(addMinutes(current, durationMinutes), "HH:mm");
     slots.push({
-      start: helpers.convertToISO8601(date_string, slotStart),
-      end: helpers.convertToISO8601(date_string, slotEnd)
+      start: convertToISO8601(date_string, slotStart),
+      end: convertToISO8601(date_string, slotEnd)
     });
 
     current = addMinutes(current, durationMinutes);
@@ -63,7 +61,7 @@ const generateSlots = (
 
 const getExistingAppointments = async (
   selectedDate: string
-): Promise<IAppointment[] | Error | CustomError<ErrorCode>> => {
+): Promise<IAppointment[] | Error | InternalServerError> => {
   try {
     const dateStr = selectedDate;
 
@@ -85,18 +83,20 @@ const getExistingAppointments = async (
     return appointments;
   } catch (err: unknown) {
     if (err instanceof Error) {
-      return err;
+      // If we get an error that means an error occured on the database
+      return new InternalServerError({
+        message: "An error occured on the database server",
+        statusCode: 500
+      });
     }
-    return new InternalServerError({
-      message: "An error occured on the server",
-      statusCode: 500
-    });
+    return new Error("An unknown error occured");
   }
 };
 
-const generateAvailableSlots = async (
+// Slot generation helper functions
+export const generateAvailableSlots = async (
   date_string: string
-): Promise<Slot[] | Error> => {
+): Promise<Slot[] | InternalServerError | Error> => {
   try {
     const checkAvailable = isSlotAvailable;
 
@@ -108,10 +108,14 @@ const generateAvailableSlots = async (
 
     const existingAppointments = await getExistingAppointments(date_string);
 
-    if (existingAppointments instanceof Error)
-      return new CustomError({
+    if (
+      existingAppointments instanceof Error ||
+      existingAppointments instanceof InternalServerError
+    )
+      return new InternalServerError({
         message: "An error occured on the database server",
-        statusCode: 500
+        statusCode: 500,
+        code: "INTERNAL_SERVER_ERROR"
       });
 
     const availableSlots = generatedSlots.filter((slot) =>
@@ -119,52 +123,61 @@ const generateAvailableSlots = async (
     );
     return availableSlots;
   } catch (err: unknown) {
-    if (err instanceof CustomError || err instanceof Error) {
-      return new CustomError({ message: err.message, statusCode: 500 });
+    if (err instanceof InternalServerError || err instanceof Error) {
+      return err;
     }
-    return new CustomError({
-      message: "An error occured on the server",
-      statusCode: 500
-    });
+    return new Error("An unknown error occured");
   }
 };
 
-const confirmUserEmail = async (
+// User email confirmation helper function
+export const confirmUserEmail = async (
   appointment: IAppointment
-): Promise<IAppointment | Error> => {
+): Promise<IAppointment | InternalServerError | Error> => {
   try {
     appointment.emailSent = true;
     const emailConfirmedAppointment = await appointment.save();
     if (!emailConfirmedAppointment) {
-      throw new Error(
-        "An error occured on database server: couldn't confirm appointment email address"
-      );
+      throw new InternalServerError({
+        message: "Failed to update document",
+        statusCode: 500,
+        code: "INTERNAL_SERVER_ERROR"
+      });
     }
     return emailConfirmedAppointment;
   } catch (err: unknown) {
-    if (err instanceof Error) {
+    if (err instanceof InternalServerError) {
       return err;
     }
-    return new Error("An error occured on the server");
+    return new Error("An unknown error occured");
   }
 };
 
-const createNewAppointment = async (
+// Appointment creation helper function
+export const createNewAppointment = async (
   appointmentInfo: IAppointment
-): Promise<IAppointment | Error> => {
+): Promise<IAppointment | InternalServerError | Error> => {
   try {
     const newAppointment = new Appointment(appointmentInfo);
     const savedAppointment = await newAppointment.save();
+    if (!savedAppointment) {
+      throw new InternalServerError({
+        message: "Failed to create new appointment document",
+        statusCode: 500,
+        code: "INTERNAL_SERVER_ERROR"
+      });
+    }
     return savedAppointment;
   } catch (err: unknown) {
-    if (err instanceof Error) {
+    if (err instanceof InternalServerError) {
       return err;
     }
-    return new Error("An error occured on the server");
+    return new Error("An unknown error occured");
   }
 };
 
-const cancelAppointment = async (
+// Appointment cancellation helper function
+export const cancelAppointment = async (
   appointmentID: string
 ): Promise<
   IAppointment | EntityNotFoundError | InternalServerError | Error
@@ -176,7 +189,7 @@ const cancelAppointment = async (
     // Checking if the appointment exist
     if (!appointment)
       throw new EntityNotFoundError({
-        message: "Appointment not found!",
+        message: `Appointment with appointment ID (${appointmentID}) not found`,
         statusCode: 404,
         code: "NOT_FOUND"
       });
@@ -185,7 +198,7 @@ const cancelAppointment = async (
     // In a scenario where the user attempts to cancel an appointment
     // but didn't get a UI update maybe due to loss of internet connection
     if (appointment.status === "cancelled") {
-      return new Error("Appointment already cancelled");
+      return new Error("Appointment already cancelled"); // This is a place holder. Still thinking of what error to throw here
     }
     // Updating appointment satus
     appointment.status = "cancelled";
@@ -201,20 +214,12 @@ const cancelAppointment = async (
     }
     return cancelledAppointment;
   } catch (err: unknown) {
-    if (err instanceof InternalServerError) {
+    if (
+      err instanceof InternalServerError ||
+      err instanceof EntityNotFoundError
+    ) {
       return err;
     }
-    return new InternalServerError({
-      message: "An error occured on server",
-      statusCode: 500,
-      code: "INTERNAL_SERVER_ERROR"
-    });
+    return new Error("An unknown error occurred");
   }
-};
-
-export default {
-  generateAvailableSlots,
-  createNewAppointment,
-  cancelAppointment,
-  confirmUserEmail
 };

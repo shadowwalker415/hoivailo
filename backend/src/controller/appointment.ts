@@ -3,10 +3,15 @@ import {
   validateAppointmentCancellationBody,
   validateAppointmentRequestBody
 } from "../utils/parsers";
-import appointmentService from "../services/appointmentService";
+import {
+  createNewAppointment,
+  cancelAppointment
+} from "../services/appointmentService";
 import { sendAppointmentEmails } from "../tasks/sendAppointmentEmails";
 import { sendCancellationEmails } from "../tasks/sendCancellationEmails";
 import CustomError from "../errors/customError";
+import InternalServerError from "../errors/internalServerError";
+import EntityNotFoundError from "../errors/entityNotFoundError";
 
 const appointmentRouter: IRouter = Router();
 
@@ -19,9 +24,7 @@ appointmentRouter.post(
       const requestedAppointment = validateAppointmentRequestBody(req.body);
 
       // Creating a new appointment document on the database
-      const savedAppointment = await appointmentService.createNewAppointment(
-        requestedAppointment
-      );
+      const savedAppointment = await createNewAppointment(requestedAppointment);
       if (savedAppointment instanceof Error)
         throw new CustomError({
           message: savedAppointment.message,
@@ -40,17 +43,10 @@ appointmentRouter.post(
       // Async fire-and-forget with IIFE for emailing the user and admin about successful booked appointment.
       (async () => sendAppointmentEmails(savedAppointment))();
     } catch (err: unknown) {
-      let error = undefined;
-      if (err instanceof Error) {
-        error = err;
-        next(error);
+      if (err instanceof Error || err instanceof InternalServerError) {
+        next(err);
       } else {
-        next(
-          new CustomError({
-            message: "An error occured on the server",
-            statusCode: 500
-          })
-        );
+        next(new Error("An unknown error occured"));
       }
     }
   }
@@ -65,17 +61,28 @@ appointmentRouter.post(
       const validatedBody = validateAppointmentCancellationBody(req.body);
 
       // Cancelling appointment
-      const cancelledAppointment = await appointmentService.cancelAppointment(
+      const cancelledAppointment = await cancelAppointment(
         validatedBody.appointmentId
       );
-      if (cancelledAppointment instanceof Error) {
-        throw new CustomError({
-          message:
-            "An error occured on the server. Couldn't cancel appointment",
-          statusCode: 500
+      // Checking if the database operation failed
+      if (
+        cancelledAppointment instanceof InternalServerError ||
+        cancelledAppointment instanceof Error
+      ) {
+        throw new InternalServerError({
+          message: cancelledAppointment.message,
+          statusCode: 500,
+          code: "INTERNAL_SERVER_ERROR"
         });
       }
-
+      // Checking if the appointment was not found
+      if (cancelledAppointment instanceof EntityNotFoundError) {
+        throw new EntityNotFoundError({
+          message: cancelledAppointment.message,
+          statusCode: cancelledAppointment.statusCode,
+          code: cancelledAppointment.code
+        });
+      }
       // Sending response to client
       res.status(201).json({
         ok: true,
@@ -89,17 +96,14 @@ appointmentRouter.post(
       (async () =>
         sendCancellationEmails(cancelledAppointment, validatedBody.reason))();
     } catch (err: unknown) {
-      let error = undefined;
-      if (err instanceof Error) {
-        error = err;
-        next(error);
+      if (
+        err instanceof Error ||
+        err instanceof InternalServerError ||
+        err instanceof EntityNotFoundError
+      ) {
+        next(err);
       } else {
-        next(
-          new CustomError({
-            message: "An error occured on the server.",
-            statusCode: 500
-          })
-        );
+        next(new Error("An unknown error occured"));
       }
     }
   }

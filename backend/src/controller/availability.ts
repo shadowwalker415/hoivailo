@@ -1,8 +1,14 @@
 import { Response, IRouter, Router, NextFunction } from "express";
 import { CustomRequest } from "../types";
 import { getAppointDate } from "../middleware/availability";
-import helpers from "../utils/helpers"; // Changes are needed on this module
-import appointmentService from "../services/appointmentService";
+import {
+  isPastDate,
+  isWorkingDay,
+  getCurrentDate,
+  getDateOfficial,
+  isCurrentDate
+} from "../utils/helpers"; // Changes are needed on this module
+import { generateAvailableSlots } from "../services/appointmentService";
 import CustomError from "../errors/customError";
 import ValidationError from "../errors/validationError";
 import InternalServerError from "../errors/internalServerError";
@@ -23,7 +29,7 @@ availabilityRouter.get(
         });
       }
       // checking if requested date is a previous date.
-      if (helpers.isPastDate(req.availabilityDate)) {
+      if (isPastDate(req.availabilityDate)) {
         res.status(200).json({
           success: true,
           status: 200,
@@ -32,7 +38,7 @@ availabilityRouter.get(
           }
         });
         // checking if requested date is a working day.
-      } else if (!helpers.isWorkingDay(req.availabilityDate)) {
+      } else if (!isWorkingDay(req.availabilityDate)) {
         res.status(200).json({
           success: true,
           status: 200,
@@ -42,8 +48,7 @@ availabilityRouter.get(
         });
         // Checking if requested date is the current date.
       } else if (
-        helpers.getCurrentDate() ===
-        helpers.getDateOfficial(new Date(req.availabilityDate))
+        getCurrentDate() === getDateOfficial(new Date(req.availabilityDate))
       ) {
         res.status(200).json({
           success: true,
@@ -53,7 +58,7 @@ availabilityRouter.get(
           }
         });
         // Checking if requested date is more than 3 months away.
-      } else if (helpers.isCurrentDate(new Date(req.availabilityDate))) {
+      } else if (isCurrentDate(new Date(req.availabilityDate))) {
         res.status(200).json({
           success: true,
           status: 200,
@@ -62,7 +67,7 @@ availabilityRouter.get(
           }
         });
       } else {
-        const availableSlots = await appointmentService.generateAvailableSlots(
+        const availableSlots = await generateAvailableSlots(
           req.availabilityDate
         );
         // Checking if the slot generation operation failed due to
