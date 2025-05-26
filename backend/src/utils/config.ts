@@ -4,8 +4,8 @@ dotenv.config();
 const MONGODB_URI = process.env.MONGODB_URI;
 const PORT = process.env.PORT;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
-const SERVICE_USERNAME = process.env.SERVICE_USERNAME;
-const SERVICE_PASSWORD = process.env.SERVICE_PASSWORD;
+const MAILTRAP_USERNAME = process.env.MAILTRAP_USERNAME;
+const MAILTRAP_PASSWORD = process.env.MAILTRAP_PASSWORD;
 const SMTP_HOST = process.env.SMTP_HOST;
 const SMTP_PORT = Number(process.env.SMTP_PORT);
 
@@ -21,7 +21,7 @@ if (!ADMIN_EMAIL) {
   throw new Error("Missing ADMIN_EMAIL in environmnet viarable");
 }
 
-if (!SERVICE_PASSWORD || !SERVICE_USERNAME || !SMTP_HOST || !SMTP_PORT) {
+if (!MAILTRAP_PASSWORD || !MAILTRAP_USERNAME || !SMTP_HOST || !SMTP_PORT) {
   throw new Error("There's an invalid environment variable value");
 }
 
@@ -29,8 +29,8 @@ let MAIL_OPTIONS = smtpTransport({
   host: SMTP_HOST,
   port: SMTP_PORT,
   auth: {
-    user: SERVICE_USERNAME,
-    pass: SERVICE_PASSWORD
+    user: MAILTRAP_USERNAME,
+    pass: MAILTRAP_PASSWORD
   }
 });
 

@@ -7,9 +7,8 @@ import {
   createNewAppointment,
   cancelAppointment
 } from "../services/appointmentService";
-import { sendAppointmentEmails } from "../tasks/sendAppointmentEmails";
+// import { sendAppointmentEmails } from "../tasks/sendAppointmentEmails";
 import { sendCancellationEmails } from "../tasks/sendCancellationEmails";
-import CustomError from "../errors/customError";
 import InternalServerError from "../errors/internalServerError";
 import EntityNotFoundError from "../errors/entityNotFoundError";
 
@@ -25,11 +24,15 @@ appointmentRouter.post(
 
       // Creating a new appointment document on the database
       const savedAppointment = await createNewAppointment(requestedAppointment);
-      if (savedAppointment instanceof Error)
-        throw new CustomError({
+      if (
+        savedAppointment instanceof Error ||
+        savedAppointment instanceof InternalServerError
+      ) {
+        throw new InternalServerError({
           message: savedAppointment.message,
           statusCode: 500
         });
+      }
 
       // Sending response to client
       res.status(200).json({
@@ -41,7 +44,7 @@ appointmentRouter.post(
       });
 
       // Async fire-and-forget with IIFE for emailing the user and admin about successful booked appointment.
-      (async () => sendAppointmentEmails(savedAppointment))();
+      // (async () => sendAppointmentEmails(savedAppointment))();
     } catch (err: unknown) {
       if (err instanceof Error || err instanceof InternalServerError) {
         next(err);

@@ -7,7 +7,7 @@ import {
   getCurrentDate,
   getDateOfficial,
   isCurrentDate
-} from "../utils/helpers"; // Changes are needed on this module
+} from "../utils/helpers";
 import { generateAvailableSlots } from "../services/appointmentService";
 import CustomError from "../errors/customError";
 import ValidationError from "../errors/validationError";

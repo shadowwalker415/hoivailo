@@ -39,7 +39,7 @@ export const databaseErrorHandler = (
     error.message.startsWith("E11000 duplicate key error collection")
   ) {
     next(
-      new InternalServerError({
+      new ValidationError({
         message: "Appointment already exist",
         statusCode: 500,
         code: "INTERNAL_SERVER_ERROR"

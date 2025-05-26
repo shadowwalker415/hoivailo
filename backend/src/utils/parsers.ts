@@ -18,9 +18,21 @@ import {
   isZeroMinutes
 } from "./helpers";
 import ValidationError from "../errors/validationError";
+import xss from "xss";
 
 const isString = (text: unknown): text is string => {
   return typeof text === "string" || text instanceof String;
+};
+
+// Helper function against Cross-Site-Scripting
+const filterTags = (input: string): string => {
+  const options = {
+    whiteList: {}, // No tags allowed
+    stripIgnoreTag: true, // This removes all tags that are not in the white list
+    stripIgnoreTagBody: ["script"] // This removes the <script> tag and it's contents
+  };
+
+  return xss(input, options);
 };
 
 const isDate = (date: string): date is string => {
@@ -74,7 +86,7 @@ const parseAppointmentID = (id: unknown): string => {
       code: "VALIDATION_ERROR"
     });
   }
-  return id;
+  return filterTags(id);
 };
 
 const parseText = (text: unknown): string => {
@@ -86,7 +98,7 @@ const parseText = (text: unknown): string => {
       code: "VALIDATION_ERROR"
     });
   }
-  return text;
+  return filterTags(text);
 };
 
 const parseTime = (time: unknown): Date => {
@@ -151,7 +163,7 @@ const parseTime = (time: unknown): Date => {
       code: "VALIDATION_ERROR"
     });
   }
-  return new Date(time);
+  return new Date(filterTags(time));
 };
 
 const parseName = (name: unknown): string => {
@@ -162,7 +174,7 @@ const parseName = (name: unknown): string => {
       code: "VALIDATION_ERROR"
     });
   }
-  return name;
+  return filterTags(name);
 };
 
 const parseEmail = (email: unknown): string => {
@@ -173,7 +185,7 @@ const parseEmail = (email: unknown): string => {
       code: "VALIDATION_ERROR"
     });
   }
-  return email;
+  return filterTags(email);
 };
 
 const parsePhoneNumber = (phoneNumber: unknown) => {
@@ -184,7 +196,7 @@ const parsePhoneNumber = (phoneNumber: unknown) => {
       code: "VALIDATION_ERROR"
     });
   }
-  return phoneNumber;
+  return filterTags(phoneNumber);
 };
 
 export const parseService = (service_type: unknown): string => {
@@ -196,7 +208,7 @@ export const parseService = (service_type: unknown): string => {
       code: "VALIDATION_ERROR"
     });
   }
-  return service_type;
+  return filterTags(service_type);
 };
 
 export const validateAppointmentRequestBody = (
