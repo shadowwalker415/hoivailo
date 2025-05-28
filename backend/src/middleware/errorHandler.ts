@@ -30,7 +30,7 @@ const getErrorMessage = (error: unknown): string => {
 export const databaseErrorHandler = (
   error: unknown,
   _req: Request,
-  _res: Response,
+  res: Response,
   next: NextFunction
 ) => {
   // Checking if the error was raised due to duplicate record
@@ -38,13 +38,11 @@ export const databaseErrorHandler = (
     error instanceof Error &&
     error.message.startsWith("E11000 duplicate key error collection")
   ) {
-    next(
-      new ValidationError({
-        message: "Appointment already exist",
-        statusCode: 500,
-        code: "INTERNAL_SERVER_ERROR"
-      })
-    );
+    res.status(500).send({
+      success: false,
+      status: 500,
+      message: "Appoinment already exist"
+    });
     // Checking if the error was raised due to error in field validation
   } else if (
     error instanceof Error &&
@@ -84,7 +82,7 @@ export const generalErrorHandler = (
     res.status(400).send({
       success: false,
       code: 400,
-      message: getErrorMessage(error.message)
+      message: getErrorMessage(error)
     });
   } else {
     next(error);

@@ -103,18 +103,18 @@ export const sendUserConfirmationEmail = async (
       mailOptions
     );
     if (!isEmailSent(responseObj)) {
-      throw new CustomError({
+      throw new InternalServerError({
         message: "Email failed to send",
-        statusCode: 400
+        statusCode: 500
       });
     }
     return responseObj;
   } catch (err: unknown) {
-    if (err instanceof CustomError || err instanceof ValidationError) {
+    if (err instanceof InternalServerError || err instanceof ValidationError) {
       return err;
     }
     return new InternalServerError({
-      message: "An error occured on server",
+      message: "An unknoown error occured on server",
       statusCode: 500,
       code: "INTERNAL_SERVER_ERROR"
     });

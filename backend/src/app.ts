@@ -2,9 +2,8 @@ import express from "express";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
-// import ExpressMongoSanitize from "express-mongo-sanitize";
 import hpp from "hpp";
-
+import { sanitizeParameters } from "./middleware/parameterSanitizer";
 import morgan from "morgan";
 import availabilityRouter from "./controller/availability";
 import appointmentRouter from "./controller/appointment";
@@ -16,7 +15,7 @@ import {
 } from "./middleware/errorHandler";
 
 const app = express();
-app.use(helmet()); // Adding security to HTTP request headers
+app.use(helmet()); // Adding security to HTTP request headers.
 
 // Configurations for HTTP request rate limiting.
 const limiter = rateLimit({
@@ -26,20 +25,21 @@ const limiter = rateLimit({
 });
 app.use(cors());
 
-if ((process.env.NODE_ENV = "development")) {
+if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
+
 app.use("/api", limiter); // Setting a request rate limit on all /api routes.
 
 app.use(express.json());
 
-// app.use(ExpressMongoSanitize()); // Preventing NoSQL Injections with data sanitization.
+app.use(sanitizeParameters); // Preventing NoSQL injections
 
 app.use(
   hpp({
     whitelist: ["date"]
   })
-); // Preventing HTTP parameter pollution
+); // Preventing HTTP parameter pollution.
 
 app.use("/api/v1/availability", availabilityRouter);
 app.use("/api/v1/appointment", appointmentRouter);

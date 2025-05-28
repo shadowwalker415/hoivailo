@@ -9,7 +9,6 @@ import {
   isCurrentDate
 } from "../utils/helpers";
 import { generateAvailableSlots } from "../services/appointmentService";
-import CustomError from "../errors/customError";
 import ValidationError from "../errors/validationError";
 import InternalServerError from "../errors/internalServerError";
 
@@ -73,10 +72,11 @@ availabilityRouter.get(
         // Checking if the slot generation operation failed due to
         // maybe an error with database query
         if (availableSlots instanceof Error) {
-          throw new CustomError({
+          throw new InternalServerError({
             message:
               "An error occured on the database: Couldn't generate available slots",
-            statusCode: 500
+            statusCode: 500,
+            code: "INTERNAL_SERVER_ERROR"
           });
         }
         res
@@ -84,16 +84,14 @@ availabilityRouter.get(
           .json({ success: true, code: 200, data: { slots: availableSlots } });
       }
     } catch (err: unknown) {
-      if (err instanceof Error || err instanceof ValidationError) {
+      if (
+        err instanceof Error ||
+        err instanceof ValidationError ||
+        err instanceof InternalServerError
+      ) {
         next(err);
       } else {
-        next(
-          new InternalServerError({
-            message: "An error occured. Check logs for more info",
-            statusCode: 500,
-            code: "INTERNAL_SERVER_ERROR"
-          })
-        );
+        next(new Error("An unknown error occured"));
       }
     }
   }

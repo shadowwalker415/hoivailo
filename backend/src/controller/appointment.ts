@@ -8,7 +8,7 @@ import {
   cancelAppointment
 } from "../services/appointmentService";
 // import { sendAppointmentEmails } from "../tasks/sendAppointmentEmails";
-import { sendCancellationEmails } from "../tasks/sendCancellationEmails";
+// import { sendCancellationEmails } from "../tasks/sendCancellationEmails";
 import InternalServerError from "../errors/internalServerError";
 import EntityNotFoundError from "../errors/entityNotFoundError";
 
@@ -19,6 +19,7 @@ appointmentRouter.post(
   "/",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
+      console.log(req.body.name);
       // Parsing and validating request body fields
       const requestedAppointment = validateAppointmentRequestBody(req.body);
 
@@ -96,8 +97,8 @@ appointmentRouter.post(
       });
 
       // Async fire-and-forget with IIFE for emailing user and admin about appointment cancellation
-      (async () =>
-        sendCancellationEmails(cancelledAppointment, validatedBody.reason))();
+      // (async () =>
+      //   sendCancellationEmails(cancelledAppointment, validatedBody.reason))();
     } catch (err: unknown) {
       if (
         err instanceof Error ||

@@ -4,7 +4,7 @@
   "description": "Backend server for Hoivailo Oy",
   "main": "index.js",
   "scripts": {
-    "test": "cross-env NODE_ENV=test morcha",
+    "test": "cross-env NODE_ENV=test mocha",
     "tsc": "tsc",
     "lint": "eslint .",
     "dev": "cross-env NODE_ENV=development ts-node-dev ./src/index.ts",
@@ -27,11 +27,13 @@
     "@types/nodemailer": "^6.4.17",
     "@types/nodemailer-smtp-transport": "^2.7.8",
     "@types/pug": "^2.0.10",
+    "@types/supertest": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^8.31.0",
     "@typescript-eslint/parser": "^8.31.0",
     "eslint": "^9.25.1",
     "mocha": "^11.5.0",
     "morgan": "^1.10.0",
+    "supertest": "^7.1.1",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.31.0"

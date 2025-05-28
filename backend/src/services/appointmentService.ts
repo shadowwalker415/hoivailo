@@ -169,7 +169,7 @@ export const createNewAppointment = async (
     }
     return savedAppointment;
   } catch (err: unknown) {
-    if (err instanceof InternalServerError) {
+    if (err instanceof InternalServerError || err instanceof Error) {
       return err;
     }
     return new Error("An unknown error occured");
@@ -198,7 +198,11 @@ export const cancelAppointment = async (
     // In a scenario where the user attempts to cancel an appointment
     // but didn't get a UI update maybe due to loss of internet connection
     if (appointment.status === "cancelled") {
-      return new Error("Appointment already cancelled"); // This is a place holder. Still thinking of what error to throw here
+      return new InternalServerError({
+        message: "Appointment already cancelled",
+        statusCode: 500,
+        code: "INTERNAL_SERVER_ERROR"
+      }); // This is a place holder. Still thinking of what error to throw here
     }
     // Updating appointment satus
     appointment.status = "cancelled";
@@ -216,7 +220,8 @@ export const cancelAppointment = async (
   } catch (err: unknown) {
     if (
       err instanceof InternalServerError ||
-      err instanceof EntityNotFoundError
+      err instanceof EntityNotFoundError ||
+      err instanceof Error
     ) {
       return err;
     }

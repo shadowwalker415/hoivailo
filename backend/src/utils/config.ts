@@ -1,7 +1,11 @@
 import dotenv from "dotenv";
 import smtpTransport from "nodemailer-smtp-transport";
 dotenv.config();
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI =
+  process.env.NODE_ENV === "test"
+    ? process.env.MONGODB_TEST
+    : process.env.MONGODB_URI;
+
 const PORT = process.env.PORT;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const MAILTRAP_USERNAME = process.env.MAILTRAP_USERNAME;

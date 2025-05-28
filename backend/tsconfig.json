@@ -18,7 +18,7 @@
     "skipLibCheck": true, // Improves build time
     "types": ["node", "express"] // Add Node.js and Express types
   },
-  "include": ["src"], // Include your source code
+  "include": ["src", "test"], // Include your source code
   "exclude": ["node_modules", "build"], // Exclude compiled output and dependencies
   "ts-node": {
     "files": true
