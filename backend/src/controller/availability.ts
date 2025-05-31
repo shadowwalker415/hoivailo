@@ -6,7 +6,7 @@ import {
   isWorkingDay,
   getCurrentDate,
   getDateOfficial,
-  isCurrentDate
+  getDifferenceInMonths
 } from "../utils/helpers";
 import { generateAvailableSlots } from "../services/appointmentService";
 import ValidationError from "../errors/validationError";
@@ -57,7 +57,7 @@ availabilityRouter.get(
           }
         });
         // Checking if requested date is more than 3 months away.
-      } else if (isCurrentDate(new Date(req.availabilityDate))) {
+      } else if (getDifferenceInMonths(new Date(req.availabilityDate)) >= 3) {
         res.status(200).json({
           success: true,
           status: 200,
