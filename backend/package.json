@@ -4,7 +4,7 @@
   "description": "Backend server for Hoivailo Oy",
   "main": "index.js",
   "scripts": {
-    "test": "cross-env NODE_ENV=test mocha",
+    "test": "cross-env NODE_ENV=test mocha -g 'Booking appointments:' ",
     "tsc": "tsc",
     "lint": "eslint .",
     "dev": "cross-env NODE_ENV=development ts-node-dev ./src/index.ts",

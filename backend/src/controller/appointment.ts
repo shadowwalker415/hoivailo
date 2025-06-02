@@ -19,7 +19,6 @@ appointmentRouter.post(
   "/",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      console.log(req.body.name);
       // Parsing and validating request body fields
       const requestedAppointment = validateAppointmentRequestBody(req.body);
 
@@ -36,9 +35,9 @@ appointmentRouter.post(
       }
 
       // Sending response to client
-      res.status(200).json({
-        ok: true,
-        status: 200,
+      res.status(201).json({
+        success: true,
+        code: 201,
         data: {
           message: `Appointment successfully booked for ${savedAppointment.email}`
         }
@@ -89,7 +88,7 @@ appointmentRouter.post(
       }
       // Sending response to client
       res.status(201).json({
-        ok: true,
+        success: true,
         status: 201,
         data: {
           message: `Appointment successfully cancelled for ${cancelledAppointment.email}`

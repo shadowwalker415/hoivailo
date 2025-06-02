@@ -119,6 +119,14 @@ const parseTime = (time: unknown): Date => {
       code: "VALIDATION_ERROR"
     });
 
+  // Checking if appointment date time is a previous date.
+  if (isPastDate(time))
+    throw new ValidationError({
+      message: "Appointment start or end time cannot be a past date",
+      statusCode: 400,
+      code: "VALIDATION_ERROR"
+    });
+
   // Checking if appointment date time is not work day
   if (!isWorkingDay(time)) {
     throw new ValidationError({
@@ -128,19 +136,10 @@ const parseTime = (time: unknown): Date => {
     });
   }
 
-  // Checking if appointment date time is a previous date.
-  if (isPastDate(time))
-    throw new ValidationError({
-      message: "Appointment start or end time cannot be a past date",
-      statusCode: 400,
-      code: "VALIDATION_ERROR"
-    });
-
   // Checking if appointment date time is more than 3 months away.
-  if (getDifferenceInMonths(new Date(time)) > 3)
+  if (getDifferenceInMonths(new Date(time)) >= 3)
     throw new ValidationError({
-      message:
-        "Appointment start or end time cannot be a date more than 3 months away",
+      message: "Appointment start or end time cannot be a date 3 months away",
       statusCode: 400,
       code: "VALIDATION_ERROR"
     });
@@ -149,7 +148,7 @@ const parseTime = (time: unknown): Date => {
   if (isBeforeOpeningHour(time)) {
     throw new ValidationError({
       message:
-        "Appointment start or end time cannot be a time before official opening hours",
+        "Appointment start or end time cannot be a time before official opening hour",
       statusCode: 400,
       code: "VALIDATION_ERROR"
     });
@@ -158,7 +157,7 @@ const parseTime = (time: unknown): Date => {
   if (isAfterClosingHour(time)) {
     throw new ValidationError({
       message:
-        "Appointment start or end time cannot be a time after official closing hours",
+        "Appointment start or end time cannot be same as closing hour or after closing hour",
       statusCode: 400,
       code: "VALIDATION_ERROR"
     });
