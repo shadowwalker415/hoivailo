@@ -48,11 +48,6 @@ const isService = (service: string): service is AppointmentServices => {
     .includes(service);
 };
 
-// Checking if ID is of format 491f16df-2c47-41c6-8b96-8eb4e54be91f for example
-const isValidID = (id: string): boolean => {
-  return /^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$/.test(id);
-};
-
 const isValidText = (text: string): boolean => {
   return /^(?!.*<.*?>)[^<>]{1,2000}$/.test(text);
 };
@@ -79,9 +74,9 @@ export const isRole = (role: unknown): role is Role => {
 };
 
 const parseAppointmentID = (id: unknown): string => {
-  if (!isString(id) || !isValidID(id)) {
+  if (!isString(id)) {
     throw new ValidationError({
-      message: "Invalid Appointment ID",
+      message: "Appointment Id must be string",
       statusCode: 400,
       code: "VALIDATION_ERROR"
     });

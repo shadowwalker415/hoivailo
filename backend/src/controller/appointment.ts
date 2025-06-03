@@ -67,17 +67,7 @@ appointmentRouter.post(
       const cancelledAppointment = await cancelAppointment(
         validatedBody.appointmentId
       );
-      // Checking if the database operation failed
-      if (
-        cancelledAppointment instanceof InternalServerError ||
-        cancelledAppointment instanceof Error
-      ) {
-        throw new InternalServerError({
-          message: cancelledAppointment.message,
-          statusCode: 500,
-          code: "INTERNAL_SERVER_ERROR"
-        });
-      }
+
       // Checking if the appointment was not found
       if (cancelledAppointment instanceof EntityNotFoundError) {
         throw new EntityNotFoundError({
@@ -85,7 +75,18 @@ appointmentRouter.post(
           statusCode: cancelledAppointment.statusCode,
           code: cancelledAppointment.code
         });
+        // Checking if the database operation failed
+      } else if (
+        cancelledAppointment instanceof Error ||
+        cancelledAppointment instanceof InternalServerError
+      ) {
+        throw new InternalServerError({
+          message: cancelledAppointment.message,
+          statusCode: 500,
+          code: "INTERNAL_SERVER_ERROR"
+        });
       }
+
       // Sending response to client
       res.status(201).json({
         success: true,

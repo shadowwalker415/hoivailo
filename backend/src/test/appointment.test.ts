@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 import Appointment from "../model/appointment";
 import { describe, it } from "mocha";
 import assert from "assert";
-
+import { v4 as uuidv4 } from "uuid";
 import {
   wasYesterday,
   overThreeMonths,
@@ -16,8 +16,6 @@ import {
 
 const server = supertest(app);
 const workingDay = getNextWorkingDay();
-const threeMonths = overThreeMonths();
-console.log(threeMonths);
 
 describe("Booking appointments:", () => {
   beforeEach(async () => {
@@ -27,7 +25,7 @@ describe("Booking appointments:", () => {
       if (err instanceof Error) throw err;
     }
   });
-  describe("When appointment input data is invalid (Phone number)", () => {
+  describe("Booking appointment with invalid input data (Phone number)", () => {
     it("Has response with status code 400", async () => {
       await server
         .post("/api/v1/appointment")
@@ -50,7 +48,7 @@ describe("Booking appointments:", () => {
     });
   });
 
-  describe("When appointment input data is invalid (Name)", () => {
+  describe("Booking appointment with invalid input data (Name)", () => {
     it("Has response with status code 400", async () => {
       await server
         .post("/api/v1/appointment")
@@ -73,7 +71,7 @@ describe("Booking appointments:", () => {
     });
   });
 
-  describe("When appointment input data is invalid (Start time is before opening hour)", () => {
+  describe("Booking appointment with invalid input data (Start time is before opening hour)", () => {
     it("Has response with status code 400", async () => {
       await server
         .post("/api/v1/appointment")
@@ -97,7 +95,7 @@ describe("Booking appointments:", () => {
     });
   });
 
-  describe("When appointment input data is invalid (Start time is at closing hour or after closing hour)", () => {
+  describe("Booking appointment with invalid input data (Start time is at closing hour or after closing hour)", () => {
     it("Has response with status code 400", async () => {
       await server
         .post("/api/v1/appointment")
@@ -121,7 +119,7 @@ describe("Booking appointments:", () => {
     });
   });
 
-  describe("When appointment input data is invalid (Appointment duration is more than 2 hours)", () => {
+  describe("Booking appointment with invalid input data (Appointment duration is more than 2 hours)", () => {
     it("Has response with status code 400", async () => {
       await server
         .post("/api/v1/appointment")
@@ -145,7 +143,7 @@ describe("Booking appointments:", () => {
     });
   });
 
-  describe("When appointment input data is invalid (Appointment start time or end time has minutes)", () => {
+  describe("Booking appointment with invalid input data (Appointment start time or end time has minutes)", () => {
     it("Has response with status code 400", async () => {
       await server
         .post("/api/v1/appointment")
@@ -168,7 +166,7 @@ describe("Booking appointments:", () => {
     });
   });
 
-  describe("When appointment input data is invalid (date time is past date)", () => {
+  describe("Booking appointment with invalid input data (date time is past date)", () => {
     it("Has response with status code 400", async () => {
       await server
         .post("/api/v1/appointment")
@@ -191,7 +189,7 @@ describe("Booking appointments:", () => {
     });
   });
 
-  describe("When appointment input data is invalid (date time is current date)", () => {
+  describe("Booking appointment with invalid input data (date time is current date)", () => {
     it("Has response with status code 400", async () => {
       await server
         .post("/api/v1/appointment")
@@ -214,7 +212,7 @@ describe("Booking appointments:", () => {
     });
   });
 
-  describe("When appointment input data is invalid (date time is three months away)", () => {
+  describe("Booking appointment with invalid input data (date time is three months away)", () => {
     it("Has response with status code 400", async () => {
       await server
         .post("/api/v1/appointment")
@@ -238,7 +236,7 @@ describe("Booking appointments:", () => {
     });
   });
 
-  describe("When appointment input data is invalid (date time is a holiday)", () => {
+  describe("Booking appointment with invalid input data (date time is a holiday)", () => {
     it("Has response with status code 400", async () => {
       await server
         .post("/api/v1/appointment")
@@ -261,7 +259,7 @@ describe("Booking appointments:", () => {
     });
   });
 
-  describe("When appointment input data is invalid (date time is a weekend)", () => {
+  describe("Booking appointment with invalid input data(date time is a weekend)", () => {
     it("Has response with status code 400", async () => {
       await server
         .post("/api/v1/appointment")
@@ -284,7 +282,7 @@ describe("Booking appointments:", () => {
     });
   });
 
-  describe("When appointment input data is valid", () => {
+  describe("Booking appointment with valid input data", () => {
     it("Successfully books an appointment", async () => {
       await server
         .post("/api/v1/appointment")
@@ -309,7 +307,7 @@ describe("Booking appointments:", () => {
     });
   });
 
-  describe("When appointment input data is valid but an appointment with same data already exist", () => {
+  describe("Booking appointment with valid input data when an appointment with same data already exist", () => {
     it("Response with status code 500", async () => {
       const appointmentDetails = {
         startTime: `${workingDay} 09:00`,
@@ -330,6 +328,120 @@ describe("Booking appointments:", () => {
             success: false,
             status: 500,
             message: "Appoinment already exist"
+          });
+        });
+    });
+  });
+
+  afterEach(async () => {
+    try {
+      await Appointment.deleteMany({});
+      await mongoose.disconnect();
+    } catch (err: unknown) {
+      if (err instanceof Error) throw err;
+    }
+  });
+});
+
+describe("Cancelling appointments:", () => {
+  beforeEach(async () => {
+    try {
+      await mongoose.connect(config.MONGODB_URI);
+    } catch (err: unknown) {
+      if (err instanceof Error) throw err;
+    }
+  });
+
+  describe("Attempting to cancel appointment with valid appointment ID", () => {
+    it("Successfully cancels the appointment", async () => {
+      const appointmentDetails = {
+        startTime: `${workingDay} 09:00`,
+        endTime: `${workingDay} 11:00`,
+        name: "John Doe",
+        phone: "+358507279900",
+        email: "johndoe@gmail.com",
+        service: "Kotiapu"
+      };
+      const newAppointment = new Appointment(appointmentDetails);
+      const savedAppointment = await newAppointment.save();
+
+      await server
+        .post("/api/v1/appointment/cancel")
+        .send({
+          appointmentId: savedAppointment.appointmentId,
+          reason: "Sickness"
+        })
+        .expect(201)
+        .expect((res) => {
+          assert.deepEqual(res.body, {
+            success: true,
+            status: 201,
+            data: {
+              message:
+                "Appointment successfully cancelled for johndoe@gmail.com"
+            }
+          });
+        });
+    });
+  });
+
+  describe("Attempting to cancel appointment with invalid appointment ID", () => {
+    it("Response with 404 status code", async () => {
+      const appointmentDetails = {
+        startTime: `${workingDay} 09:00`,
+        endTime: `${workingDay} 11:00`,
+        name: "John Doe",
+        phone: "+358507279900",
+        email: "johndoe@gmail.com",
+        service: "Kotiapu"
+      };
+      const newAppointment = new Appointment(appointmentDetails);
+      await newAppointment.save();
+      const id = uuidv4();
+
+      await server
+        .post("/api/v1/appointment/cancel")
+        .send({
+          appointmentId: id,
+          reason: "Sickness"
+        })
+        .expect(404)
+        .expect((res) => {
+          assert.deepEqual(res.body, {
+            success: false,
+            code: 404,
+            message: `Appointment with appointment ID (${id}) not found`
+          });
+        });
+    });
+  });
+
+  describe("Attempting to cancel appointment that has already been cancelled", () => {
+    it("Response with 500 status code", async () => {
+      const appointmentDetails = {
+        startTime: `${workingDay} 09:00`,
+        endTime: `${workingDay} 11:00`,
+        name: "John Doe",
+        phone: "+358507279900",
+        email: "johndoe@gmail.com",
+        service: "Kotiapu"
+      };
+      const newAppointment = new Appointment(appointmentDetails);
+      const savedAppointment = await newAppointment.save();
+      savedAppointment.status = "cancelled";
+      await savedAppointment.save();
+      await server
+        .post("/api/v1/appointment/cancel")
+        .send({
+          appointmentId: savedAppointment.appointmentId,
+          reason: "Sickness"
+        })
+        .expect(500)
+        .expect((res) => {
+          assert.deepEqual(res.body, {
+            success: false,
+            code: 500,
+            message: "Appointment already cancelled"
           });
         });
     });
