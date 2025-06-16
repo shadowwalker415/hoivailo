@@ -1,4 +1,5 @@
 import express from "express";
+import path from "path";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
@@ -8,6 +9,7 @@ import morgan from "morgan";
 import availabilityRouter from "./controller/availability";
 import appointmentRouter from "./controller/appointment";
 import contactRouter from "./controller/contact";
+import { Request, Response } from "express";
 import {
   unknownEndPoint,
   generalErrorHandler,
@@ -15,6 +17,10 @@ import {
 } from "./middleware/errorHandler";
 
 const app = express();
+app.set("view engine", "pug"); // Setting pug as our rendering template engine.
+app.set("views", path.join(__dirname, "views"));
+app.use("/public", express.static(path.join(__dirname, "public"))); // For serving static files
+app.use("/static", express.static("node_modules/flatpickr"));
 app.use(helmet()); // Adding security to HTTP request headers.
 
 // Configurations for HTTP request rate limiting.
@@ -41,6 +47,9 @@ app.use(
   })
 ); // Preventing HTTP parameter pollution.
 
+app.get("/", (_req: Request, res: Response) => {
+  res.status(200).render("home");
+}); // Home route
 app.use("/api/v1/availability", availabilityRouter);
 app.use("/api/v1/appointment", appointmentRouter);
 app.use("/api/v1/contact-us", contactRouter);
