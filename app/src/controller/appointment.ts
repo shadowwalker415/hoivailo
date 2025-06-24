@@ -14,9 +14,21 @@ import EntityNotFoundError from "../errors/entityNotFoundError";
 
 const appointmentRouter: IRouter = Router();
 
+//
+appointmentRouter.get("/cancel", (_req: Request, res: Response) => {
+  res.status(200).render("cancelAppointment");
+});
+
+appointmentRouter.get(
+  "/select-appointment-date",
+  (_req: Request, res: Response) => {
+    res.status(200).render("selectDate");
+  }
+);
+
 // Route handler for booking appointments
 appointmentRouter.post(
-  "/",
+  "/booking",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Parsing and validating request body fields
@@ -32,18 +44,12 @@ appointmentRouter.post(
           message: savedAppointment.message,
           statusCode: 500
         });
+      } else {
+        // Sending response to client
+        res.status(201).render("appointmentSuccess", { savedAppointment });
       }
 
-      // Sending response to client
-      res.status(201).json({
-        success: true,
-        code: 201,
-        data: {
-          message: `Appointment successfully booked for ${savedAppointment.email}`
-        }
-      });
-
-      // Async fire-and-forget with IIFE for emailing the user and admin about successful booked appointment.
+      //  Fire-and-forget Async job with IIFE for emailing the user and admin on appointment booking success.
       // (async () => sendAppointmentEmails(savedAppointment))();
     } catch (err: unknown) {
       if (err instanceof Error || err instanceof InternalServerError) {
@@ -70,41 +76,30 @@ appointmentRouter.post(
 
       // Checking if the appointment was not found
       if (cancelledAppointment instanceof EntityNotFoundError) {
-        throw new EntityNotFoundError({
-          message: cancelledAppointment.message,
-          statusCode: cancelledAppointment.statusCode,
-          code: cancelledAppointment.code
-        });
-        // Checking if the database operation failed
+        res.status(404).render("404NotFound", { validatedBody });
+        // Checking if the appointment had already been cancelled
       } else if (
-        cancelledAppointment instanceof Error ||
-        cancelledAppointment instanceof InternalServerError
+        cancelledAppointment instanceof InternalServerError &&
+        cancelledAppointment.message === "Appointment already cancelled"
       ) {
+        res.status(201).render("alreadyCancelled", { validatedBody });
+        // Checking if the database operation failed
+      } else if (cancelledAppointment instanceof Error) {
         throw new InternalServerError({
-          message: cancelledAppointment.message,
+          message:
+            "An error occured on the database, couldn't cancel appointment",
           statusCode: 500,
           code: "INTERNAL_SERVER_ERROR"
         });
+      } else {
+        // Sending response to client
+        res.status(201).render("cancellationSuccess", { cancelledAppointment });
       }
-
-      // Sending response to client
-      res.status(201).json({
-        success: true,
-        status: 201,
-        data: {
-          message: `Appointment successfully cancelled for ${cancelledAppointment.email}`
-        }
-      });
-
-      // Async fire-and-forget with IIFE for emailing user and admin about appointment cancellation
+      // Fire-and-forget Async job with IIFE for emailing user and admin on appointment cancellation success.
       // (async () =>
       //   sendCancellationEmails(cancelledAppointment, validatedBody.reason))();
     } catch (err: unknown) {
-      if (
-        err instanceof Error ||
-        err instanceof InternalServerError ||
-        err instanceof EntityNotFoundError
-      ) {
+      if (err instanceof InternalServerError) {
         next(err);
       } else {
         next(new Error("An unknown error occured"));

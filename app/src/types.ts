@@ -30,8 +30,8 @@ export interface WorkingHours {
 }
 
 export interface Slot {
-  start: Date;
-  end: Date;
+  startTime: string;
+  endTime: string;
 }
 
 export interface CustomRequest extends Request {

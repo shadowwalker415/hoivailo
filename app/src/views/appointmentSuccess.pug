@@ -1,0 +1,11 @@
+doctype html
+html(lang="fi")
+  head
+    meta(charset="UTF-8")
+    link(rel="stylesheet", href="../public/dist/css/styles.css")
+    title Appointment Successfully Booked | Hoivailo Oy
+  body
+    .container.w-50.m-5
+      p.mb-4.text-center Appointment successfully booked! 
+      p.mb-4 A confirmation email has been sent to 
+      span.fw-bold #{savedAppointment.email}

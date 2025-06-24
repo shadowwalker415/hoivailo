@@ -19,8 +19,6 @@ import {
 const app = express();
 app.set("view engine", "pug"); // Setting pug as our rendering template engine.
 app.set("views", path.join(__dirname, "views"));
-app.use("/public", express.static(path.join(__dirname, "public"))); // For serving static files
-app.use("/static", express.static("node_modules/flatpickr"));
 app.use(helmet()); // Adding security to HTTP request headers.
 
 // Configurations for HTTP request rate limiting.
@@ -37,7 +35,7 @@ if (process.env.NODE_ENV === "development") {
 
 app.use("/api", limiter); // Setting a request rate limit on all /api routes.
 
-app.use(express.json());
+app.use(express.urlencoded()); // Parsing form data
 
 app.use(sanitizeParameters); // Preventing NoSQL injections
 
@@ -47,12 +45,13 @@ app.use(
   })
 ); // Preventing HTTP parameter pollution.
 
+app.use("/public", express.static(path.join(__dirname, "public"))); // For serving static files
 app.get("/", (_req: Request, res: Response) => {
   res.status(200).render("home");
 }); // Home route
-app.use("/api/v1/availability", availabilityRouter);
-app.use("/api/v1/appointment", appointmentRouter);
-app.use("/api/v1/contact-us", contactRouter);
+app.use("/appointment-slots", availabilityRouter);
+app.use("/appointment", appointmentRouter);
+app.use("/contact-us", contactRouter);
 app.use(databaseErrorHandler);
 app.use(generalErrorHandler);
 app.use(unknownEndPoint);

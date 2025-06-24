@@ -29,42 +29,18 @@ availabilityRouter.get(
       }
       // checking if requested date is a previous date.
       if (isPastDate(req.availabilityDate)) {
-        res.status(200).json({
-          success: true,
-          status: 200,
-          data: {
-            slot: []
-          }
-        });
+        res.status(200).render("noSlotsFound");
         // checking if requested date is a working day.
       } else if (!isWorkingDay(req.availabilityDate)) {
-        res.status(200).json({
-          success: true,
-          status: 200,
-          data: {
-            slot: []
-          }
-        });
+        res.status(200).render("noSlotsFound");
         // Checking if requested date is the current date.
       } else if (
         getCurrentDate() === getDateOfficial(new Date(req.availabilityDate))
       ) {
-        res.status(200).json({
-          success: true,
-          status: 200,
-          data: {
-            slot: []
-          }
-        });
+        res.status(200).render("noSlotsFound");
         // Checking if requested date is more than 3 months away.
       } else if (getDifferenceInMonths(new Date(req.availabilityDate)) >= 3) {
-        res.status(200).json({
-          success: true,
-          status: 200,
-          data: {
-            slot: []
-          }
-        });
+        res.status(200).render("noSlotsFound");
       } else {
         const availableSlots = await generateAvailableSlots(
           req.availabilityDate
@@ -79,9 +55,7 @@ availabilityRouter.get(
             code: "INTERNAL_SERVER_ERROR"
           });
         }
-        res
-          .status(200)
-          .json({ success: true, code: 200, data: { slots: availableSlots } });
+        res.status(200).render("appointment", { availableSlots });
       }
     } catch (err: unknown) {
       if (

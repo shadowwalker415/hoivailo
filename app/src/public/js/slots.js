@@ -3,8 +3,8 @@ import "flatpickr/dist/flatpickr.min.css";
 import { Finnish } from "flatpickr/dist/l10n/fi.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  // const BASE_URI = "http://localhost:3001/api/v1/availability";
-  // const slotsButton = document.querySelector(".slots-btn");
+  const BASE_URL = "http://localhost:3001/appointment-slots";
+  const slotsButton = document.querySelector(".slots-btn");
 
   let selectedDate;
 
@@ -14,11 +14,16 @@ document.addEventListener("DOMContentLoaded", () => {
     disable: [(date) => date.getDay() === 0 || date.getDay() === 6], // Disabling all weekend dates
     onChange: function (_dateArr, instance) {
       selectedDate = instance;
-      console.log(selectedDate);
     }
   });
 
-  // slotsButton.addEventListener("click", (event) => {
-  //   event.preventDefault();
-  // });
+  slotsButton.addEventListener("click", () => {
+    if (!selectedDate) {
+      return;
+    }
+
+    const url = `${BASE_URL}?date=${encodeURIComponent(selectedDate)}`;
+
+    window.location.href = url; // Navigating to the new url
+  });
 });

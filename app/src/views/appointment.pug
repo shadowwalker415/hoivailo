@@ -1,0 +1,53 @@
+doctype html
+html(lang="fi")
+  head
+    meta(charset="UTF-8")
+    link(rel="stylesheet", href="../public/dist/css/styles.css")
+    script(defer src="../public/dist/js/appointment.main.js")
+    title Book Appointment | Hoivailo Oy
+  body
+    .container.w-50.m-5.bg-primary-subtle.p-4
+      form.appointment-form(action="http://localhost:3001/appointment/booking" method="post")
+
+        fieldset 
+          legend Valitse aika
+          
+          each slot, index in availableSlots 
+            - const timeLabel = new Date(slot.startTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+            .form-check.mb-3
+              label.form-check-label(for="time-#{index}") klo #{timeLabel}
+                input.d-block(
+                  type="radio"
+                  name="startTime"
+                  value=slot.startTime
+                  id="startTime-#{index}"
+                  data-endTime=slot.endTime
+                )
+
+              
+        input(type="hidden" name="endTime" id="endTimeField")
+
+        .mb-3.name-group
+          label.form-label.fw-bold(for="name") Nimi
+          input.form-control(type="text" name="name" placeholder="Nimi" id="name" required)
+        .mb-3.email-group
+          label.form-label(for="email") Sähköposti  
+          input.form-control(type="email" name="email" placeholder="esim@gmail.com" id="email" required)
+        .mb-3.phone-group
+          label.form-label(for="phone") Puhelin  
+          input.form-control(type="text" name="phone" id="phone" placeholder="esim +3584XXXXXXX +3585XXXXXXX" required)
+        .mb-3.service-group
+          select.form-select.form-select-sm(name="service" id="service" arial-label="Select appointment service" required)
+            option(value="" selected) Valitse palvelu
+            option(value="Kotiapu") Kotiapu
+            option(value="Kotihoito") Kotihoito
+            option(value="Lastenhoito") Lastenhoito
+            option(value="Kotisiivous") Kotisiivous
+            option(value="Yrityssiivous") Yrityssiivous
+        .mb-3.notes-group
+          label.form-label(for="notes") Teksti
+          span.text-body-tertiary (Valinnainen)
+          textarea.form-control(name="notes" id="notes")
+          p.text-body-tertiary Ethän lähetä lomakkeella arkaluonteisia tietoja, kuten terveystietoja.
+        button.btn.btn-primary(type="submit") Lähetä ajanvaraus
+      p.text-danger.mb-3.opacity-0(id="error-alert")

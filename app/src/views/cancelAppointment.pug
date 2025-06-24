@@ -1,0 +1,20 @@
+doctype html
+html(lang="fi")
+  head
+    meta(charset="UTF-8")
+    link(rel="stylesheet", href="../public/dist/css/styles.css")
+    script(defer src="../public/dist/js/cancelAppointment.main.js")
+    title Cancel Appointment
+  body
+    .container.w-50.m-5.bg-primary-subtle.p-4
+      form.appointment-cancelling(action="http://localhost:3001/appointment/cancel" method="post")
+        .mb-3.name-group
+          label.form-label(for="appointmentId") Ajan varauden koodi
+          input.form-control(type="text" name="appointmentId" placeholder="Koodi" id="appointmentId" required)
+        .mb-3.name-group
+          label.form-label(for="reason") Syy
+          textarea.form-control(name="reason" id="reason")
+          p.text-body-tertiary Ethän lähetä lomakkeella arkaluonteisia tietoja, kuten terveystietoja.
+        button.btn.btn-primary(type="submit") Peruta ajanvaraus
+      p.text-danger.mb-3.opacity-0(id="error-alert")
+        

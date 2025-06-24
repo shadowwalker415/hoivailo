@@ -1,0 +1,25 @@
+doctype html
+html(lang="fi")
+  head
+    meta(charset="UTF-8")
+    link(rel="stylesheet", href="../public/dist/css/styles.css")
+    script(defer src="../public/dist/js/cancelAppointment.main.js")
+    title Contact Us | Hoivailo Oy
+  body
+    .container.w-50.m-5.bg-primary-subtle.p-4
+      form.form-contact-us(action="http://localhost:3001/contact-us" method="post")
+        .mb-3
+          label.form-label(for="name") Nimi
+          input.form-control(type="text" name="name" placeholder="Nimi" id="name" required)
+        .mb-3
+          label.form-label(for="email") Sähköposti
+          input.form-control(type="email" name="email" placeholder="Sähköposti" id="email" required)
+        .mb-3
+          label.form-label(for="phone") Puhelin
+          input.form-control(type="text" name="phone" placeholder="esim +3584XXXXXXX +3585XXXXXXX" id="phone" required)
+        .mb-3
+          label.form-label(for="message") Viesti
+          textarea.form-control(name="message" id="message" required)
+          p.text-body-tertiary Ethän lähetä lomakkeella arkaluonteisia tietoja, kuten terveystietoja.
+        button.btn.btn-primary(type="submit") Lähetä viesti
+      p.text-danger.mb-3.opacity-0(id="error-alert")

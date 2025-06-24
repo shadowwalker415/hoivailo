@@ -37,9 +37,8 @@ const filterTags = (input: string): string => {
 
 const isDate = (date: string): date is string => {
   // Reqular expression testing if date string is of format yyyy-mm-dd or yyyy-mm-dd hh:mm
-  return (
-    /^\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?$/.test(date) && Boolean(Date.parse(date))
-  );
+  const dateRegex = /^\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?$/;
+  return dateRegex.test(date) && Boolean(Date.parse(date));
 };
 
 const isService = (service: string): service is AppointmentServices => {
@@ -49,19 +48,26 @@ const isService = (service: string): service is AppointmentServices => {
 };
 
 const isValidText = (text: string): boolean => {
-  return /^(?!.*<.*?>)[^<>]{1,2000}$/.test(text);
+  const textRegex = /^(?!.*<.*?>)[^<>]{1,2000}$/;
+  return textRegex.test(text);
 };
 
-// Checking if phone number is a valid Finnish phone number for example +358408229831 or +358509310044
+// Checking if phone number is a valid Finnish phone number for example +3584XXXXXXXX or +3585XXXXXXXX
 const isValidPhone = (phone: string): boolean => {
-  return /^\+358(4\d|5\d)\d{6,7}$|^\+358[- ]?(4\d|5\d)[- ]?\d{3}[- ]?\d{4}$/.test(
-    phone
-  );
+  const phoneRegex =
+    /^\+358(4\d|5\d)\d{6,7}$|^\+358[- ]?(4\d|5\d)[- ]?\d{3}[- ]?\d{4}$/;
+  return phoneRegex.test(phone);
 };
 
 const isValidEmail = (email: string): boolean => {
   return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
 };
+
+function isValidID(id: string): boolean {
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(id.trim());
+}
 
 export const isMessagePurpose = (
   purpose: unknown
@@ -77,6 +83,14 @@ const parseAppointmentID = (id: unknown): string => {
   if (!isString(id)) {
     throw new ValidationError({
       message: "Appointment Id must be string",
+      statusCode: 400,
+      code: "VALIDATION_ERROR"
+    });
+  }
+
+  if (!isValidID(id)) {
+    throw new ValidationError({
+      message: "Appointment Id is of invalid format",
       statusCode: 400,
       code: "VALIDATION_ERROR"
     });

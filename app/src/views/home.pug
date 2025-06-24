@@ -3,16 +3,7 @@ html(lang="fi")
   head
     meta(charset="UTF-8")
     link(rel="stylesheet", href="../public/dist/css/styles.css")
-    link(rel="stylesheet", href="../public/dist/css/slots.css")
-    script(defer src="../public/dist/js/slots.main.js")
-    title Date Picker
+    title Home
   body
     .container.w-50.m-5
-      label.text-primary.fw-bold.mb-2(for="datePicker") Valitse päivämäärä:
-      input.form-control.w-50.fw-bold.text-primary(type="date", id="datePicker")
-      span.input-group-text.w-10(data-td-toggle="datetimepicker")
-        | 📅
-    .container 
-      button.btn.btn-primary.slots-btn
-        | Get slots
-
+      a.btn.btn-primary(href="http://localhost:3001/appointment/select-appointment-date") Varaa aikaa

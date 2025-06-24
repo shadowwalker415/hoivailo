@@ -12,12 +12,15 @@ import EntityNotFoundError from "../errors/entityNotFoundError";
 
 // Helper function for filtering already booked appointments
 const isSlotAvailable = (
-  slotStart: Date,
-  slotEnd: Date,
+  slotStart: string,
+  slotEnd: string,
   appointments: IAppointment[]
 ): boolean => {
   return !appointments.some((appt) => {
-    return slotStart < appt.endTime && slotEnd > appt.startTime;
+    return (
+      convertToISO8601(slotStart) < appt.endTime &&
+      convertToISO8601(slotEnd) > appt.startTime
+    );
   });
 };
 
@@ -49,8 +52,8 @@ const generateSlots = (
     const slotStart = format(current, "HH:mm");
     const slotEnd = format(addMinutes(current, durationMinutes), "HH:mm");
     slots.push({
-      start: convertToISO8601(date_string, slotStart),
-      end: convertToISO8601(date_string, slotEnd)
+      startTime: `${date_string} ${slotStart}`,
+      endTime: `${date_string} ${slotEnd}`
     });
 
     current = addMinutes(current, durationMinutes);
@@ -119,7 +122,7 @@ export const generateAvailableSlots = async (
       });
 
     const availableSlots = generatedSlots.filter((slot) =>
-      checkAvailable(slot.start, slot.end, existingAppointments)
+      checkAvailable(slot.startTime, slot.endTime, existingAppointments)
     );
     return availableSlots;
   } catch (err: unknown) {

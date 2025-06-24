@@ -90,11 +90,7 @@ export const getDifferenceInMonths = (start_time: Date): number => {
 };
 
 // Converting a date string to an ISO 18601 date format.
-export const convertToISO8601 = (date_string: string, time: string): Date => {
-  const convertedTime = parse(
-    `${date_string} ${time}`,
-    "yyyy-MM-dd HH:mm",
-    new Date()
-  );
+export const convertToISO8601 = (date_time: string): Date => {
+  const convertedTime = parse(`${date_time}`, "yyyy-MM-dd HH:mm", new Date());
   return convertedTime;
 };

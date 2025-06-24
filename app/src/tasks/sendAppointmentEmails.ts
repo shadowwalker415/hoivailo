@@ -22,9 +22,9 @@ export const sendAppointmentEmails = async (
       });
     }
 
-    //Updating the appointment emailSent field
+    // Updating the appointment emailSent field
     const confirmedAppointment = await confirmUserEmail(appointment);
-    // Checking if the update was successful
+    // Checking if the database update operation was successful
     if (confirmedAppointment instanceof Error)
       throw new InternalServerError({
         message: "An error occured on the database",

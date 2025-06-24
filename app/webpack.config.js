@@ -8,7 +8,7 @@ module.exports = {
     slots: "./src/public/js/slots.js",
     contact: "./src/public/js/contact.js",
     appointment: "./src/public/js/appointment.js",
-    styles: "./src/public/js/styles.js"
+    cancelAppointment: "./src/public/js/cancelAppointment.js"
   },
   output: {
     filename: "./js/[name].main.js", // Creates a directory named js and inserts all *.main.js output files in it
