@@ -7,8 +7,8 @@ import {
   createNewAppointment,
   cancelAppointment
 } from "../services/appointmentService";
-// import { sendAppointmentEmails } from "../tasks/sendAppointmentEmails";
-// import { sendCancellationEmails } from "../tasks/sendCancellationEmails";
+import { sendAppointmentEmails } from "../tasks/sendAppointmentEmails";
+import { sendCancellationEmails } from "../tasks/sendCancellationEmails";
 import InternalServerError from "../errors/internalServerError";
 import EntityNotFoundError from "../errors/entityNotFoundError";
 
@@ -50,7 +50,7 @@ appointmentRouter.post(
       }
 
       //  Fire-and-forget Async job with IIFE for emailing the user and admin on appointment booking success.
-      // (async () => sendAppointmentEmails(savedAppointment))();
+      (async () => sendAppointmentEmails(savedAppointment))();
     } catch (err: unknown) {
       if (err instanceof Error || err instanceof InternalServerError) {
         next(err);
@@ -94,10 +94,11 @@ appointmentRouter.post(
       } else {
         // Sending response to client
         res.status(201).render("cancellationSuccess", { cancelledAppointment });
+
+        // Fire-and-forget Async job with IIFE for emailing user and admin on appointment cancellation success.
+        (async () =>
+          sendCancellationEmails(cancelledAppointment, validatedBody.reason))();
       }
-      // Fire-and-forget Async job with IIFE for emailing user and admin on appointment cancellation success.
-      // (async () =>
-      //   sendCancellationEmails(cancelledAppointment, validatedBody.reason))();
     } catch (err: unknown) {
       if (err instanceof InternalServerError) {
         next(err);

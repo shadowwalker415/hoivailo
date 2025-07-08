@@ -1,11 +1,13 @@
-doctype html
-html(lang="fi")
-  head
-    meta(charset="UTF-8")
-    link(rel="stylesheet", href="../public/dist/css/styles.css")
-    script(defer src="../public/dist/js/cancelAppointment.main.js")
-    title Cancel Appointment
-  body
+extends baseLayout.pug
+
+block scripts 
+  script(defer src="../public/dist/js/index.main.js")
+  script(defer src="../public/dist/js/cancelAppointment.main.js")
+block title
+  title Cancel Appointment | Hoivailo Oy
+
+block content
+  .container-fluid
     .container.w-50.m-5.bg-primary-subtle.p-4
       form.appointment-cancelling(action="http://localhost:3001/appointment/cancel" method="post")
         .mb-3.name-group

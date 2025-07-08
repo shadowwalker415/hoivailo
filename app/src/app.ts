@@ -45,7 +45,8 @@ app.use(
   })
 ); // Preventing HTTP parameter pollution.
 
-app.use("/public", express.static(path.join(__dirname, "public"))); // For serving static files
+app.use("/public", express.static(path.join(__dirname, "public"))); // Serving static files
+// app.use("/assets", express.static(path.join(__dirname, "public/assets"))); // Serving images or videos
 app.get("/", (_req: Request, res: Response) => {
   res.status(200).render("home");
 }); // Home route

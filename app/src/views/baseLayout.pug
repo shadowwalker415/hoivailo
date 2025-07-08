@@ -1,0 +1,79 @@
+doctype html
+html(lang="en" data-bs-theme="light")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    block links 
+      link(rel="stylesheet", href="../public/dist/css/styles.css")
+    block scripts
+      script(defer src="../public/dist/js/index.main.js")
+    block title
+  body
+    header
+      nav.navbar.navbar-expand-lg.navbar-light.px-4.shadow-sm
+        .container-fluid
+          a.navbar-brand(href="#")
+            img(src="../public/assets/hoivailo_logo.svg" alt="logo")
+          button.navbar-toggler(type="button", data-bs-toggle="collapse", data-bs-target="#navbarNav", aria-controls="navbarNav", aria-expanded="false", aria-label="Toggle navigation")
+            span.navbar-toggler-icon
+
+          #navbarNav.collapse.navbar-collapse
+            ul.navbar-nav.ms-auto.d-flex.align-items-center
+              li.nav-item
+                a.nav-link.fs-5(href="#") Etusivu 
+              li.nav-item
+                a.nav-link.fs-5(href="#") Meistä
+              li.nav-item
+                a.nav-link.fs-5(href="#") Yhteystiedot
+              li.nav-item
+                a.nav-link.fs-5(href="#") FAQ
+              li 
+                a.btn.btn-info.text-white(href="#") Varaa aika         
+    main
+      block content 
+      
+    footer
+      .container-fluid.bg-dark-blue
+        .row
+          .col.p-4(id="footer-logo")
+            .container.mb-2
+              a(href="#")
+                img(src="../public/assets/hoivailo_logo.svg" alt="logo")
+            .container
+              p Kotipalvelu Hoivailo tarjoaa tukipalveluita ikääntyneille, vammaisille ja toimintakykyrajoitteisille henkilöille sekä henkilökohtaista apua tarvitseville vaikeavammaisille henkilöille Helsingissä, Espoossa ja Vantaalla.
+            
+          .col.p-4(id="footer-services")
+            .container.mt-3
+              h5.mb-2.fs-3 Palvelut
+              ul.list-unstyled.nav-underline.fs-5.w-35.d-inline-block
+                li.nav-item
+                  a.nav-link(href="#") Lastenhoito
+                li.nav-item
+                  a.nav-link(href="#") Kotisiivous
+                li.nav-item
+                  a.nav-link(href="#") Yrityssiivous
+                li.nav-item
+                  a.nav-link(href="#") Kotiapu
+                li.nav-item 
+                  a.nav-link(href="#") Kotihoito
+          .col.p-4(id="footer-links")
+            .container.mt-3
+              h5.mb-2.fs-3 Yritys
+              ul.list-unstyled.nav-underline.fs-5.w-35.d-inline-block
+                li.nav-item 
+                  a.nav-link(href="#") Meistä
+                li.nav-item 
+                  a.nav-link(href="#") Yhteystiedot
+                li.nav-item 
+                  a.nav-link(href="#") Ura
+                li.nav-item 
+                  a.nav-link(href="#") FAQ
+                li.nav-item 
+                  a.nav-link(href="#") Vaara aika
+          .col(id="socials")
+            .container.mt-3
+
+
+
+
+        

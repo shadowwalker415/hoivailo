@@ -1,11 +1,10 @@
-doctype html
-html(lang="fi")
-  head
-    meta(charset="UTF-8")
-    link(rel="stylesheet", href="../public/dist/css/styles.css")
-    title Bad Request | Hoivailo Oy
-  body
-    .container
+extends baseLayout.pug
+
+block title
+  title Appointments | Hoivailo Oy
+
+block content
+    .container-fluid
       p.text-center 
         | The appointment with ID 
         span.fw-bold #{validatedBody.appointmentId} 

@@ -1,17 +1,20 @@
-doctype html
-html(lang="fi")
-  head
-    meta(charset="UTF-8")
-    link(rel="stylesheet", href="../public/dist/css/styles.css")
-    script(defer src="../public/dist/js/appointment.main.js")
-    title Book Appointment | Hoivailo Oy
-  body
+extends baseLayout.pug
+
+
+block scripts
+  script(defer src="../public/dist/js/index.main.js")
+  script(defer src="../public/dist/js/appointment.main.js")
+
+block title
+  title Book Appointment | Hoivailo Oy
+
+block content 
+  .container-fluid
     .container.w-50.m-5.bg-primary-subtle.p-4
       form.appointment-form(action="http://localhost:3001/appointment/booking" method="post")
 
         fieldset 
           legend Valitse aika
-          
           each slot, index in availableSlots 
             - const timeLabel = new Date(slot.startTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
             .form-check.mb-3
@@ -23,10 +26,8 @@ html(lang="fi")
                   id="startTime-#{index}"
                   data-endTime=slot.endTime
                 )
-
-              
-        input(type="hidden" name="endTime" id="endTimeField")
-
+        // This hidden input field will be manipulated to store the value of endTime      
+        input(type="hidden" name="endTime" id="endTimeField") 
         .mb-3.name-group
           label.form-label.fw-bold(for="name") Nimi
           input.form-control(type="text" name="name" placeholder="Nimi" id="name" required)

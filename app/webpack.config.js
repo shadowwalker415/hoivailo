@@ -1,10 +1,11 @@
 const path = require("path");
-const autoprefixer = require("autoprefixer");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
   // Entry points for the various js bundles
   entry: {
+    index: "./src/public/js/index.js",
+    styles: "./src/public/scss/styles.scss",
     slots: "./src/public/js/slots.js",
     contact: "./src/public/js/contact.js",
     appointment: "./src/public/js/appointment.js",
@@ -27,17 +28,10 @@ module.exports = {
           MiniCssExtractPlugin.loader,
           "css-loader",
           {
-            loader: "postcss-loader",
-            options: {
-              postcssOptions: {
-                plugins: [autoprefixer]
-              }
-            }
-          },
-          {
             loader: "sass-loader",
             options: {
               sassOptions: {
+                // Optional: Silence Sass deprecation warnings. See note below.
                 silenceDeprecations: [
                   "mixed-decls",
                   "color-functions",

@@ -1,11 +1,14 @@
-doctype html
-html(lang="fi")
-  head
-    meta(charset="UTF-8")
-    link(rel="stylesheet", href="../public/dist/css/styles.css")
-    script(defer src="../public/dist/js/cancelAppointment.main.js")
-    title Contact Us | Hoivailo Oy
-  body
+extends baseLayout.pug 
+
+block scripts 
+  script(defer src="../public/dist/js/contact.main.js")
+  script(defer src="../public/dist/js/index.main.js")
+
+block title 
+  title Contact Us | Hoivailo Oy
+
+block content
+  .container-fluid
     .container.w-50.m-5.bg-primary-subtle.p-4
       form.form-contact-us(action="http://localhost:3001/contact-us" method="post")
         .mb-3

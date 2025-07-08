@@ -6,6 +6,7 @@ import {
   sanitizeText,
   sanitizeEmailAndId
 } from "./helper";
+
 document.addEventListener("DOMContentLoaded", () => {
   const formElement = document.querySelector(".appointment-form");
   const nameElement = document.getElementById("name");
