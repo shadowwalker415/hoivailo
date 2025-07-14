@@ -36,7 +36,7 @@ $colors: (
   "danger": #dc3545,
   "light": #f8f9fa,
   "dark": #212529,
-  // 👇 Add your custom colors
+  // custom colors
   "brand": #663399,
   "muted-blue": #8899aa
 );
@@ -46,10 +46,16 @@ $colors: (
   color: white;
 }
 
+.social-icons {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
 .hero {
   height: 100vh;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.384), rgba(0, 0, 0, 0.438)),
-    url(../assets/kotisairaanhoito.jpg);
+  background-image: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.85)),
+    url(../assets/hero_image.jpg);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

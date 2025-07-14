@@ -4,18 +4,20 @@ block title
   title Kotipalvelu Hoivailo Oy
 
 block content
+  // Hero section
   section.hero.d-flex.align-items-center.text-white.mb-6(id="hero")
     .container.text-center
-      h1.display-3 Welcome to Hoivailo
-      p.lead.mt-3 ipsum dolor sit amet consectetur adipisicing elit. Reiciendis rerum labore harum architecto in earum eveniet! Tempora debitis omnis sapiente explicabo facere, quae voluptatum nam pariatur obcaecati dolore eaque est.
+      h1.display-3 KOTIPALVELU HOIVAILO
+      p.lead.mt-3.text-center ipsum dolor sit amet consectetur adipisicing elit. Reiciendis rerum labore harum architecto in earum eveniet! Tempora debitis omnis sapiente explicabo facere, quae voluptatum nam pariatur obcaecati dolore eaque est.
 
+  // About us section
   section.mb-4(id="about-us")
-      h2.text-center.mb-7 Meista
+      h2.text-center.mb-7 MEISTÄ
       .container.mt-5
         .row.align-items-center.mb-7
           .col-md-6
             h3.text-center.mb-4 Kotipalvelu Hoivailo
-            p
+            p.fw-light.fs-5
               | Oma koti kullan kallis. Koti on paikka jossa haluamme elää omanlaista elämää. Paikka joka on saattanut muuttua turvattomaksi toimintakyvyn heiketessä. Älä jää yksin, olemme avuksesi.
               | Kotipalvelu Hoivailo Oy on kotimainen, aurinkoisella ja sydämellisellä palvelu asenteella vakaasti kasvava sosiaalipalveluita tarjoava yritys. Hoivailo on yhden naisen, vuonna 2023 perustettu yritys. Vastuuhenkilöllä Mavis Ayimaalla on pitkä työkokemus sairaanhoitajana sekä henkilökohtaisena avustajana.
               | Hoivailo on Helsingin Kaupungin, Länsi-Uudenmaan sekä Vantaan ja Keravan hyvinvointialueiden hyväksymä yksityisten sosiaalipalvelujen tuottaja.
@@ -24,20 +26,20 @@ block content
             img.img-fluid(src="../public/assets/Hoivailo_tiimi.png" alt="Hoivailo tiimi")
         .row.align-items-center.mb-7
           .col-md-6
-            img.img-fluid(src="../public/assets/henkilökohtainen.jpg" alt="Personal assistant")
+            img.img-fluid(src="../public/assets/vanha.jpeg" alt="Personal assistant")
           .col-md-6
-            p
+            p.fw-light.fs-5
               | Tarjoamme laadukasta ja kiireetöntä omaan kotiin tuottavaa seuraa, hoivaa ja huolenpitoa asiakkaan tarpeen mukaisesti. Palveluihimme kuuluu henkilökohtainen avustaja-palvelut, omaishoitajan vapaiden sijaistus, kotihoito ja kotihoidon tukipalvelut kuten kotisiivous, asiointi ja saattamisapu sekä seuranpito palvelusetelillä tai ilman.
               | Asiakkaan (ja omaisen) kanssa laaditaan aina henkilökohtainen palvelusopimus ja -suunnitelma. Palvelusuunnitelma pohjautuu asiakkaan omiin tarpeisiin ja toiveisiin palvelun sisällöstä ja laajuudesta.
               | Varaa ilmainen kartoituskäynti ja katsotaan miten voimme olla avuksi. Voit soittaa, lähettää sähköpostia tai ottaa yhteyttä yhteydenottolomakkeen kautta.
-         
+  // Services section       
   section.mb-6(id="services")
-    h2.text-center.mb-6 Palvelumme
+    h2.text-center.mb-6 PALVELUMME
     .container
       .row 
         .col-md-6.mb-4
-          img.img-fluid(src="../public/assets/kotihoito.jpg")
-        .col-md-6.mb-4.bg-primary.text-white.p-3
+          img.img-fluid(src="../public/assets/avustus.jpeg")
+        .col-md-6.mb-4.bg-primary.text-white.p-3.fw-light.fs-5
           h3 Hoivailo auttaa arjessa
           p 
             | Palveluihimme kuuluu mm.
@@ -52,7 +54,7 @@ block content
               li Harrastustoiminnoissa avustaminen
               li Ulkoilu
               li Asiakkaan määrittelemä palvelu 
-
+    // Services cards
     .container.py-5
       .row
         .col-md-4.mb-5
@@ -63,27 +65,27 @@ block content
             // Card body
             .card-body
               h5.card-title Kotihoito
-              p.card-text Kotihoito palvelumme tuo helpotusta ja turvaa arkeen silloin kun oma jaksaminen on
+              p.card-text.fw-light.fs-5 Kotihoito palvelumme tuo helpotusta ja turvaa arkeen silloin kun oma jaksaminen on
               a.btn.btn-info.text-white(href="#") Lue lisa
         .col-md-4.mb-5
           // Card container
           .card.text-center.h-100.shadow-lg.border.border-0(style="width: 18rem;")
             // Card top image
-            img.card-img-top(src="../public/assets/kotihoito.jpg")
+            img.card-img-top(src="../public/assets/kotisairaanhoito.jpg")
             // Card body
             .card-body
-              h5.card-title Kotihoito
-              p.card-text Kotihoito palvelumme tuo helpotusta ja turvaa arkeen silloin kun oma jaksaminen on
+              h5.card-title Kotisairaanhoito
+              p.card-text.fw-light.fs-5 Kotihoito palvelumme tuo helpotusta ja turvaa arkeen silloin kun oma jaksaminen on
               a.btn.btn-info.text-white(href="#") Lue lisa
         .col-md-4.mb-4
           // Card container
           .card.text-center.h-100.shadow-lg.border.border-0(style="width: 18rem;")
             // Card top image
-            img.card-img-top(src="../public/assets/kotihoito.jpg")
+            img.card-img-top(src="../public/assets/kotisiivous.jpg")
             // Card body
             .card-body
-              h5.card-title Kotihoito
-              p.card-text Kotihoito palvelumme tuo helpotusta ja turvaa arkeen silloin kun oma jaksaminen on
+              h5.card-title Kotisiivous
+              p.card-text.fw-light.fs-5 Kotihoito palvelumme tuo helpotusta ja turvaa arkeen silloin kun oma jaksaminen on
               a.btn.btn-info.text-white(href="#") Lue lisa
 
       .row
@@ -91,27 +93,38 @@ block content
           // Card container
           .card.text-center.h-100.shadow-lg.border.border-0(style="width: 18rem;")
             // Card top image
-            img.card-img-top(src="../public/assets/kotihoito.jpg")
+            img.card-img-top(src="../public/assets/lastenhoito.jpg")
             // Card body
             .card-body
-              h5.card-title Kotihoito
-              p.card-text Kotihoito palvelumme tuo helpotusta ja turvaa arkeen silloin kun oma jaksaminen on
+              h5.card-title Lastenhoito
+              p.card-text.fw-light.fs-5 Kotihoito palvelumme tuo helpotusta ja turvaa arkeen silloin kun oma jaksaminen on
               a.btn.btn-info.text-white(href="#") Lue lisa
         .col-md-4.mb-5
           // Card container
           .card.text-center.h-100.shadow-lg.border.border-0(style="width: 18rem;")
             // Card top image
-            img.card-img-top(src="../public/assets/kotihoito.jpg")
+            img.card-img-top(src="../public/assets/yrityssiivous.jpg")
             // Card body
             .card-body
-              h5.card-title Kotihoito
-              p.card-text Kotihoito palvelumme tuo helpotusta ja turvaa arkeen silloin kun oma jaksaminen on
+              h5.card-title Yrityssiivous
+              p.card-text.fw-light.fs-5 Kotihoito palvelumme tuo helpotusta ja turvaa arkeen silloin kun oma jaksaminen on
               a.btn.btn-info.text-white(href="#") Lue lisa
+        .col-md-4.mb-5
+          // Card container
+          .card.text-center.h-100.shadow-lg.border.border-0(style="width: 18rem;")
+            // Card top image
+            img.card-img-top(src="../public/assets/henkilökohtainen_apu.jpg" alt="Henkilökohtainen avustaja auta asiakas")
+            // Card body
+            .card-body
+              h5.card-title Henkilökohtainen apu
+              p.card-text.fw-light.fs-5 Henkilökohtainen avustaja Hoivailon tiimistä auttaa kaikissa arjen toiminnoissa kotona ja kodin ulkopuolella.
+              a.btn.btn-info.text-white(href="#") Lue lisa
+  // Menu section
   section.mb-6
     h2.text-center.mb-5 HINNASTO
-    p HYÖDYNNÄ TUET
-    // HYÖDYNNÄ TUET mini section
-    .container-fluid.bg-primary.p-5
+
+    .container-fluid.bg-primary.p-5.mb-5
+      p.text-center.text-white.fs-4 HYÖDYNNÄ TUET
       .mb-4.p-3.text-center.bg-white.shadow-lg.rounded
         h5 Alv 0%
         p 
@@ -122,7 +135,7 @@ block content
         p 
           | Muistathan, että voit saada palveluistamme 60%
           span 
-            a.text-decoration-none.external-service(href="https://www.vero.fi/henkiloasiakkaat/vahennykset/kotitalousvahennys/")  kotitalousvähennyksen 
+            a.text-decoration-none.external-service(href="https://www.vero.fi/henkiloasiakkaat/vahennykset/kotitalousvahennys/" target="_blank" rel="noopener noreferrer")  kotitalousvähennyksen 
           | jolloin palvelun 
           | todelliseksi hinnaksi jää alkaen 16 € / h.
       .mb-4.p-3.text-center.bg-white.shadow-lg.rounded
@@ -131,13 +144,103 @@ block content
           | Vaihtoehtoisesti, 
           | voit hyödyntää hyvinvointialueen myöntämät
           span 
-            a.text-decoration-none.external-service(href="https://stm.fi/palveluseteli") palvelusetelit. 
+            a.text-decoration-none.external-service(href="https://stm.fi/palveluseteli" target="_blank" rel="noopener noreferrer") palvelusetelit. 
       .mb-4.p-3.text-center.bg-white.shadow-lg.rounded
         h5 Eläkettä saavan hoitotuki
         p  
           | Kelan myöntämä, eläkeläisille tarkoitettu
           span 
-            a.text-decoration-none.external-service(href="https://www.kela.fi/elaketta-saavan-hoitotuki") tuki. 
+            a.text-decoration-none.external-service(href="https://www.kela.fi/elaketta-saavan-hoitotuki" target="_blank" rel="noopener noreferrer") tuki. 
+    // Menu cards
+    .container
+      .row
+        .col-md-4.mb-5 
+          .bg-dark-blue.border.border-0.shadow-lg.rounded-4.py-4
+            p.text-center.mb-4.fs-5 KOTISAIRAANHOITO
+            .bg-primary.text-center.mb-5
+              span.fs-1.fw-bold 
+                | €45
+              span 
+                |  ALV 0% / h 
+            p.text-center.fs-5.mb-5.text-warning
+              | Kotitalousvähennyksellä €18 / h
+
+            .text-center 
+              img(src="../public/assets/cropped-favicon.png" width="50px")
+ 
+        .col-md-4.mb-5 
+          .bg-dark-blue.border.border-0.shadow-lg.rounded-4.py-4
+            p.text-center.mb-4.fs-5 KOTIHOITO
+            .bg-primary.text-center.mb-5
+              span.fs-1.fw-bold 
+                | €39
+              span 
+                |  ALV 0% / h 
+            p.text-center.fs-5.mb-5.text-warning
+              | Kotitalousvähennyksellä €15.60  / h
+
+            .text-center 
+              img(src="../public/assets/cropped-favicon.png" width="50px")
+        .col-md-4.mb-5 
+          .bg-dark-blue.border.border-0.shadow-lg.rounded-4.py-4
+            p.text-center.mb-4.fs-5 OMAISHOIDON LOMITUS
+            .bg-primary.text-center.mb-5
+              span.fs-1.fw-bold 
+                | €39
+              span 
+                |  ALV 0% / h 
+            p.text-center.fs-5.mb-5.text-warning
+              | Kotitalousvähennyksellä €15.60  / h
+
+            .text-center 
+              img(src="../public/assets/cropped-favicon.png" width="50px")
+      .row
+        .col-md-4.mb-5 
+          .bg-dark-blue.border.border-0.shadow-lg.rounded-4.py-4
+            p.text-center.mb-4.fs-5 LASTENHOITO
+            .bg-primary.text-center.mb-5
+              span.fs-1.fw-bold 
+                | €39
+              span 
+                |  ALV 0% / h 
+            p.text-center.fs-5.mb-5.text-warning
+              | Kotitalousvähennyksellä €15.60 / h
+            .text-center 
+              img(src="../public/assets/cropped-favicon.png" width="50px")
+ 
+        .col-md-4.mb-5 
+          .bg-dark-blue.border.border-0.shadow-lg.rounded-4.py-4
+            p.text-center.mb-4.fs-5 HENKILÖKOHTAINEN APU
+            .bg-primary.text-center.mb-5
+              span.fs-1.fw-bold 
+                | €30
+              span 
+                |  ALV 0% / h 
+            p.text-center.fs-5.mb-5.text-warning
+              | Kotitalousvähennyksellä €12  / h
+            .text-center 
+              img(src="../public/assets/cropped-favicon.png" width="50px")
+
+        .col-md-4.mb-5 
+          .bg-dark-blue.border.border-0.shadow-lg.rounded-4.py-4
+            p.text-center.mb-4.fs-5 KOTI/YRITYSSIIVOUS
+            .bg-primary.text-center.mb-5
+              span.fs-1.fw-bold 
+                | €40
+              span 
+                |  ALV 0% / h 
+            p.text-center.fs-5.mb-5.text-warning
+              | Kotitalousvähennyksellä €16  / h
+            .text-center 
+              img(src="../public/assets/cropped-favicon.png" width="50px")
+    .container-md.bg-dark-blue.mt-3.p-3.text-center.shadow-lg.text-warning
+      p Iltalisä 18 - 21 +15% 
+      p Yölisä 21 - 06 + 40% 
+      p Lauantailisä 06 - 20 + 25% 
+      p Sunnuntailisä (la 20 - ma 06), arkipyhät + 100% 
+ 
+
+
 
 
 

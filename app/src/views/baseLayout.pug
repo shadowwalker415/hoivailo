@@ -5,6 +5,7 @@ html(lang="en" data-bs-theme="light")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     block links 
       link(rel="stylesheet", href="../public/dist/css/styles.css")
+      link(rel="icon" href="../public/assets/cropped-favicon.png")
     block scripts
       script(defer src="../public/dist/js/index.main.js")
     block title
@@ -38,14 +39,14 @@ html(lang="en" data-bs-theme="light")
           .col.p-4(id="footer-logo")
             .container.mb-2
               a(href="#")
-                img(src="../public/assets/hoivailo_logo.svg" alt="logo")
+                img(src="../public/assets/footer_logo.png" alt="footer logo" width="200px")
             .container
-              p Kotipalvelu Hoivailo tarjoaa tukipalveluita ikääntyneille, vammaisille ja toimintakykyrajoitteisille henkilöille sekä henkilökohtaista apua tarvitseville vaikeavammaisille henkilöille Helsingissä, Espoossa ja Vantaalla.
+              p.fw-light Kotipalvelu Hoivailo tarjoaa tukipalveluita ikääntyneille, vammaisille ja toimintakykyrajoitteisille henkilöille sekä henkilökohtaista apua tarvitseville vaikeavammaisille henkilöille Helsingissä, Espoossa ja Vantaalla.
             
           .col.p-4(id="footer-services")
             .container.mt-3
-              h5.mb-2.fs-3 Palvelut
-              ul.list-unstyled.nav-underline.fs-5.w-35.d-inline-block
+              h5.mb-2.fs-3.text-warning Palvelut
+              ul.list-unstyled.nav-underline.fs-5.w-35.d-inline-block.fw-light
                 li.nav-item
                   a.nav-link(href="#") Lastenhoito
                 li.nav-item
@@ -58,8 +59,8 @@ html(lang="en" data-bs-theme="light")
                   a.nav-link(href="#") Kotihoito
           .col.p-4(id="footer-links")
             .container.mt-3
-              h5.mb-2.fs-3 Yritys
-              ul.list-unstyled.nav-underline.fs-5.w-35.d-inline-block
+              h5.mb-2.fs-3.text-warning Yritys
+              ul.list-unstyled.nav-underline.fs-5.w-35.d-inline-block.fw-light
                 li.nav-item 
                   a.nav-link(href="#") Meistä
                 li.nav-item 
@@ -70,8 +71,13 @@ html(lang="en" data-bs-theme="light")
                   a.nav-link(href="#") FAQ
                 li.nav-item 
                   a.nav-link(href="#") Vaara aika
-          .col(id="socials")
+          .col.p-4(id="socials")
             .container.mt-3
+              .social-icons.mt-3
+              .social-icons.mt-3
+              .social-icons.mt-3
+
+
 
 
 
