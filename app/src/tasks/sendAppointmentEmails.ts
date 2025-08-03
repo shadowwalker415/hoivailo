@@ -34,7 +34,7 @@ export const sendAppointmentEmails = async (
 
     // Sending new appointment notification email to admin
     const adminEmail = await sendAdminConfirmationEmail(confirmedAppointment);
-    if (!isEmailSent(adminEmail)) {
+    if (isEmailSent(adminEmail)) {
       throw new InternalServerError({
         message: "Email was not successfully sent",
         statusCode: 500,
