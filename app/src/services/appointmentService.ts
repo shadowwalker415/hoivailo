@@ -6,7 +6,7 @@ import {
 import { parse, isBefore, format, addMinutes } from "date-fns";
 import { convertToISO8601 } from "../utils/helpers";
 import Appointment, { IAppointment } from "../model/appointment";
-import { DateTime } from "luxon";
+// import { DateTime } from "luxon";
 import InternalServerError from "../errors/internalServerError";
 import EntityNotFoundError from "../errors/entityNotFoundError";
 
@@ -63,26 +63,28 @@ const generateSlots = (
 };
 
 const getExistingAppointments = async (
-  selectedDate: string
+  _selectedDate: string
 ): Promise<IAppointment[] | Error | InternalServerError> => {
   try {
-    const dateStr = selectedDate;
+    // const dateStr = selectedDate;
 
-    const start = DateTime.fromISO(dateStr, {
-      zone: "Europe/Helsinki"
-    }).startOf("day");
-    const end = start.plus({ days: 1 });
+    // const start = DateTime.fromISO(dateStr, {
+    //   zone: "Europe/Helsinki"
+    // }).startOf("day");
+    // const end = start.plus({ days: 1 });
 
-    const startUTC = start.toUTC().toJSDate();
-    const endUTC = end.toUTC().toJSDate();
+    // const startUTC = start.toUTC().toJSDate();
+    // const endUTC = end.toUTC().toJSDate();
 
     // Quering the database for appointment documents created on requested date
-    const appointments = await Appointment.find({
-      createdAt: {
-        $gte: startUTC,
-        $lt: endUTC
-      }
-    });
+    // const appointments = await Appointment.find({
+    //   createdAt: {
+    //     $gte: startUTC,
+    //     $lt: endUTC
+    //   }
+    // });
+
+    const appointments = await Appointment.find({});
     return appointments;
   } catch (err: unknown) {
     if (err instanceof Error) {

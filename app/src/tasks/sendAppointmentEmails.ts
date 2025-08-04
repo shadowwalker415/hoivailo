@@ -15,7 +15,7 @@ export const sendAppointmentEmails = async (
     // Sending appointment confirmation notification email to user
     const sentUserEmail = await sendUserConfirmationEmail(appointment);
     // Checking if email was successfully sent to the user
-    if (isEmailSent(sentUserEmail)) {
+    if (!isEmailSent(sentUserEmail)) {
       throw new InternalServerError({
         message: "Email was not successfully sent",
         statusCode: 500
@@ -33,8 +33,10 @@ export const sendAppointmentEmails = async (
       });
 
     // Sending new appointment notification email to admin
-    const adminEmail = await sendAdminConfirmationEmail(confirmedAppointment);
-    if (isEmailSent(adminEmail)) {
+    const sentAdminEmail = await sendAdminConfirmationEmail(
+      confirmedAppointment
+    );
+    if (!isEmailSent(sentAdminEmail)) {
       throw new InternalServerError({
         message: "Email was not successfully sent",
         statusCode: 500,
