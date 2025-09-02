@@ -4,9 +4,12 @@ block scripts
   script(defer src="../public/dist/js/index.main.js")
   script(defer src="../public/dist/js/cancelAppointment.main.js")
 block title
-  title Cancel Appointment | Hoivailo Oy
+  title Aika perutus | Hoivailo Oy
 
 block content
+  .page-tittle.d-flex.align-items-center.text-white.mb-6
+    .container.text-center
+      h1.display-3 AIKA PERUTUS
   .container-fluid
     .container.w-50.m-5.bg-primary-subtle.p-4
       form.appointment-cancelling(action="http://localhost:3001/appointment/cancel" method="post")

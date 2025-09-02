@@ -61,6 +61,15 @@ $colors: (
   background-repeat: no-repeat;
 }
 
+.page-tittle {
+  height: 30vh;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.85)),
+    url(../assets/kotihoito.jpg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 @import "bootstrap/scss/bootstrap";
 @import "bootstrap/scss/functions";
 @import "bootstrap/scss/variables";

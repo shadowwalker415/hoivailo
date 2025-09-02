@@ -5,9 +5,12 @@ block scripts
   script(defer src="../public/dist/js/index.main.js")
 
 block title 
-  title Contact Us | Hoivailo Oy
+  title Yhteistiedot | Hoivailo Oy
 
 block content
+  .page-tittle.d-flex.align-items-center.text-white.mb-6
+    .container.text-center
+      h1.display-3 YHTEISTIEDOT
   .container-fluid
     .container.w-50.m-5.bg-primary-subtle.p-4
       form.form-contact-us(action="http://localhost:3001/contact-us" method="post")

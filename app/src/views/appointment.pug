@@ -6,9 +6,12 @@ block scripts
   script(defer src="../public/dist/js/appointment.main.js")
 
 block title
-  title Book Appointment | Hoivailo Oy
+  title Varaa aikaa | Hoivailo Oy
 
-block content 
+block content
+  .page-tittle.d-flex.align-items-center.text-white.mb-6
+    .container.text-center
+      h1.display-3 VARAA AIKAA
   .container-fluid
     .container.w-50.m-5.bg-primary-subtle.p-4
       form.appointment-form(action="http://localhost:3001/appointment/booking" method="post")
