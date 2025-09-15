@@ -3,7 +3,7 @@ import "flatpickr/dist/flatpickr.min.css";
 import { Finnish } from "flatpickr/dist/l10n/fi.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const BASE_URL = "http://localhost:3001/appointment-slots";
+  const BASE_URL = "http://localhost:3001/oleva-aikaa";
   const slotsButton = document.querySelector(".slots-btn");
 
   let selectedDate;

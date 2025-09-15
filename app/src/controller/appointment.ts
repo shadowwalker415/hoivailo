@@ -15,16 +15,13 @@ import EntityNotFoundError from "../errors/entityNotFoundError";
 const appointmentRouter: IRouter = Router();
 
 //
-appointmentRouter.get("/cancel", (_req: Request, res: Response) => {
+appointmentRouter.get("/peruta", (_req: Request, res: Response) => {
   res.status(200).render("cancelAppointment");
 });
 
-appointmentRouter.get(
-  "/select-appointment-date",
-  (_req: Request, res: Response) => {
-    res.status(200).render("selectDate");
-  }
-);
+appointmentRouter.get("/valitse-paivamaara", (_req: Request, res: Response) => {
+  res.status(200).render("selectDate");
+});
 
 // Route handler for booking appointments
 appointmentRouter.post(
@@ -63,7 +60,7 @@ appointmentRouter.post(
 
 // Route handler for cancelling appointments
 appointmentRouter.post(
-  "/cancel",
+  "/peruta",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Parsing and validating request body fields

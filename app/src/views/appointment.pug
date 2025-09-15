@@ -12,9 +12,10 @@ block content
   .page-tittle.d-flex.align-items-center.text-white.mb-6
     .container.text-center
       h1.display-3 VARAA AIKAA
-  .container-fluid
-    .container.w-50.m-5.bg-primary-subtle.p-4
-      form.appointment-form(action="http://localhost:3001/appointment/booking" method="post")
+  .container.d-flex.flex-column.align-items-center
+    // Appointment form container
+    .container.m-5.bg-primary-subtle.p-4.rounded-4
+      form.appointment-form(action="http://localhost:3001/tapaaminen/booking" method="post")
 
         fieldset 
           legend Valitse aika
@@ -32,7 +33,7 @@ block content
         // This hidden input field will be manipulated to store the value of endTime      
         input(type="hidden" name="endTime" id="endTimeField") 
         .mb-3.name-group
-          label.form-label.fw-bold(for="name") Nimi
+          label.form-label(for="name") Nimi
           input.form-control(type="text" name="name" placeholder="Nimi" id="name" required)
         .mb-3.email-group
           label.form-label(for="email") Sähköposti  
@@ -52,7 +53,8 @@ block content
           label.form-label(for="notes") Teksti
           span.text-body-tertiary (Valinnainen)
           textarea.form-control(name="notes" id="notes")
-          p.text-body-tertiary Ethän lähetä lomakkeella arkaluonteisia tietoja, kuten terveystietoja.
+          p.text-body-tertiary.text-center Ethän lähetä lomakkeella arkaluonteisia tietoja, kuten terveystietoja.
+        // button container
         .text-center
           button.btn.btn-primary.text-white(type="submit") Varaa aika
       p.text-danger.mb-3.opacity-0(id="error-alert")

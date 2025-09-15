@@ -8,12 +8,30 @@ block title
   title Yhteistiedot | Hoivailo Oy
 
 block content
+  //Where page title is a custom class for the background of the page title container
   .page-tittle.d-flex.align-items-center.text-white.mb-6
     .container.text-center
       h1.display-3 YHTEISTIEDOT
-  .container-fluid
-    .container.w-50.m-5.bg-primary-subtle.p-4
-      form.form-contact-us(action="http://localhost:3001/contact-us" method="post")
+  .container.d-flex.flex-column.align-items-center
+    .container.mb-5 
+      h2.text-center.bg-dark-blue.text-white.p-3 Postiosoite
+      p.text-center.fs-5 Hoivailo Oy
+      p.text-center.fs-5 Valimotie 13A
+      p.text-center.fs-5 00380 Helsinki 
+
+    .container.m-5
+      h2.text-center.bg-dark-blue.text-white.p-3 Asiakas Palvelu
+      p.text-center.fs-3 Puhelimme
+      p.text-center 040 721 6555
+      p.text-center.fs-3 Sähköpostimme
+      p.text-center info@hoivailo.fi
+    
+    h3.fs-1 Kysy lisää palveluistamme
+    p.text-center Jos toivot yhteydenottoa, jätäthän meille joko puhelinnumerosi tai sähköpostiosoitteesi.
+
+    // Contact form container
+    .container.m-5.bg-primary-subtle.p-4
+      form.form-contact-us(action="http://localhost:3001/yhteistiedot" method="post")
         .mb-3
           label.form-label(for="name") Nimi
           input.form-control(type="text" name="name" placeholder="Nimi" id="name" required)
@@ -26,6 +44,7 @@ block content
         .mb-3
           label.form-label(for="message") Viesti
           textarea.form-control(name="message" id="message" required)
-          p.text-body-tertiary Ethän lähetä lomakkeella arkaluonteisia tietoja, kuten terveystietoja.
-        button.btn.btn-primary(type="submit") Lähetä viesti
+          p.text-body-tertiary.text-center Ethän lähetä lomakkeella arkaluonteisia tietoja, kuten terveystietoja.
+        .text-center
+          button.btn.btn-primary(type="submit") Lähetä viesti
       p.text-danger.mb-3.opacity-0(id="error-alert")

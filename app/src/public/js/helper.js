@@ -15,7 +15,7 @@ export const isName = (name) => {
 };
 
 export const isPhoneNumber = (phoneNumber) => {
-  // Where valid email format is +3584XXXXXXXX +3585XXXXXXXX
+  // Where valid phone format is +3584XXXXXXXX +3585XXXXXXXX
   const phoneRegex =
     /^\+358(4\d|5\d)\d{6,7}$|^\+358[- ]?(4\d|5\d)[- ]?\d{3}[- ]?\d{4}$/;
   return phoneRegex.test(phoneNumber.trim());

@@ -1,14 +1,15 @@
 extends baseLayout.pug
 
 block title
-  title Vaara aikaa | Hoivailo Oy
+  title Peruta aikaa | Hoivailo Oy
 
 block content
   .page-tittle.d-flex.align-items-center.text-white.mb-6
     .container.text-center
       h1.display-3 VARAA AIKAA
-    .container-fluid
-      p.text-center 
-        | The appointment with ID 
-        span.fw-bold #{validatedBody.appointmentId} 
-        | has already been cancelled.
+    .container.d-flex.flex-column.align-items-center
+      .container.mb-5
+        p.text-center 
+          | The appointment with ID 
+          span.fw-bold #{validatedBody.appointmentId} 
+          | has already been cancelled.

@@ -50,12 +50,12 @@ app.use("/public", express.static(path.join(__dirname, "public"))); // Serving s
 app.get("/", (_req: Request, res: Response) => {
   res.status(200).render("home");
 }); // Home route
-app.get("/about-us", (_req: Request, res: Response) => {
+app.get("/meista", (_req: Request, res: Response) => {
   res.status(200).render("aboutUs");
 });
-app.use("/appointment-slots", availabilityRouter);
-app.use("/appointment", appointmentRouter);
-app.use("/contact-us", contactRouter);
+app.use("/tapaaminen", appointmentRouter);
+app.use("/oleva-aikaa", availabilityRouter);
+app.use("/yhteistiedot", contactRouter);
 app.use(databaseErrorHandler);
 app.use(generalErrorHandler);
 app.use(unknownEndPoint);

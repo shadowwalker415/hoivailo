@@ -10,16 +10,20 @@ block content
   .page-tittle.d-flex.align-items-center.text-white.mb-6
     .container.text-center
       h1.display-3 AIKA PERUTUS
-  .container-fluid
-    .container.w-50.m-5.bg-primary-subtle.p-4
-      form.appointment-cancelling(action="http://localhost:3001/appointment/cancel" method="post")
+  // Page content container
+  .container.d-flex.flex-column.align-items-center
+    // Appointment cancellation form container
+    .container.m-5.bg-primary-subtle.p-4
+      form.appointment-cancelling(action="http://localhost:3001/tapaaminen/peruta" method="post")
         .mb-3.name-group
           label.form-label(for="appointmentId") Ajan varauden koodi
           input.form-control(type="text" name="appointmentId" placeholder="Koodi" id="appointmentId" required)
         .mb-3.name-group
           label.form-label(for="reason") Syy
           textarea.form-control(name="reason" id="reason")
-          p.text-body-tertiary Ethän lähetä lomakkeella arkaluonteisia tietoja, kuten terveystietoja.
-        button.btn.btn-primary(type="submit") Peruta ajanvaraus
-      p.text-danger.mb-3.opacity-0(id="error-alert")
+          p.text-body-tertiary.text-center Ethän lähetä lomakkeella arkaluonteisia tietoja, kuten terveystietoja.
+          p.text-danger.mb-3.opacity-0.text-center(id="error-alert")
+        .button-container.text-center
+          button.btn.btn-primary(type="submit") Peruta ajanvaraus
+      
         
