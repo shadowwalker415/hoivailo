@@ -9,6 +9,7 @@ import morgan from "morgan";
 import availabilityRouter from "./controller/availability";
 import appointmentRouter from "./controller/appointment";
 import contactRouter from "./controller/contact";
+import servicesRouter from "./controller/services";
 import { Request, Response } from "express";
 import {
   unknownEndPoint,
@@ -27,6 +28,7 @@ const limiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1hr
   message: "Too many request from this IP. Please try again in an hour"
 });
+
 app.use(cors());
 
 if (process.env.NODE_ENV === "development") {
@@ -53,6 +55,8 @@ app.get("/", (_req: Request, res: Response) => {
 app.get("/meista", (_req: Request, res: Response) => {
   res.status(200).render("aboutUs");
 });
+
+app.use("/palvelu", servicesRouter);
 app.use("/tapaaminen", appointmentRouter);
 app.use("/oleva-aikaa", availabilityRouter);
 app.use("/yhteistiedot", contactRouter);
