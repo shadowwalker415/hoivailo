@@ -10,7 +10,7 @@ import availabilityRouter from "./controller/availability";
 import appointmentRouter from "./controller/appointment";
 import contactRouter from "./controller/contact";
 import servicesRouter from "./controller/services";
-import { Request, Response } from "express";
+import homeRouter from "./controller/home";
 import {
   unknownEndPoint,
   generalErrorHandler,
@@ -49,13 +49,8 @@ app.use(
 
 app.use("/public", express.static(path.join(__dirname, "public"))); // Serving static files
 // app.use("/assets", express.static(path.join(__dirname, "public/assets"))); // Serving images or videos
-app.get("/", (_req: Request, res: Response) => {
-  res.status(200).render("home");
-}); // Home route
-app.get("/meista", (_req: Request, res: Response) => {
-  res.status(200).render("aboutUs");
-});
 
+app.use("/", homeRouter);
 app.use("/palvelu", servicesRouter);
 app.use("/tapaaminen", appointmentRouter);
 app.use("/oleva-aikaa", availabilityRouter);

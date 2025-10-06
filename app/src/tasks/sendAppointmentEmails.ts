@@ -4,24 +4,14 @@ import {
   sendAdminConfirmationEmail
 } from "../services/emailService";
 import { confirmUserEmail } from "../services/appointmentService";
-import { isEmailSent } from "../utils/helpers";
 import InternalServerError from "../errors/internalServerError";
+import ValidationError from "../errors/validationError";
 
 // Async job that runs after an appointment is successfully booked
 export const sendAppointmentEmails = async (
   appointment: IAppointment
 ): Promise<void> => {
   try {
-    // Sending appointment confirmation notification email to user
-    const sentUserEmail = await sendUserConfirmationEmail(appointment);
-    // Checking if email was successfully sent to the user
-    if (!isEmailSent(sentUserEmail)) {
-      throw new InternalServerError({
-        message: "Email was not successfully sent",
-        statusCode: 500
-      });
-    }
-
     // Updating the appointment emailSent field
     const confirmedAppointment = await confirmUserEmail(appointment);
     // Checking if the database update operation was successful
@@ -32,17 +22,23 @@ export const sendAppointmentEmails = async (
         code: "INTERNAL_SERVER_ERROR"
       });
 
+    // Due to Mailtrap free plan only one email is sent for the time being.
+
     // Sending new appointment notification email to admin
-    const sentAdminEmail = await sendAdminConfirmationEmail(
+    await sendAdminConfirmationEmail(confirmedAppointment);
+
+    // Sending appointment confirmation notification email to user
+    const userNotification = await sendUserConfirmationEmail(
       confirmedAppointment
     );
-    if (!isEmailSent(sentAdminEmail)) {
-      throw new InternalServerError({
-        message: "Email was not successfully sent",
-        statusCode: 500,
-        code: "INTERNAL_SERVER_ERROR"
-      });
+    if (
+      userNotification instanceof Error ||
+      userNotification instanceof InternalServerError ||
+      userNotification instanceof ValidationError
+    ) {
+      console.log(userNotification.message);
     }
+    // Checking if email was successfully sent to the user
   } catch (err: unknown) {
     if (err instanceof Error || err instanceof InternalServerError) {
       // We will log error on this line since this is an async job.

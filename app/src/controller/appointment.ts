@@ -11,10 +11,14 @@ import { sendAppointmentEmails } from "../tasks/sendAppointmentEmails";
 import { sendCancellationEmails } from "../tasks/sendCancellationEmails";
 import InternalServerError from "../errors/internalServerError";
 import EntityNotFoundError from "../errors/entityNotFoundError";
+import { IAppointment } from "../model/appointment";
+// import { IAppointment } from "../model/appointment";
 
 const appointmentRouter: IRouter = Router();
 
-//
+// let cancelledDetails: any;
+// let bookingDetails: any;
+
 appointmentRouter.get("/peruta", (_req: Request, res: Response) => {
   res.status(200).render("cancelAppointment");
 });
@@ -25,7 +29,7 @@ appointmentRouter.get("/valitse-paivamaara", (_req: Request, res: Response) => {
 
 // Route handler for booking appointments
 appointmentRouter.post(
-  "/booking",
+  "/aika",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Parsing and validating request body fields
@@ -43,11 +47,20 @@ appointmentRouter.post(
         });
       } else {
         // Sending response to client
+        // bookingDetails = { ...savedAppointment };
+        // res.redirect(303, "aika/onnistuminnen");
         res.status(201).render("appointmentSuccess", { savedAppointment });
       }
-
       //  Fire-and-forget Async job with IIFE for emailing the user and admin on appointment booking success.
-      (async () => sendAppointmentEmails(savedAppointment))();
+      (async () => {
+        try {
+          await sendAppointmentEmails(savedAppointment);
+        } catch (err: unknown) {
+          if (err instanceof Error) {
+            console.log(err.message);
+          }
+        }
+      })();
     } catch (err: unknown) {
       if (err instanceof Error || err instanceof InternalServerError) {
         next(err);
@@ -89,13 +102,25 @@ appointmentRouter.post(
           code: "INTERNAL_SERVER_ERROR"
         });
       } else {
-        // Sending response to client
-        res.status(201).render("cancellationSuccess", { cancelledAppointment });
+        // cancelledDetails = { ...cancelledAppointment };
 
-        // Fire-and-forget Async job with IIFE for emailing user and admin on appointment cancellation success.
-        (async () =>
-          sendCancellationEmails(cancelledAppointment, validatedBody.reason))();
+        // Sending response to client
+        // res.redirect(303, "tapaaminen/peruta/onnistuminen");
+        res.status(201).render("cancellationSuccess", { cancelledAppointment });
       }
+      // Fire-and-forget Async job with IIFE for emailing user and admin on appointment cancellation success.
+      (async () => {
+        try {
+          await sendCancellationEmails(
+            cancelledAppointment as IAppointment,
+            validatedBody.reason
+          );
+        } catch (err: unknown) {
+          if (err instanceof Error) {
+            console.log(err.message);
+          }
+        }
+      })();
     } catch (err: unknown) {
       if (err instanceof InternalServerError) {
         next(err);
@@ -105,5 +130,18 @@ appointmentRouter.post(
     }
   }
 );
+
+// Appointment cancellation success route handler
+appointmentRouter.get(
+  "/peruta/onnistuminen",
+  (_req: Request, res: Response) => {
+    res.status(200).render("cancellationSuccess");
+  }
+);
+
+// Appointment booking success route handler
+appointmentRouter.get("/aika/onnistuminnen", (_req: Request, res: Response) => {
+  res.status(200).render("appointmentSuccess");
+});
 
 export default appointmentRouter;

@@ -10,7 +10,7 @@ import Appointment, { IAppointment } from "../model/appointment";
 import InternalServerError from "../errors/internalServerError";
 import EntityNotFoundError from "../errors/entityNotFoundError";
 
-// Helper function for filtering already booked appointments
+// Helper function for filtering already booked appointments.
 const isSlotAvailable = (
   slotStart: string,
   slotEnd: string,
@@ -24,7 +24,7 @@ const isSlotAvailable = (
   });
 };
 
-// Generating available appointment time slots in ISO 8601 date format
+// Generating available appointment time slots in ISO 8601 date format.
 const generateSlots = (
   date_string: string,
   workHours: WorkingHours,
@@ -45,7 +45,7 @@ const generateSlots = (
   const slots: Slot[] = [];
   let current = startTime;
 
-  // Converting slot start and end times to ISO 8601 date time object
+  // Converting slot start and end times to ISO 8601 date time object.
   while (
     isBefore(addMinutes(current, durationMinutes), addMinutes(endTime, 1))
   ) {
@@ -88,7 +88,7 @@ const getExistingAppointments = async (
     return appointments;
   } catch (err: unknown) {
     if (err instanceof Error) {
-      // If we get an error that means an error occured on the database
+      // If we get an error that means an error occured on the database.
       return new InternalServerError({
         message: "An error occured on the database server",
         statusCode: 500
@@ -98,7 +98,7 @@ const getExistingAppointments = async (
   }
 };
 
-// Slot generation helper functions
+// Slot generation helper functions.
 export const generateAvailableSlots = async (
   date_string: string
 ): Promise<Slot[] | InternalServerError | Error> => {
@@ -135,7 +135,7 @@ export const generateAvailableSlots = async (
   }
 };
 
-// User email confirmation helper function
+// User email confirmation helper function.
 export const confirmUserEmail = async (
   appointment: IAppointment
 ): Promise<IAppointment | InternalServerError | Error> => {
@@ -158,7 +158,7 @@ export const confirmUserEmail = async (
   }
 };
 
-// Appointment creation helper function
+// Appointment creation helper function.
 export const createNewAppointment = async (
   appointmentInfo: IAppointment
 ): Promise<IAppointment | InternalServerError | Error> => {
@@ -181,7 +181,7 @@ export const createNewAppointment = async (
   }
 };
 
-// Appointment cancellation helper function
+// Appointment cancellation helper function.
 export const cancelAppointment = async (
   appointmentID: string
 ): Promise<
@@ -191,7 +191,7 @@ export const cancelAppointment = async (
     const appointment = await Appointment.findOne({
       appointmentId: appointmentID
     });
-    // Checking if the appointment exist
+    // Checking if the appointment exist.
     if (!appointment)
       throw new EntityNotFoundError({
         message: `Appointment with appointment ID (${appointmentID}) not found`,
@@ -200,19 +200,19 @@ export const cancelAppointment = async (
       });
 
     // Checking if the appointment had already been cancelled.
-    // In a scenario where the user attempts to cancel an appointment
-    // but didn't get a UI update maybe due to loss of internet connection
+    // In a scenario where the user attempts to cancel an appointment.
+    // But didn't get a UI update maybe due to loss of internet connection.
     if (appointment.status === "cancelled") {
       return new InternalServerError({
         message: "Appointment already cancelled",
         statusCode: 500,
         code: "INTERNAL_SERVER_ERROR"
-      }); // This is a place holder. Still thinking of what error to throw here
+      }); // This is a place holder. Still thinking of what error to throw here.
     }
-    // Updating appointment satus
+    // Updating appointment satus.
     appointment.status = "cancelled";
     const cancelledAppointment = await appointment.save();
-    // Checking if update was successful
+    // Checking if update was successful.
     if (!cancelAppointment) {
       throw new InternalServerError({
         message:

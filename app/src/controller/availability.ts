@@ -27,10 +27,10 @@ availabilityRouter.get(
           code: "VALIDATION_ERROR"
         });
       }
-      // checking if requested date is a previous date.
+      // Checking if requested date is a previous date.
       if (isPastDate(req.availabilityDate)) {
         res.status(200).render("noSlotsFound");
-        // checking if requested date is a working day.
+        // Checking if requested date is a working day.
       } else if (!isWorkingDay(req.availabilityDate)) {
         res.status(200).render("noSlotsFound");
         // Checking if requested date is the current date.
@@ -45,8 +45,8 @@ availabilityRouter.get(
         const availableSlots = await generateAvailableSlots(
           req.availabilityDate
         );
-        // Checking if the slot generation operation failed due to
-        // maybe an error with database query
+        // Checking if the slot generation operation failed due to.
+        // Maybe an error with database query.
         if (availableSlots instanceof Error) {
           throw new InternalServerError({
             message:

@@ -9,11 +9,7 @@ import config from "../utils/config";
 import { IContact, MessagePurpose, Role } from "../types";
 import { IAppointment } from "../model/appointment";
 import { isRole, isMessagePurpose } from "../utils/parsers";
-import {
-  getHourOfficial,
-  getDateOfficial,
-  isEmailSent
-} from "../utils/helpers";
+import { getHourOfficial, getDateOfficial } from "../utils/helpers";
 import InternalServerError from "../errors/internalServerError";
 import ValidationError from "../errors/validationError";
 
@@ -82,27 +78,18 @@ export const sendUserConfirmationEmail = async (
   appointmentInfo: IAppointment
 ): Promise<SentMessageInfo | InternalServerError | ValidationError | Error> => {
   try {
-    // message sample
+    // Message sample
     const html = constructHtmlTemplate(appointmentInfo, "user", "confirmation");
-    // mail options
+    // Mail options
     const mailOptions = {
-      from: "No reply noreply@hoivailo.fi",
+      from: "noreply@hoivailo.fi",
       to: `${appointmentInfo.email}`,
       subject: "Ajanvaraus varattu",
       html: html
     };
-    // sending email
-    const responseObj: SentMessageInfo = await transporter.sendMail(
-      mailOptions
-    );
-    if (!isEmailSent(responseObj)) {
-      throw new InternalServerError({
-        message: "Email failed to send",
-        statusCode: 500,
-        code: "INTERNAL_SERVER_ERROR"
-      });
-    }
-    return responseObj;
+    // Sending email
+    await transporter.sendMail(mailOptions);
+    console.log("This is for user confirmation email and we got here.");
   } catch (err: unknown) {
     if (
       err instanceof InternalServerError ||
@@ -120,32 +107,22 @@ export const sendAdminConfirmationEmail = async (
   appointmentInfo: IAppointment
 ): Promise<SentMessageInfo | InternalServerError | ValidationError | Error> => {
   try {
-    // message sample
+    // Message sample
     const html = constructHtmlTemplate(
       appointmentInfo,
       "admin",
       "confirmation"
     );
 
-    // mail options
+    // Mail options
     const mailOptions = {
-      from: "No reply noreply@hoivailo.fi",
-      to: `Hoivailo Oy ${config.ADMIN_EMAIL}`,
+      from: "hello@hoivailo.fi",
+      to: `${config.ADMIN_EMAIL}`,
       subject: "Uusi aika",
       html: html
     };
-    // sending email
-    const responseObj: SentMessageInfo = await transporter.sendMail(
-      mailOptions
-    );
-    if (!isEmailSent(responseObj)) {
-      throw new InternalServerError({
-        message: "Email failed to send",
-        statusCode: 500,
-        code: "INTERNAL_SERVER_ERROR"
-      });
-    }
-    return responseObj;
+    // Sending email
+    await transporter.sendMail(mailOptions); // The problem seems to be here. It doesn't get past this line
   } catch (err: unknown) {
     if (
       err instanceof InternalServerError ||
@@ -171,26 +148,16 @@ export const sendCancellationEmailAdmin = async (
       "cancellation",
       reason
     );
-    // mail option
+    // Mail option
     const mailOptions: SendMailOptions = {
-      from: "No reply noreply@hoivailo.fi",
-      to: `Hoivailo Oy ${config.ADMIN_EMAIL}`,
+      from: "noreply@hoivailo.fi",
+      to: `${config.ADMIN_EMAIL}`,
       subject: "Aika peruutettu",
       html: html
     };
 
-    // sending email
-    const responseObj: SentMessageInfo = await transporter.sendMail(
-      mailOptions
-    );
-    if (!isEmailSent(responseObj)) {
-      throw new InternalServerError({
-        message: "Email failed to send",
-        statusCode: 500,
-        code: "INTERNAL_SERVER_ERROR"
-      });
-    }
-    return responseObj;
+    // Sending email
+    await transporter.sendMail(mailOptions);
   } catch (err: unknown) {
     if (
       err instanceof InternalServerError ||
@@ -216,26 +183,16 @@ export const sendCancellationEmailUser = async (
       "cancellation",
       reason
     );
-    // mail option
+    // Mail option
     const mailOptions: SendMailOptions = {
-      from: "No reply noreply@hoivailo.fi",
-      to: `${appointmentInfo.name} ${appointmentInfo.email}`,
+      from: "noreply@hoivailo.fi",
+      to: `${appointmentInfo.email}`,
       subject: "Ajanvarauksesi peruuttanut",
       html: html
     };
 
-    // sending email
-    const responseObj: SentMessageInfo = await transporter.sendMail(
-      mailOptions
-    );
-    if (!isEmailSent(responseObj)) {
-      throw new InternalServerError({
-        message: "Email failed to send",
-        statusCode: 500,
-        code: "INTERNAL_SERVER_ERROR"
-      });
-    }
-    return responseObj;
+    // Sending email
+    await transporter.sendMail(mailOptions);
   } catch (err: unknown) {
     if (
       err instanceof InternalServerError ||
@@ -253,32 +210,22 @@ export const sendContactNotificationEmail = async (
   contactObj: IContact
 ): Promise<SentMessageInfo | InternalServerError | ValidationError | Error> => {
   try {
-    // constructing message
+    // Constructing message
     const template = pug.compileFile(
       `${__dirname}/../views/emailTemplates/newContactNotification.pug`
     );
     const html = template(contactObj);
 
-    // mail options
+    // Mail options
     const mailOptions: SendMailOptions = {
-      from: `No reply contact@hoivailo.fi`,
-      to: `Hoivailo Oy ${config.ADMIN_EMAIL}`,
+      from: `contact@hoivailo.fi`,
+      to: `${config.ADMIN_EMAIL}`,
       subject: "Uusi viesti",
       html: html
     };
 
-    // sending email
-    const responseObj: SentMessageInfo = await transporter.sendMail(
-      mailOptions
-    );
-    if (!isEmailSent(responseObj)) {
-      throw new InternalServerError({
-        message: "Email failed to send",
-        statusCode: 500,
-        code: "INTERNAL_SERVER_ERROR"
-      });
-    }
-    return responseObj;
+    // Sending email
+    await transporter.sendMail(mailOptions);
   } catch (err: unknown) {
     if (
       err instanceof InternalServerError ||

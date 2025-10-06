@@ -3,7 +3,6 @@ import {
   sendCancellationEmailUser,
   sendCancellationEmailAdmin
 } from "../services/emailService";
-import { isEmailSent } from "../utils/helpers";
 import InternalServerError from "../errors/internalServerError";
 
 // Async job that runs after an appointment is successfully cancelled
@@ -12,25 +11,10 @@ export const sendCancellationEmails = async (
   reason: string
 ): Promise<void> => {
   try {
-    // Sending appointment cancellation notification email to user
-    const userEmail = await sendCancellationEmailUser(appointment, reason);
-    if (!isEmailSent(userEmail)) {
-      throw new InternalServerError({
-        message: "Email was not successfully sent",
-        statusCode: 500,
-        code: "INTERNAL_SERVER_ERROR"
-      });
-    }
-
     // Sending appointment cancellation notification email to admin
-    const adminEmail = await sendCancellationEmailAdmin(appointment, reason);
-    if (!isEmailSent(adminEmail)) {
-      throw new InternalServerError({
-        message: "Email was not successfully sent",
-        statusCode: 500,
-        code: "INTERNAL_SERVER_ERROR"
-      });
-    }
+    await sendCancellationEmailAdmin(appointment, reason);
+    // Sending appointment cancellation notification email to user
+    await sendCancellationEmailUser(appointment, reason);
   } catch (err: unknown) {
     if (err instanceof Error || err instanceof InternalServerError) {
       // We will log the error for this failed async job here
