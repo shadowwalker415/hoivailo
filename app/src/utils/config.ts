@@ -1,5 +1,4 @@
 import dotenv from "dotenv";
-import smtpTransport from "nodemailer-smtp-transport";
 dotenv.config();
 const MONGODB_URI =
   process.env.NODE_ENV === "test"
@@ -12,6 +11,9 @@ const MAILTRAP_USERNAME = process.env.MAILTRAP_USERNAME;
 const MAILTRAP_PASSWORD = process.env.MAILTRAP_PASSWORD;
 const SMTP_HOST = process.env.SMTP_HOST;
 const SMTP_PORT = Number(process.env.SMTP_PORT);
+const REDIS_DEV_HOST = process.env.DEV_REDIS_HOST;
+const REDIS_DEV_TCP_PORT = Number(process.env.DEV_REDIS_TCP_PORT);
+const REDIS_DEV_PASSWORD = process.env.DEV_REDIS_PASSWORD;
 
 if (!MONGODB_URI) {
   throw new Error("Missing MongoDB URI in environment variable");
@@ -26,21 +28,30 @@ if (!ADMIN_EMAIL) {
 }
 
 if (!MAILTRAP_PASSWORD || !MAILTRAP_USERNAME || !SMTP_HOST || !SMTP_PORT) {
-  throw new Error("There's an invalid environment variable value");
+  throw new Error("There's an invalid environment variable value for Mailtrap");
 }
 
-let MAIL_OPTIONS = smtpTransport({
-  host: SMTP_HOST,
-  port: SMTP_PORT,
-  auth: {
-    user: MAILTRAP_USERNAME,
-    pass: MAILTRAP_PASSWORD
-  }
-});
+if (!REDIS_DEV_HOST || !REDIS_DEV_PASSWORD || REDIS_DEV_TCP_PORT) {
+  throw new Error(
+    "There's an invalid enviroment variable value for redis cloud"
+  );
+}
+
+export const REDIS_DEV_CONFIG = {
+  port: REDIS_DEV_TCP_PORT,
+  host: REDIS_DEV_HOST,
+  username: "default",
+  password: REDIS_DEV_PASSWORD,
+  maxRetriesPerRequest: null,
+  enableReadyCheck: false
+};
 
 export default {
   MONGODB_URI,
   PORT,
   ADMIN_EMAIL,
-  MAIL_OPTIONS
+  SMTP_HOST,
+  SMTP_PORT,
+  MAILTRAP_PASSWORD,
+  MAILTRAP_USERNAME
 };
