@@ -193,6 +193,7 @@ export const cancelAppointment = async (
     });
     // Checking if the appointment exist.
     if (!appointment)
+      // This is a place holder. We will redirect to a not found page if appointment was not found.
       throw new EntityNotFoundError({
         message: `Appointment with appointment ID (${appointmentID}) not found`,
         statusCode: 404,

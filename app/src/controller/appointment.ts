@@ -12,6 +12,7 @@ import { sendCancellationEmails } from "../tasks/sendCancellationEmails";
 import InternalServerError from "../errors/internalServerError";
 import EntityNotFoundError from "../errors/entityNotFoundError";
 import { IAppointment } from "../model/appointment";
+
 // import { IAppointment } from "../model/appointment";
 
 const appointmentRouter: IRouter = Router();

@@ -1,8 +1,6 @@
-import nodemailer, {
-  Transporter,
-  SendMailOptions,
-  SentMessageInfo
-} from "nodemailer";
+import { SendMailOptions, SentMessageInfo } from "nodemailer";
+import { transporter } from "../utils/mailer";
+
 import pug from "pug";
 import config from "../utils/config";
 
@@ -12,11 +10,6 @@ import { isRole, isMessagePurpose } from "../utils/parsers";
 import { getHourOfficial, getDateOfficial } from "../utils/helpers";
 import InternalServerError from "../errors/internalServerError";
 import ValidationError from "../errors/validationError";
-
-// Creating instance of Nodemailer's email transporter
-const transporter: Transporter<SentMessageInfo> = nodemailer.createTransport(
-  config.MAIL_OPTIONS
-);
 
 // HTML template constructor funcion for sending appointment confirmation and cancellation emails
 const constructHtmlTemplate = (

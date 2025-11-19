@@ -1,6 +1,27 @@
 import { Queue } from "bullmq";
+import { redisConnection } from "../../worker";
 
-export const confirmationEmailQueue = new Queue("Confirmation-Email");
-export const userEmailConfirmationQueue = new Queue("Confirm-User-Email");
-export const cancellationEmailQueue = new Queue("Cancellation-Email");
-export const messageRequestQueue = new Queue("Message-Request");
+export const userConfirmationEmailQueue = new Queue("User-Confirmation-Email", {
+  connection: redisConnection
+});
+export const adminConfirmationEmailQueue = new Queue(
+  "Admin-Confirmation-Email",
+  {
+    connection: redisConnection
+  }
+);
+export const userEmailConfirmationQueue = new Queue("Confirm-User-Email", {
+  connection: redisConnection
+});
+export const userCancellationEmailQueue = new Queue("User-Cancellation-Email", {
+  connection: redisConnection
+});
+export const adminCancellationEmailQueue = new Queue(
+  "Admin-Cancellation-Email",
+  {
+    connection: redisConnection
+  }
+);
+export const messageRequestQueue = new Queue("Message-Request", {
+  connection: redisConnection
+});
