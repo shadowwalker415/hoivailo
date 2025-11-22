@@ -31,7 +31,7 @@ if (!MAILTRAP_PASSWORD || !MAILTRAP_USERNAME || !SMTP_HOST || !SMTP_PORT) {
   throw new Error("There's an invalid environment variable value for Mailtrap");
 }
 
-if (!REDIS_DEV_HOST || !REDIS_DEV_PASSWORD || REDIS_DEV_TCP_PORT) {
+if (!REDIS_DEV_HOST || !REDIS_DEV_PASSWORD || !REDIS_DEV_TCP_PORT) {
   throw new Error(
     "There's an invalid enviroment variable value for redis cloud"
   );

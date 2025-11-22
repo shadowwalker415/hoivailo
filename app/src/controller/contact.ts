@@ -1,7 +1,7 @@
 import { Router, IRouter, Request, Response } from "express";
 import { validateContactBody } from "../utils/parsers";
 import ValidationError from "../errors/validationError";
-// import { contactAdmin } from "../tasks/contactAdmin";
+import { addJobsToQueue } from "../utils/redisHelpers";
 import { messageRequestQueue } from "../jobs/queues/queques";
 
 const contactRouter: IRouter = Router();
@@ -15,13 +15,17 @@ contactRouter.post("/", async (req: Request, res: Response) => {
     // Parsing and validating request body fields
     const validatedReqBody = validateContactBody(req.body);
 
+    // Instead of rendering here, we have to redirect to prevent form resubmition
     res.status(201).render("contactSuccess");
 
     // Adding a message request job to the message request queue
-    messageRequestQueue.add("message-request", validatedReqBody);
-
-    // Fire-and-forget Async  job with IIFE for admin email notification on new contact request.
-    // (async () => contactAdmin(validatedReqBody))();
+    // await messageRequestQueue.add("message-request", validatedReqBody);
+    (async () =>
+      addJobsToQueue(
+        messageRequestQueue,
+        "message-request",
+        validatedReqBody
+      ))();
   } catch (err: unknown) {
     if (err instanceof ValidationError) {
       throw new ValidationError(err);

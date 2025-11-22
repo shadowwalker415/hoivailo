@@ -10,7 +10,7 @@ export const adminConfirmationEmailQueue = new Queue(
     connection: redisConnection
   }
 );
-export const userEmailConfirmationQueue = new Queue("Confirm-User-Email", {
+export const userRecordUpdateQueue = new Queue("Confirm-User-Email", {
   connection: redisConnection
 });
 export const userCancellationEmailQueue = new Queue("User-Cancellation-Email", {

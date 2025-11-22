@@ -17,9 +17,6 @@ import { IAppointment } from "../model/appointment";
 
 const appointmentRouter: IRouter = Router();
 
-// let cancelledDetails: any;
-// let bookingDetails: any;
-
 appointmentRouter.get("/peruta", (_req: Request, res: Response) => {
   res.status(200).render("cancelAppointment");
 });
@@ -48,7 +45,6 @@ appointmentRouter.post(
         });
       } else {
         // Sending response to client
-        // bookingDetails = { ...savedAppointment };
         // res.redirect(303, "aika/onnistuminnen");
         res.status(201).render("appointmentSuccess", { savedAppointment });
       }

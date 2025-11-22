@@ -131,7 +131,7 @@ export const sendAdminConfirmationEmail = async (
 // Admin cancellation email helper function
 export const sendCancellationEmailAdmin = async (
   appointmentInfo: IAppointment,
-  reason: string
+  reason?: string
 ): Promise<SentMessageInfo | InternalServerError | ValidationError | Error> => {
   try {
     // Message
@@ -166,7 +166,7 @@ export const sendCancellationEmailAdmin = async (
 // User cancellation email helper function
 export const sendCancellationEmailUser = async (
   appointmentInfo: IAppointment,
-  reason: string
+  reason?: string
 ): Promise<SentMessageInfo | InternalServerError | ValidationError | Error> => {
   try {
     // Message

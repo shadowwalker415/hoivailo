@@ -113,6 +113,14 @@ export const generateAvailableSlots = async (
 
     const existingAppointments = await getExistingAppointments(date_string);
 
+    if (!existingAppointments) {
+      throw new InternalServerError({
+        message: "An error occured on the database server",
+        statusCode: 500,
+        code: "INTERNAL_SERVER_ERROR"
+      });
+    }
+
     if (
       existingAppointments instanceof Error ||
       existingAppointments instanceof InternalServerError
@@ -141,15 +149,15 @@ export const confirmUserEmail = async (
 ): Promise<IAppointment | InternalServerError | Error> => {
   try {
     appointment.emailSent = true;
-    const emailConfirmedAppointment = await appointment.save();
-    if (!emailConfirmedAppointment) {
+    const emailConfirmed = await appointment.save();
+    if (!emailConfirmed) {
       throw new InternalServerError({
         message: "Failed to update document",
         statusCode: 500,
         code: "INTERNAL_SERVER_ERROR"
       });
     }
-    return emailConfirmedAppointment;
+    return emailConfirmed;
   } catch (err: unknown) {
     if (err instanceof InternalServerError) {
       return err;
