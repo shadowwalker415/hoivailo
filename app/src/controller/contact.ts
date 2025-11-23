@@ -15,7 +15,7 @@ contactRouter.post("/", async (req: Request, res: Response) => {
     // Parsing and validating request body fields
     const validatedReqBody = validateContactBody(req.body);
 
-    // Instead of rendering here, we have to redirect to prevent form resubmition
+    // We will redirect here instead of rendering here, to prevent form resubmition.
     res.status(201).render("contactSuccess");
 
     // Adding a message request job to the message request queue

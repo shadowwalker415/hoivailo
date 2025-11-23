@@ -3,15 +3,17 @@ import {
   validateAppointmentCancellationBody,
   validateAppointmentRequestBody
 } from "../utils/parsers";
+import { createNewAppointment, cancelAppointment } from "../tasks/appointments";
 import {
-  createNewAppointment,
-  cancelAppointment
-} from "../services/appointmentService";
-import { sendAppointmentEmails } from "../tasks/sendAppointmentEmails";
-import { sendCancellationEmails } from "../tasks/sendCancellationEmails";
+  userConfirmationEmailQueue,
+  adminConfirmationEmailQueue,
+  userCancellationEmailQueue,
+  adminCancellationEmailQueue
+} from "../jobs/queues/queques";
 import InternalServerError from "../errors/internalServerError";
 import EntityNotFoundError from "../errors/entityNotFoundError";
-import { IAppointment } from "../model/appointment";
+import { IAppointment, ICancelledAppointment } from "../model/appointment";
+import { addJobsToQueue } from "../utils/redisHelpers";
 
 // import { IAppointment } from "../model/appointment";
 
@@ -44,20 +46,22 @@ appointmentRouter.post(
           statusCode: 500
         });
       } else {
-        // Sending response to client
+        // We will redirect to the appointment success.
         // res.redirect(303, "aika/onnistuminnen");
         res.status(201).render("appointmentSuccess", { savedAppointment });
       }
-      //  Fire-and-forget Async job with IIFE for emailing the user and admin on appointment booking success.
-      (async () => {
-        try {
-          await sendAppointmentEmails(savedAppointment);
-        } catch (err: unknown) {
-          if (err instanceof Error) {
-            console.log(err.message);
-          }
-        }
-      })();
+      // Adding email background jobs to their various queues
+      await addJobsToQueue(
+        userConfirmationEmailQueue,
+        "user-email-confirmation",
+        savedAppointment
+      );
+
+      await addJobsToQueue(
+        adminConfirmationEmailQueue,
+        "admin-email-confirmation",
+        { ...savedAppointment } as IAppointment
+      );
     } catch (err: unknown) {
       if (err instanceof Error || err instanceof InternalServerError) {
         next(err);
@@ -89,6 +93,7 @@ appointmentRouter.post(
         cancelledAppointment instanceof InternalServerError &&
         cancelledAppointment.message === "Appointment already cancelled"
       ) {
+        // We will redirect here instead of rendering
         res.status(201).render("alreadyCancelled", { validatedBody });
         // Checking if the database operation failed
       } else if (cancelledAppointment instanceof Error) {
@@ -99,25 +104,29 @@ appointmentRouter.post(
           code: "INTERNAL_SERVER_ERROR"
         });
       } else {
-        // cancelledDetails = { ...cancelledAppointment };
-
         // Sending response to client
         // res.redirect(303, "tapaaminen/peruta/onnistuminen");
         res.status(201).render("cancellationSuccess", { cancelledAppointment });
+
+        // Adding background jobs to their respective queues
+        await addJobsToQueue(
+          userCancellationEmailQueue,
+          "user-cancellation-email",
+          {
+            ...cancelledAppointment,
+            reason: validatedBody.reason
+          } as ICancelledAppointment
+        );
+
+        await addJobsToQueue(
+          adminCancellationEmailQueue,
+          "admin-cancellation-email",
+          {
+            ...cancelledAppointment,
+            reason: validatedBody.reason
+          } as ICancelledAppointment
+        );
       }
-      // Fire-and-forget Async job with IIFE for emailing user and admin on appointment cancellation success.
-      (async () => {
-        try {
-          await sendCancellationEmails(
-            cancelledAppointment as IAppointment,
-            validatedBody.reason
-          );
-        } catch (err: unknown) {
-          if (err instanceof Error) {
-            console.log(err.message);
-          }
-        }
-      })();
     } catch (err: unknown) {
       if (err instanceof InternalServerError) {
         next(err);

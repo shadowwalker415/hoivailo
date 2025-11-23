@@ -8,7 +8,7 @@ import {
   getDateOfficial,
   getDifferenceInMonths
 } from "../utils/helpers";
-import { generateAvailableSlots } from "../services/appointmentService";
+import { generateAvailableSlots } from "../tasks/appointments";
 import ValidationError from "../errors/validationError";
 import InternalServerError from "../errors/internalServerError";
 

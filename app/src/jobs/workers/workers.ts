@@ -42,7 +42,11 @@ export const userRecordUpdateWorker = new Worker(
 export const userCancellationEmailWorker = new Worker(
   "User-Cancellation-Email",
   async (job) => {
-    await sendCancellationEmailUser(job.data);
+    const sentEmail = await sendCancellationEmailUser(job.data);
+
+    if (sentEmail instanceof Error) {
+      console.log(sentEmail.message);
+    }
   },
   {
     connection: redisConnection

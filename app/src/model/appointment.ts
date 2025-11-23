@@ -20,6 +20,10 @@ export interface IAppointment extends Document {
   toJSON(): IAppointment;
 }
 
+export interface ICancelledAppointment extends IAppointment {
+  reason: string;
+}
+
 const appointmentSchema: Schema<IAppointment> = new Schema(
   {
     startTime: {
