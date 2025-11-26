@@ -5,7 +5,7 @@ import pug from "pug";
 import config from "../utils/config";
 
 import { IContact, MessagePurpose, Role } from "../types";
-import { IAppointment } from "../model/appointment";
+import { IAppointment, ICancelledAppointment } from "../model/appointment";
 import { isRole, isMessagePurpose } from "../utils/parsers";
 import { getHourOfficial, getDateOfficial } from "../utils/helpers";
 import InternalServerError from "../errors/internalServerError";
@@ -165,7 +165,7 @@ export const sendCancellationEmailAdmin = async (
 
 // User cancellation email helper function
 export const sendCancellationEmailUser = async (
-  appointmentInfo: IAppointment,
+  appointmentInfo: ICancelledAppointment,
   reason?: string
 ): Promise<SentMessageInfo | InternalServerError | ValidationError | Error> => {
   try {

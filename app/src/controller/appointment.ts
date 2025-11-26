@@ -6,13 +6,12 @@ import {
 import { createNewAppointment, cancelAppointment } from "../tasks/appointments";
 import {
   userConfirmationEmailQueue,
-  adminConfirmationEmailQueue,
   userCancellationEmailQueue,
   adminCancellationEmailQueue
 } from "../jobs/queues/queques";
 import InternalServerError from "../errors/internalServerError";
 import EntityNotFoundError from "../errors/entityNotFoundError";
-import { IAppointment, ICancelledAppointment } from "../model/appointment";
+import { ICancelledAppointment } from "../model/appointment";
 import { addJobsToQueue } from "../utils/redisHelpers";
 
 // import { IAppointment } from "../model/appointment";
@@ -50,17 +49,12 @@ appointmentRouter.post(
         // res.redirect(303, "aika/onnistuminnen");
         res.status(201).render("appointmentSuccess", { savedAppointment });
       }
+
       // Adding email background jobs to their various queues
       await addJobsToQueue(
         userConfirmationEmailQueue,
         "user-email-confirmation",
         savedAppointment
-      );
-
-      await addJobsToQueue(
-        adminConfirmationEmailQueue,
-        "admin-email-confirmation",
-        { ...savedAppointment } as IAppointment
       );
     } catch (err: unknown) {
       if (err instanceof Error || err instanceof InternalServerError) {
@@ -109,23 +103,24 @@ appointmentRouter.post(
         res.status(201).render("cancellationSuccess", { cancelledAppointment });
 
         // Adding background jobs to their respective queues
-        await addJobsToQueue(
-          userCancellationEmailQueue,
-          "user-cancellation-email",
-          {
-            ...cancelledAppointment,
-            reason: validatedBody.reason
-          } as ICancelledAppointment
-        );
-
-        await addJobsToQueue(
-          adminCancellationEmailQueue,
-          "admin-cancellation-email",
-          {
-            ...cancelledAppointment,
-            reason: validatedBody.reason
-          } as ICancelledAppointment
-        );
+        await Promise.allSettled([
+          addJobsToQueue(
+            userCancellationEmailQueue,
+            "user-cancellation-email",
+            {
+              ...cancelledAppointment,
+              reason: validatedBody.reason
+            } as ICancelledAppointment
+          ),
+          addJobsToQueue(
+            adminCancellationEmailQueue,
+            "admin-cancellation-email",
+            {
+              ...cancelledAppointment,
+              reason: validatedBody.reason
+            } as ICancelledAppointment
+          )
+        ]);
       }
     } catch (err: unknown) {
       if (err instanceof InternalServerError) {

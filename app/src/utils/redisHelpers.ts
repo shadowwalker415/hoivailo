@@ -7,6 +7,8 @@ export const addJobsToQueue = async (
   jobName: string,
   payLoad: IAppointment | IContact | ICancelledAppointment
 ) => {
-  await queue.add(jobName, payLoad);
-  console.log("%s added to queue", jobName);
+  await queue.add(jobName, payLoad, {
+    removeOnComplete: true,
+    removeOnFail: { age: 24 * 3600 } // Keeping failed jobs for up to 24 hours
+  });
 };

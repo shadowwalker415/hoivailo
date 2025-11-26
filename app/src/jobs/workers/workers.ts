@@ -1,5 +1,12 @@
-import { Worker } from "bullmq";
+import { Job, Worker } from "bullmq";
 import { redisConnection } from "../../worker";
+import {
+  userRecordUpdateQueueEvent,
+  userConfirmationEmailQueueEvent,
+  userConfirmationEmailQueue,
+  userRecordUpdateQueue,
+  adminConfirmationEmailQueue
+} from "../queues/queques";
 import {
   sendContactNotificationEmail,
   sendAdminConfirmationEmail,
@@ -8,11 +15,17 @@ import {
   sendCancellationEmailUser
 } from "../../tasks/emails";
 import { confirmUserEmail } from "../../tasks/appointments";
+import { addJobsToQueue } from "../../utils/redisHelpers";
+import { IAppointment, ICancelledAppointment } from "../../model/appointment";
+import { IContact } from "../../types";
 
 export const userConfirmationEmailWorker = new Worker(
   "User-Confirmation-Email",
-  async (job) => {
-    await sendUserConfirmationEmail(job.data);
+  async (job: Job<IAppointment>) => {
+    const sentEmail = await sendUserConfirmationEmail(job.data);
+    if (sentEmail instanceof Error) {
+      console.log(`An error occured: ${sentEmail.message}`);
+    }
   },
   {
     connection: redisConnection
@@ -21,8 +34,12 @@ export const userConfirmationEmailWorker = new Worker(
 
 export const adminConfirmationEmailWorker = new Worker(
   "Admin-Confirmation-Email",
-  async (job) => {
-    sendAdminConfirmationEmail(job.data);
+  async (job: Job<IAppointment>) => {
+    const sentEmail = await sendAdminConfirmationEmail(job.data);
+    if (sentEmail instanceof Error) {
+      // We will log the error here
+      console.log(sentEmail.message);
+    }
   },
   {
     connection: redisConnection
@@ -31,7 +48,7 @@ export const adminConfirmationEmailWorker = new Worker(
 
 export const userRecordUpdateWorker = new Worker(
   "Confirm-User-Email",
-  async (job) => {
+  async (job: Job<IAppointment>) => {
     await confirmUserEmail(job.data);
   },
   {
@@ -41,8 +58,11 @@ export const userRecordUpdateWorker = new Worker(
 
 export const userCancellationEmailWorker = new Worker(
   "User-Cancellation-Email",
-  async (job) => {
-    const sentEmail = await sendCancellationEmailUser(job.data);
+  async (job: Job<ICancelledAppointment>) => {
+    const sentEmail = await sendCancellationEmailUser(
+      job.data,
+      job.data.reason
+    );
 
     if (sentEmail instanceof Error) {
       console.log(sentEmail.message);
@@ -55,8 +75,8 @@ export const userCancellationEmailWorker = new Worker(
 
 export const adminCancellationEmailWorker = new Worker(
   "Admin-Cancellation-Email",
-  async (job) => {
-    await sendCancellationEmailAdmin(job.data);
+  async (job: Job<ICancelledAppointment>) => {
+    await sendCancellationEmailAdmin(job.data, job.data.reason);
   },
   {
     connection: redisConnection
@@ -66,7 +86,7 @@ export const adminCancellationEmailWorker = new Worker(
 // Worker for message request background jobs
 const messageRequestWorker = new Worker(
   "Message-Request",
-  async (job) => {
+  async (job: Job<IContact>) => {
     await sendContactNotificationEmail(job.data);
   },
   {
@@ -77,4 +97,28 @@ const messageRequestWorker = new Worker(
 messageRequestWorker.on("failed", (job, err) => {
   // We will log the error here
   console.error("Job failed:", job?.id, err);
+});
+
+userConfirmationEmailQueueEvent.on("completed", async ({ jobId }) => {
+  const completedJob = await userConfirmationEmailQueue.getJob(jobId);
+  if (!completedJob) {
+    // We will log here
+    return;
+  }
+  await addJobsToQueue(
+    userRecordUpdateQueue,
+    "confirm-user-email",
+    completedJob.data
+  );
+});
+userRecordUpdateQueueEvent.on("completed", async ({ jobId }) => {
+  const completedJob = await userRecordUpdateQueue.getJob(jobId);
+  if (!completedJob) {
+    return;
+  }
+  await addJobsToQueue(
+    adminConfirmationEmailQueue,
+    "admin-email-confirmation",
+    completedJob.data
+  );
 });
