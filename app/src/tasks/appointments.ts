@@ -103,8 +103,6 @@ export const generateAvailableSlots = async (
   date_string: string
 ): Promise<Slot[] | InternalServerError | Error> => {
   try {
-    const checkAvailable = isSlotAvailable;
-
     const generatedSlots = generateSlots(
       date_string,
       WORKING_HOURS,
@@ -132,7 +130,7 @@ export const generateAvailableSlots = async (
       });
 
     const availableSlots = generatedSlots.filter((slot) =>
-      checkAvailable(slot.startTime, slot.endTime, existingAppointments)
+      isSlotAvailable(slot.startTime, slot.endTime, existingAppointments)
     );
     return availableSlots;
   } catch (err: unknown) {

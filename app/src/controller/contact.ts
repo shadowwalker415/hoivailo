@@ -19,13 +19,11 @@ contactRouter.post("/", async (req: Request, res: Response) => {
     res.status(201).render("contactSuccess");
 
     // Adding a message request job to the message request queue
-    // await messageRequestQueue.add("message-request", validatedReqBody);
-    (async () =>
-      addJobsToQueue(
-        messageRequestQueue,
-        "message-request",
-        validatedReqBody
-      ))();
+    await addJobsToQueue(
+      messageRequestQueue,
+      "message-request",
+      validatedReqBody
+    );
   } catch (err: unknown) {
     if (err instanceof ValidationError) {
       throw new ValidationError(err);

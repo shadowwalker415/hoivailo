@@ -55,7 +55,11 @@ availabilityRouter.get(
             code: "INTERNAL_SERVER_ERROR"
           });
         }
-        res.status(200).render("appointment", { availableSlots });
+        if (availableSlots.length < 1) {
+          res.status(200).render("noSlotsFound");
+        } else {
+          res.status(200).render("appointment", { availableSlots });
+        }
       }
     } catch (err: unknown) {
       if (

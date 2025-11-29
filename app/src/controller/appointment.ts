@@ -14,8 +14,6 @@ import EntityNotFoundError from "../errors/entityNotFoundError";
 import { ICancelledAppointment } from "../model/appointment";
 import { addJobsToQueue } from "../utils/redisHelpers";
 
-// import { IAppointment } from "../model/appointment";
-
 const appointmentRouter: IRouter = Router();
 
 appointmentRouter.get("/peruta", (_req: Request, res: Response) => {

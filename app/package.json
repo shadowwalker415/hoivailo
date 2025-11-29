@@ -11,6 +11,7 @@
     "lint": "eslint .",
     "dev": "cross-env NODE_ENV=development ts-node-dev ./src/index.ts",
     "redis:dev": "cross-env NODE_ENV=development ts-node-dev ./src/jobs/workers/workers.ts",
+    "queueEvents:dev": "cross-env NODE_ENV=development ts-node-dev ./src/jobs/workers/queueEvents.ts",
     "start": "cross-env NODE_ENV=production node build/index.js"
   },
   "author": "John Nkwelle",

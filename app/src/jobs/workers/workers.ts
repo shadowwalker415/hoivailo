@@ -1,13 +1,6 @@
 import { Job, Worker } from "bullmq";
 import { redisConnection } from "../../worker";
 import {
-  userRecordUpdateQueueEvent,
-  userConfirmationEmailQueueEvent,
-  userConfirmationEmailQueue,
-  userRecordUpdateQueue,
-  adminConfirmationEmailQueue
-} from "../queues/queques";
-import {
   sendContactNotificationEmail,
   sendAdminConfirmationEmail,
   sendUserConfirmationEmail,
@@ -15,7 +8,7 @@ import {
   sendCancellationEmailUser
 } from "../../tasks/emails";
 import { confirmUserEmail } from "../../tasks/appointments";
-import { addJobsToQueue } from "../../utils/redisHelpers";
+
 import { IAppointment, ICancelledAppointment } from "../../model/appointment";
 import { IContact } from "../../types";
 
@@ -24,8 +17,11 @@ export const userConfirmationEmailWorker = new Worker(
   async (job: Job<IAppointment>) => {
     const sentEmail = await sendUserConfirmationEmail(job.data);
     if (sentEmail instanceof Error) {
+      // We will log here
       console.log(`An error occured: ${sentEmail.message}`);
     }
+    console.log("Job completed");
+    return true;
   },
   {
     connection: redisConnection
@@ -65,6 +61,7 @@ export const userCancellationEmailWorker = new Worker(
     );
 
     if (sentEmail instanceof Error) {
+      // We will log here
       console.log(sentEmail.message);
     }
   },
@@ -97,28 +94,4 @@ const messageRequestWorker = new Worker(
 messageRequestWorker.on("failed", (job, err) => {
   // We will log the error here
   console.error("Job failed:", job?.id, err);
-});
-
-userConfirmationEmailQueueEvent.on("completed", async ({ jobId }) => {
-  const completedJob = await userConfirmationEmailQueue.getJob(jobId);
-  if (!completedJob) {
-    // We will log here
-    return;
-  }
-  await addJobsToQueue(
-    userRecordUpdateQueue,
-    "confirm-user-email",
-    completedJob.data
-  );
-});
-userRecordUpdateQueueEvent.on("completed", async ({ jobId }) => {
-  const completedJob = await userRecordUpdateQueue.getJob(jobId);
-  if (!completedJob) {
-    return;
-  }
-  await addJobsToQueue(
-    adminConfirmationEmailQueue,
-    "admin-email-confirmation",
-    completedJob.data
-  );
 });
