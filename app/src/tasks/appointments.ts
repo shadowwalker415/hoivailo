@@ -143,21 +143,46 @@ export const generateAvailableSlots = async (
 
 // User email confirmation helper function.
 export const confirmUserEmail = async (
-  appointment: IAppointment
+  appointmentId: string
 ): Promise<IAppointment | InternalServerError | Error> => {
   try {
-    appointment.emailSent = true;
-    const emailConfirmed = await appointment.save();
-    if (!emailConfirmed) {
+    console.log("This is the confirmUserEmail function and we got here");
+    const appointmentToUpdate = await Appointment.findOne({
+      appointmentId: appointmentId
+    });
+
+    if (!appointmentToUpdate) {
+      console.log("Appointment to update not found");
+      throw new EntityNotFoundError({
+        message: `Appointment with appointment id (${appointmentId} was not found)`,
+        statusCode: 404,
+        code: "NOT_FOUND"
+      });
+    }
+    console.log(appointmentToUpdate);
+    if (!appointmentToUpdate.emailSent) {
+      console.log("emailSent field not found");
+      throw new EntityNotFoundError({
+        message: `emailSent field not found in Appointment object)`,
+        statusCode: 404,
+        code: "NOT_FOUND"
+      });
+    }
+    console.log(appointmentToUpdate.emailSent);
+    appointmentToUpdate.emailSent = true;
+    console.log(appointmentToUpdate.emailSent);
+    const updatedRecord = await appointmentToUpdate.save();
+    if (!updatedRecord) {
       throw new InternalServerError({
         message: "Failed to update document",
         statusCode: 500,
         code: "INTERNAL_SERVER_ERROR"
       });
     }
-    return emailConfirmed;
+    return updatedRecord;
   } catch (err: unknown) {
-    if (err instanceof InternalServerError) {
+    if (err instanceof InternalServerError || err instanceof Error) {
+      console.log(err.message);
       return err;
     }
     return new Error("An unknown error occured");

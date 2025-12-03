@@ -55,6 +55,7 @@ availabilityRouter.get(
             code: "INTERNAL_SERVER_ERROR"
           });
         }
+        // Checking if all slots have already been booked for selected date
         if (availableSlots.length < 1) {
           res.status(200).render("noSlotsFound");
         } else {
