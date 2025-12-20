@@ -43,7 +43,13 @@ export const REDIS_DEV_CONFIG = {
   username: "default",
   password: REDIS_DEV_PASSWORD,
   maxRetriesPerRequest: null,
-  enableReadyCheck: false
+  enableReadyCheck: false,
+  lazyConnect: true
+};
+
+export const JOB_OPTIONS = {
+  removeOnComplete: false,
+  removeOnFail: { age: 24 * 3600 } // Keeping failed jobs for up to 24 hours
 };
 
 export default {

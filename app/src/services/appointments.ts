@@ -141,48 +141,25 @@ export const generateAvailableSlots = async (
   }
 };
 
-// User email confirmation helper function.
-export const confirmUserEmail = async (
+export const markAppointmentEmailSent = async (
   appointmentId: string
-): Promise<IAppointment | InternalServerError | Error> => {
+): Promise<IAppointment | Error> => {
   try {
-    console.log("This is the confirmUserEmail function and we got here");
-    const appointmentToUpdate = await Appointment.findOne({
-      appointmentId: appointmentId
-    });
-
-    if (!appointmentToUpdate) {
-      console.log("Appointment to update not found");
-      throw new EntityNotFoundError({
-        message: `Appointment with appointment id (${appointmentId} was not found)`,
-        statusCode: 404,
-        code: "NOT_FOUND"
-      });
-    }
-    console.log(appointmentToUpdate);
-    if (!appointmentToUpdate.emailSent) {
-      console.log("emailSent field not found");
-      throw new EntityNotFoundError({
-        message: `emailSent field not found in Appointment object)`,
-        statusCode: 404,
-        code: "NOT_FOUND"
-      });
-    }
-    console.log(appointmentToUpdate.emailSent);
-    appointmentToUpdate.emailSent = true;
-    console.log(appointmentToUpdate.emailSent);
-    const updatedRecord = await appointmentToUpdate.save();
-    if (!updatedRecord) {
-      throw new InternalServerError({
-        message: "Failed to update document",
-        statusCode: 500,
-        code: "INTERNAL_SERVER_ERROR"
-      });
-    }
-    return updatedRecord;
+    // Marking the Appointment emailSent field to true.
+    await Appointment.updateOne(
+      { _id: appointmentId, emailSent: false },
+      { $set: { emailSent: true } },
+      (err: unknown, doc: IAppointment) => {
+        if (err instanceof Error) {
+          throw new Error(
+            `An error occured while attempting to update appointent: ${err.message}`
+          );
+        }
+        return doc;
+      }
+    );
   } catch (err: unknown) {
     if (err instanceof InternalServerError || err instanceof Error) {
-      console.log(err.message);
       return err;
     }
     return new Error("An unknown error occured");
