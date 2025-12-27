@@ -129,6 +129,7 @@ export const generateAvailableSlots = async (
         code: "INTERNAL_SERVER_ERROR"
       });
 
+    // Generating appointmenet slots
     const availableSlots = generatedSlots.filter((slot) =>
       isSlotAvailable(slot.startTime, slot.endTime, existingAppointments)
     );
@@ -143,26 +144,26 @@ export const generateAvailableSlots = async (
 
 export const markAppointmentEmailSent = async (
   appointmentId: string
-): Promise<IAppointment | Error> => {
+): Promise<void> => {
   try {
     // Marking the Appointment emailSent field to true.
+    // Making sure if emailSent is already set to true then we skip the operation.
     await Appointment.updateOne(
-      { _id: appointmentId, emailSent: false },
+      { appointmentId: appointmentId, emailSent: false },
       { $set: { emailSent: true } },
-      (err: unknown, doc: IAppointment) => {
+      (err: unknown, _doc: IAppointment) => {
         if (err instanceof Error) {
           throw new Error(
             `An error occured while attempting to update appointent: ${err.message}`
           );
         }
-        return doc;
       }
     );
   } catch (err: unknown) {
     if (err instanceof InternalServerError || err instanceof Error) {
-      return err;
+      throw new Error(err.message);
     }
-    return new Error("An unknown error occured");
+    throw new Error("An unknown error occured");
   }
 };
 

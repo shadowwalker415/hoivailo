@@ -115,7 +115,7 @@ export const sendAdminConfirmationEmail = async (
       html: html
     };
     // Sending email
-    await transporter.sendMail(mailOptions); // The problem seems to be here. It doesn't get past this line
+    await transporter.sendMail(mailOptions);
   } catch (err: unknown) {
     if (
       err instanceof InternalServerError ||

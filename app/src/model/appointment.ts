@@ -1,4 +1,4 @@
-import mongoose, { Schema, model, Document } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
 import { v4 as uuidv4 } from "uuid";
 
@@ -10,7 +10,6 @@ export interface IAppointment extends Document {
   appointmentId?: string;
   name: string;
   email: string;
-  emailSent?: boolean;
   phone: string;
   service: string;
   notes?: string;
@@ -51,10 +50,6 @@ const appointmentSchema: Schema<IAppointment> = new Schema(
         }
       },
       trim: true
-    },
-    emailSent: {
-      type: Boolean,
-      default: false
     },
     phone: {
       type: String
@@ -101,4 +96,4 @@ appointmentSchema.set("toJSON", {
   }
 });
 
-export default model<IAppointment>("Appointment", appointmentSchema);
+export default mongoose.model<IAppointment>("Appointment", appointmentSchema);
