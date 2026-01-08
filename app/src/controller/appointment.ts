@@ -3,16 +3,19 @@ import {
   validateAppointmentCancellationBody,
   validateAppointmentRequestBody
 } from "../utils/parsers";
-import { createNewAppointment, cancelAppointment } from "../tasks/appointments";
 import {
-  userConfirmationEmailQueue,
-  userCancellationEmailQueue,
-  adminCancellationEmailQueue
-} from "../jobs/queues/queques";
+  createNewAppointment,
+  cancelAppointment
+} from "../services/appointments";
+// import {
+//   userConfirmationEmailQueue,
+//   userCancellationEmailQueue,
+//   adminCancellationEmailQueue
+// } from "../jobs/queues/queques";
 import InternalServerError from "../errors/internalServerError";
 import EntityNotFoundError from "../errors/entityNotFoundError";
-import { ICancelledAppointment } from "../model/appointment";
-import { addJobsToQueue } from "../utils/redisHelpers";
+// import { ICancelledAppointment } from "../model/appointment";
+// import { addJobsToQueue } from "../utils/redisHelpers";
 
 const appointmentRouter: IRouter = Router();
 
@@ -49,11 +52,6 @@ appointmentRouter.post(
       }
 
       // Adding email background jobs to their various queues
-      await addJobsToQueue(
-        userConfirmationEmailQueue,
-        "user-email-confirmation",
-        savedAppointment
-      );
     } catch (err: unknown) {
       if (err instanceof Error || err instanceof InternalServerError) {
         next(err);
@@ -101,24 +99,6 @@ appointmentRouter.post(
         res.status(201).render("cancellationSuccess", { cancelledAppointment });
 
         // Adding background jobs to their respective queues
-        await Promise.allSettled([
-          addJobsToQueue(
-            userCancellationEmailQueue,
-            "user-cancellation-email",
-            {
-              ...cancelledAppointment,
-              reason: validatedBody.reason
-            } as ICancelledAppointment
-          ),
-          addJobsToQueue(
-            adminCancellationEmailQueue,
-            "admin-cancellation-email",
-            {
-              ...cancelledAppointment,
-              reason: validatedBody.reason
-            } as ICancelledAppointment
-          )
-        ]);
       }
     } catch (err: unknown) {
       if (err instanceof InternalServerError) {

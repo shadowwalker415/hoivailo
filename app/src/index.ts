@@ -1,15 +1,16 @@
 import config from "./utils/config";
 import app from "./app";
 import mongoose from "mongoose";
-import { redisConnection } from "./worker";
+import { initRedis } from "./queues/registry";
 
 const startApp = async () => {
   try {
     console.log("Connecting to MongoDB");
     await mongoose.connect(config.MONGODB_URI);
+    // await redisConnection.connect();
     console.log("Connected to MongoDB");
-    console.log("Connecting to Redis");
-    await redisConnection.connect();
+
+    await initRedis();
     console.log("Connected to Redis");
 
     app.listen(config.PORT, () => {

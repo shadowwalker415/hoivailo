@@ -5,7 +5,8 @@ import {
 } from "../utils/availability.config";
 import { parse, isBefore, format, addMinutes } from "date-fns";
 import { convertToISO8601 } from "../utils/helpers";
-import Appointment, { IAppointment } from "../model/appointment";
+import { IAppointment, Appointment } from "../model/appointment";
+import { AppointmentEmail } from "../model/appointmentEmail";
 // import { DateTime } from "luxon";
 import InternalServerError from "../errors/internalServerError";
 import EntityNotFoundError from "../errors/entityNotFoundError";
@@ -24,6 +25,7 @@ const isSlotAvailable = (
   });
 };
 
+// We have to refactor this function
 // Generating available appointment time slots in ISO 8601 date format.
 const generateSlots = (
   date_string: string,
@@ -62,6 +64,7 @@ const generateSlots = (
   return slots;
 };
 
+// Gets existing appointments from database.
 const getExistingAppointments = async (
   _selectedDate: string
 ): Promise<IAppointment[] | Error | InternalServerError> => {
@@ -98,7 +101,7 @@ const getExistingAppointments = async (
   }
 };
 
-// Slot generation helper functions.
+// Generates available appointment slots
 export const generateAvailableSlots = async (
   date_string: string
 ): Promise<Slot[] | InternalServerError | Error> => {
@@ -142,23 +145,38 @@ export const generateAvailableSlots = async (
   }
 };
 
-export const markAppointmentEmailSent = async (
-  appointmentId: string
-): Promise<void> => {
+// Creates a booked appointment confirmation email record with a dedupe key for idempotency.
+export const createBookedAppointmentEmail = async (
+  appointmentId: string,
+  actor: string
+) => {
   try {
-    // Marking the Appointment emailSent field to true.
-    // Making sure if emailSent is already set to true then we skip the operation.
-    await Appointment.updateOne(
-      { appointmentId: appointmentId, emailSent: false },
-      { $set: { emailSent: true } },
-      (err: unknown, _doc: IAppointment) => {
-        if (err instanceof Error) {
-          throw new Error(
-            `An error occured while attempting to update appointent: ${err.message}`
-          );
-        }
-      }
-    );
+    if (actor === "user") {
+      const deDupeKey = `APPOINTMENT_BOOKED_USER:${appointmentId}`;
+      await AppointmentEmail.create({ deDupeKey });
+    } else if (actor === "admin") {
+      const deDupeKey = `APPOINTMENT_BOOKED_ADMIN:${appointmentId}`;
+      await AppointmentEmail.create({ deDupeKey });
+    }
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      throw new Error(err.message);
+    }
+  }
+};
+
+export const markAppointmentEmailSent = async (
+  appointmentId: string,
+  actor: string
+) => {
+  try {
+    if (actor === "user") {
+      const deDupeKey = `APPOINTMENT_BOOKED_USER:${appointmentId}`;
+      await AppointmentEmail.updateOne({ deDupeKey }, { status: "sent" });
+    } else if (actor === "admin") {
+      const deDupeKey = `APPOINTMENT_BOOKED_ADMIN:${appointmentId}`;
+      await AppointmentEmail.updateOne({ deDupeKey }, { status: "sent" });
+    }
   } catch (err: unknown) {
     if (err instanceof InternalServerError || err instanceof Error) {
       throw new Error(err.message);
@@ -167,7 +185,6 @@ export const markAppointmentEmailSent = async (
   }
 };
 
-// Appointment creation helper function.
 export const createNewAppointment = async (
   appointmentInfo: IAppointment
 ): Promise<IAppointment | InternalServerError | Error> => {

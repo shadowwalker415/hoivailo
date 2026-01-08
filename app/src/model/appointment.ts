@@ -1,8 +1,6 @@
-import mongoose, { Schema, Document } from "mongoose";
+import { Schema, Document, model } from "mongoose";
 
 import { v4 as uuidv4 } from "uuid";
-
-mongoose.set("strictQuery", false);
 
 export interface IAppointment extends Document {
   startTime: Date;
@@ -71,8 +69,8 @@ const appointmentSchema: Schema<IAppointment> = new Schema(
     },
     status: {
       type: String,
-      enum: ["confirmed", "cancelled"],
-      default: "confirmed",
+      enum: ["booked", "cancelled"],
+      default: "booked",
       required: true
     },
     appointmentId: {
@@ -96,4 +94,7 @@ appointmentSchema.set("toJSON", {
   }
 });
 
-export default mongoose.model<IAppointment>("Appointment", appointmentSchema);
+export const Appointment = model<IAppointment>(
+  "Appointment",
+  appointmentSchema
+);
