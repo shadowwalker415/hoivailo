@@ -1,9 +1,9 @@
 import {
   AppointmentServices,
   IAppointmentCancel,
-  MessagePurpose,
-  Role,
-  IContact
+  Recipient,
+  IContact,
+  EmailType
 } from "../types";
 import { IAppointment } from "../model/appointment";
 import {
@@ -69,13 +69,11 @@ function isValidID(id: string): boolean {
   return uuidRegex.test(id.trim());
 }
 
-export const isMessagePurpose = (
-  purpose: unknown
-): purpose is MessagePurpose => {
+export const isEmailType = (purpose: unknown): purpose is EmailType => {
   return purpose === "confirmation" || purpose === "cancellation";
 };
 
-export const isRole = (role: unknown): role is Role => {
+export const isRecipient = (role: unknown): role is Recipient => {
   return role === "user" || role == "admin";
 };
 

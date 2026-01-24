@@ -1,8 +1,8 @@
 import { Request } from "express";
 
-export type MessagePurpose = "confirmation" | "cancellation";
+export type EmailType = "confirmation" | "cancellation";
 
-export type Role = "user" | "admin";
+export type Recipient = "user" | "admin";
 
 export enum AppointmentServices {
   kotiapu = "Kotiapu",

@@ -6,7 +6,6 @@ import {
 import { parse, isBefore, format, addMinutes } from "date-fns";
 import { convertToISO8601 } from "../utils/helpers";
 import { IAppointment, Appointment } from "../model/appointment";
-import { AppointmentEmail } from "../model/appointmentEmail";
 // import { DateTime } from "luxon";
 import InternalServerError from "../errors/internalServerError";
 import EntityNotFoundError from "../errors/entityNotFoundError";
@@ -142,46 +141,6 @@ export const generateAvailableSlots = async (
       return err;
     }
     return new Error("An unknown error occured");
-  }
-};
-
-// Creates a booked appointment confirmation email record with a dedupe key for idempotency.
-export const createBookedAppointmentEmail = async (
-  appointmentId: string,
-  actor: string
-) => {
-  try {
-    if (actor === "user") {
-      const deDupeKey = `APPOINTMENT_BOOKED_USER:${appointmentId}`;
-      await AppointmentEmail.create({ deDupeKey });
-    } else if (actor === "admin") {
-      const deDupeKey = `APPOINTMENT_BOOKED_ADMIN:${appointmentId}`;
-      await AppointmentEmail.create({ deDupeKey });
-    }
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      throw new Error(err.message);
-    }
-  }
-};
-
-export const markAppointmentEmailSent = async (
-  appointmentId: string,
-  actor: string
-) => {
-  try {
-    if (actor === "user") {
-      const deDupeKey = `APPOINTMENT_BOOKED_USER:${appointmentId}`;
-      await AppointmentEmail.updateOne({ deDupeKey }, { status: "sent" });
-    } else if (actor === "admin") {
-      const deDupeKey = `APPOINTMENT_BOOKED_ADMIN:${appointmentId}`;
-      await AppointmentEmail.updateOne({ deDupeKey }, { status: "sent" });
-    }
-  } catch (err: unknown) {
-    if (err instanceof InternalServerError || err instanceof Error) {
-      throw new Error(err.message);
-    }
-    throw new Error("An unknown error occured");
   }
 };
 

@@ -1,40 +1,44 @@
-import { Schema, model } from "mongoose";
-
+import { Document, Schema, model, Types } from "mongoose";
+import { Recipient } from "../types";
 // This means even fields that were sent but were not defined in our schema will be stored in the db.
 // setting strictQuery to true means only fields specified in the schema will be stored in the db.
 // mongoose.set("strictQuery", false);
 
-export type Recipient = "user" | "admin";
-export type EmailStatus = "pending" | "sending" | "sent" | "failed";
-export type AppointmentSatus = "booked" | "cancelled";
+type EmailStatus = "pending" | "sending" | "sent" | "failed";
+type AppointmentSatus = "booked" | "cancelled";
 
-const appointmentEmailSchema: Schema = new Schema(
-  {
-    appointmentId: {
-      type: Schema.Types.ObjectId,
-      require: true,
-      index: true
-    },
-    status: {
-      type: String,
-      enum: ["pending", "sent", "failed", "sending"],
-      default: "pending",
-      index: true
-    },
-    recipient: {
-      type: String,
-      enum: ["user", "admin"],
-      required: true
-    },
-    appointmentStatus: {
-      type: String,
-      enum: ["booked", "cancelled"],
-      required: true,
-      index: true
-    }
+export interface IAppointmentEmail extends Document {
+  appointmentId: Types.ObjectId;
+  status: EmailStatus;
+  recipient: Recipient;
+  appointmentSatus: AppointmentSatus;
+}
+
+const appointmentEmailSchema: Schema = new Schema<IAppointmentEmail>({
+  appointmentId: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    index: true
   },
-  { timestamps: true }
-);
+  status: {
+    type: String,
+    enum: ["pending", "sending", "sent", "failed"],
+    default: "pending",
+    index: true
+  },
+  recipient: {
+    type: String,
+    enum: ["user", "admin"],
+    required: true
+  },
+  appointmentSatus: {
+    type: String,
+    enum: ["booked", "cancelled"],
+    default: "booked",
+    required: true,
+    index: true
+  }
+});
 
 // Setting index for fast reads. Where unique, prevents duplicates.
 appointmentEmailSchema.index(
@@ -42,7 +46,7 @@ appointmentEmailSchema.index(
   { unique: true }
 );
 
-export const AppointmentEmail = model(
+export const AppointmentEmail = model<IAppointmentEmail>(
   "AppointmentEmail",
   appointmentEmailSchema
 );

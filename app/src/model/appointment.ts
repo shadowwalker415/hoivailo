@@ -21,7 +21,7 @@ export interface ICancelledAppointment extends IAppointment {
   reason: string;
 }
 
-const appointmentSchema: Schema<IAppointment> = new Schema(
+const appointmentSchema = new Schema<IAppointment>(
   {
     startTime: {
       type: Date,
