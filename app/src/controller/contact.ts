@@ -1,9 +1,8 @@
 import { Router, IRouter, Request, Response } from "express";
 import { validateContactBody } from "../utils/parsers";
 import ValidationError from "../errors/validationError";
-// import { addJobsToQueue } from "../utils/redisHelpers";
-// import { messageRequestQueue } from "../jobs/queues/queques";
-
+import { SERVICE_INQUIRY_QUEUE } from "../queues/service-inquiry.queue";
+import { getQueue } from "../queues/registry";
 const contactRouter: IRouter = Router();
 
 contactRouter.get("/", (_req: Request, res: Response) => {
@@ -19,6 +18,7 @@ contactRouter.post("/", async (req: Request, res: Response) => {
     res.status(201).render("contactSuccess");
 
     // Adding a message request job to the message request queue
+    getQueue(SERVICE_INQUIRY_QUEUE).add("service-inquiry", validateContactBody);
   } catch (err: unknown) {
     if (err instanceof ValidationError) {
       throw new ValidationError(err);

@@ -1,8 +1,8 @@
 import {
   AppointmentServices,
   IAppointmentCancel,
+  IServiceInquiry,
   Recipient,
-  IContact,
   EmailType
 } from "../types";
 import { IAppointment } from "../model/appointment";
@@ -308,7 +308,7 @@ export const validateAppointmentCancellationBody = (
   });
 };
 
-export const validateContactBody = (contactObj: unknown): IContact => {
+export const validateContactBody = (contactObj: unknown): IServiceInquiry => {
   if (!contactObj || typeof contactObj !== "object") {
     throw new ValidationError({
       message: "Empty request body",

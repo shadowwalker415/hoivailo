@@ -17,7 +17,7 @@ export interface IAppointmentCancel {
   reason: string;
 }
 
-export interface IContact {
+export interface IServiceInquiry {
   name: string;
   email: string;
   phone: string;

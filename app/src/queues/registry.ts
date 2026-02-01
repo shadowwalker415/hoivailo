@@ -7,35 +7,56 @@ export interface QueueBundle {
   worker?: Worker;
 }
 
-let redis: Redis;
+let redisConnectionAPI: Redis | null = null;
+
+let redisConnectionWorker: Redis | null = null;
 
 const registry = new Map<string, QueueBundle>();
 
-export const initRedis = async () => {
-  redis = new Redis(REDIS_DEV_CONFIG);
-  await redis.connect();
+export const initRedisAPI = async () => {
+  redisConnectionAPI = new Redis(REDIS_DEV_CONFIG);
+  await redisConnectionAPI.connect();
 };
 
-// The any is just a placeholder
+export const initRedisWorker = async () => {
+  redisConnectionWorker = new Redis(REDIS_DEV_CONFIG);
+  await redisConnectionWorker.connect();
+};
+
 export const registerQueue = (
   name: string,
   options: { worker?: Processor }
 ) => {
-  // Checking if redis has already been initialized
-  if (!redis) {
-    throw new Error("Redis has not been initialized");
+  // Checking if API redis connection has already been initialized
+  if (!redisConnectionAPI) {
+    throw new Error("API Redis connection has not been initialized");
   }
+
   // Checking if queue with key already exist in the hash map
   if (registry.has(name)) {
-    return registry.get(name)!;
+    return registry.get(name);
   }
 
   const bundle: QueueBundle = {
-    queue: new Queue(name, { connection: redis })
+    queue: new Queue(name, { connection: redisConnectionAPI })
   };
 
   if (options.worker) {
-    bundle.worker = new Worker(name, options.worker, { connection: redis });
+    // Checking if Redis connection for worker has already been initialized.
+    if (!redisConnectionWorker) {
+      throw new Error("Worker Redis connection has not been initialized");
+    }
+    bundle.worker = new Worker(name, options.worker, {
+      connection: redisConnectionWorker
+    });
+
+    bundle.worker.on("ready", () => {
+      `Worker for ${name} is ready.`;
+    });
+
+    bundle.worker.on("failed", (job, err) => {
+      console.log(`Job with id ${job?.id} failed, ${err}`);
+    });
   }
 
   registry.set(name, bundle);

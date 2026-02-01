@@ -7,15 +7,11 @@ import {
   createNewAppointment,
   cancelAppointment
 } from "../services/appointments";
-// import {
-//   userConfirmationEmailQueue,
-//   userCancellationEmailQueue,
-//   adminCancellationEmailQueue
-// } from "../jobs/queues/queques";
 import InternalServerError from "../errors/internalServerError";
 import EntityNotFoundError from "../errors/entityNotFoundError";
-// import { ICancelledAppointment } from "../model/appointment";
-// import { addJobsToQueue } from "../utils/redisHelpers";
+import { getQueue } from "../queues/registry";
+import { APPOINTMENT_BOOKED_QUEUE } from "../queues/appointment-booked.queue";
+import { APPOINTMENT_CANCELLED_QUEUE } from "../queues/appointment-cancelled.queue";
 
 const appointmentRouter: IRouter = Router();
 
@@ -52,6 +48,10 @@ appointmentRouter.post(
       }
 
       // Adding email background jobs to their various queues
+      getQueue(APPOINTMENT_BOOKED_QUEUE).add(
+        "appointment-booked",
+        savedAppointment
+      );
     } catch (err: unknown) {
       if (err instanceof Error || err instanceof InternalServerError) {
         next(err);
@@ -99,6 +99,10 @@ appointmentRouter.post(
         res.status(201).render("cancellationSuccess", { cancelledAppointment });
 
         // Adding background jobs to their respective queues
+        getQueue(APPOINTMENT_CANCELLED_QUEUE).add(
+          "appointment-cancelled",
+          cancelledAppointment
+        );
       }
     } catch (err: unknown) {
       if (err instanceof InternalServerError) {

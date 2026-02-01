@@ -2,12 +2,12 @@ import { Document, Schema, model } from "mongoose";
 
 type EmailStatus = "pending" | "sending" | "sent" | "failed";
 
-export interface IContactRequestEmail extends Document {
+export interface IServiceInquiryEmail extends Document {
   status: EmailStatus;
   senderEmail: string;
 }
 
-const contactRequestEmailSchema = new Schema<IContactRequestEmail>({
+const serviceInquiryEmailSchema = new Schema<IServiceInquiryEmail>({
   status: {
     type: String,
     enum: ["pending", "sending", "sent", "failed"],
@@ -18,14 +18,16 @@ const contactRequestEmailSchema = new Schema<IContactRequestEmail>({
   senderEmail: {
     type: String,
     required: true,
-    index: true,
-    unique: true
+    index: true
   }
 });
 
-contactRequestEmailSchema.index({ status: 1, senderEmail: 1 });
+serviceInquiryEmailSchema.index(
+  { status: 1, senderEmail: 1 },
+  { unique: true }
+);
 
-export const contactRequestEmail = model<IContactRequestEmail>(
-  "ContactRequestEmail",
-  contactRequestEmailSchema
+export const serviceInquiryEmail = model<IServiceInquiryEmail>(
+  "ServiceInquiryEMail",
+  serviceInquiryEmailSchema
 );

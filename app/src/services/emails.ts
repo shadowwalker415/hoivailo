@@ -4,7 +4,7 @@ import { transporter } from "../utils/mailer";
 import pug from "pug";
 import config from "../utils/config";
 
-import { IContact, EmailType, Recipient } from "../types";
+import { IServiceInquiry, EmailType, Recipient } from "../types";
 import { IAppointment, ICancelledAppointment } from "../model/appointment";
 import { isRecipient, isEmailType } from "../utils/parsers";
 import { getHourOfficial, getDateOfficial } from "../utils/helpers";
@@ -144,7 +144,7 @@ export const sendAppointmentCancelledEmail = async (
 
 // Contact-us email notification helper function
 export const sendServiceInquiryEmail = async (
-  inquiryInfo: IContact
+  inquiryInfo: IServiceInquiry
 ): Promise<SentMessageInfo | InternalServerError | ValidationError | Error> => {
   try {
     // Constructing message

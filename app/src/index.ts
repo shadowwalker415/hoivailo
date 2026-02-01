@@ -1,7 +1,8 @@
 import config from "./utils/config";
 import app from "./app";
 import mongoose from "mongoose";
-import { initRedis } from "./queues/registry";
+import { initRedisAPI } from "./queues/registry";
+import { initQueusForAPI } from "./queues";
 
 const startApp = async () => {
   try {
@@ -10,8 +11,10 @@ const startApp = async () => {
     // await redisConnection.connect();
     console.log("Connected to MongoDB");
 
-    await initRedis();
+    await initRedisAPI();
     console.log("Connected to Redis");
+
+    initQueusForAPI();
 
     app.listen(config.PORT, () => {
       console.log(`Server running on port ${config.PORT}`);

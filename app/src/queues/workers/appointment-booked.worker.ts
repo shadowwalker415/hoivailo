@@ -1,11 +1,27 @@
 import { Job } from "bullmq";
 
+import { IProcessingData, processAppointmentEmails } from "./utils";
 import { sendAppointmentBookedEmail } from "../../services/emails";
-import { IAppointment } from "../../model/appointment";
+
+import { ICancelledAppointment, IAppointment } from "../../model/appointment";
+import { Recipient } from "../../types";
 
 export const appointmentBookedWorker = async (job: Job<IAppointment>) => {
-  try {
-    await sendAppointmentBookedEmail(job.data, "user");
-    await sendAppointmentBookedEmail(job.data, "admin");
-  } catch (err: unknown) {}
+  const data: IProcessingData = {
+    emailData: job.data,
+    appointmentId: job.data.appointmentId as string,
+    appointmentStatus: "booked",
+    recipient: "user",
+    sendEmail: async (
+      data: ICancelledAppointment | IAppointment,
+      recipient: Recipient,
+      _reason?: string | undefined
+    ) => sendAppointmentBookedEmail(data as IAppointment, recipient)
+  };
+
+  // Sending booked appointment email notification to user.
+  await processAppointmentEmails(data);
+
+  // Sending booked appointment email notification to admin.
+  await processAppointmentEmails({ ...data, recipient: "admin" });
 };

@@ -6,8 +6,24 @@ import {
 import { SentMessageInfo } from "nodemailer";
 import InternalServerError from "../../errors/internalServerError";
 import ValidationError from "../../errors/validationError";
-import { IAppointment } from "../../model/appointment";
-import { Recipient } from "../../types";
+import { IAppointment, ICancelledAppointment } from "../../model/appointment";
+import { IServiceInquiry, Recipient } from "../../types";
+import {
+  IServiceInquiryEmail,
+  serviceInquiryEmail
+} from "../../model/serviceInquiryEmail";
+
+export interface IProcessingData {
+  appointmentId: string;
+  appointmentStatus: AppointmentStatus;
+  recipient: Recipient;
+  emailData: IAppointment | ICancelledAppointment;
+  sendEmail: (
+    data: IAppointment | ICancelledAppointment,
+    recipient: Recipient,
+    reason?: string
+  ) => Promise<SentMessageInfo | InternalServerError | ValidationError | Error>;
+}
 
 interface HasEmailStatus extends Document {
   status: "pending" | "sending" | "sent" | "failed";
@@ -15,7 +31,7 @@ interface HasEmailStatus extends Document {
 export type AppointmentStatus = "booked" | "cancelled";
 
 // Can be used to create both an appointment booked appointment email records, and cancelled appointment email records.
-export const getOrCreateAppointmentEmail = async (
+const getOrCreateAppointmentEmail = async (
   appointmentId: string,
   recipient: Recipient,
   appointmentStatus: AppointmentStatus
@@ -46,6 +62,40 @@ export const getOrCreateAppointmentEmail = async (
       return err;
     }
     return new Error("An unkown error occured");
+  }
+};
+
+const getOrCreateServiceInquiryEmail = async (
+  sender: string
+): Promise<IServiceInquiryEmail | Error> => {
+  try {
+    const serviceInquiry = serviceInquiryEmail.findOneAndUpdate(
+      {
+        senderEmail: sender
+      },
+      {
+        $setOnInsert: {
+          status: "pending",
+          senderEmail: sender
+        }
+      },
+      {
+        new: true,
+        upsert: true
+      }
+    );
+
+    // Checking if database write operation failed.
+    if (serviceInquiry instanceof Error) {
+      throw new Error(serviceInquiry.message);
+    }
+
+    return serviceInquiry;
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      return err;
+    }
+    return new Error("An unknown error occured on the database");
   }
 };
 
@@ -99,20 +149,10 @@ const markEmailFailed = async <T extends HasEmailStatus>(
   }
 };
 
-interface IProcessingData {
-  appointmentId: string;
-  appointmentStatus: AppointmentStatus;
-  recipient: Recipient;
-  emailData: IAppointment;
-  sendEmail: (
-    data: IAppointment
-  ) => Promise<SentMessageInfo | InternalServerError | ValidationError | Error>;
-}
-
 // Can be used for both booked appointment emails, and cancelled appointment emails.
 export const processAppointmentEmails = async (
   processingData: IProcessingData
-) => {
+): Promise<void> => {
   const { appointmentId, recipient, appointmentStatus, emailData, sendEmail } =
     processingData;
 
@@ -130,12 +170,25 @@ export const processAppointmentEmails = async (
     return;
   }
 
-  const isSending = await markEmailSending(AppointmentEmail, email.id);
+  /*  
+    Where a false value means, the email has already been sent by another worker or 
+    is in the process of being sent by another worker. 
+  */
+  const acquired: Boolean = await markEmailSending(AppointmentEmail, email.id);
 
-  if (!isSending) return;
+  // Checking if another worker already sent the email or is sending the email.
+  if (!acquired) return;
 
   try {
-    await sendEmail(emailData);
+    // Checking if the appointment email to be processed is that of a booked appointment.
+    if (appointmentStatus === "booked") {
+      // Checking if there's a reason field in the cancelled appointment object.
+      if ("reason" in emailData) {
+        await sendEmail(emailData, recipient, emailData.reason);
+      }
+    } else {
+      await sendEmail(emailData, recipient);
+    }
 
     await markEmailSent(AppointmentEmail, email.id);
   } catch (err: unknown) {
@@ -145,10 +198,44 @@ export const processAppointmentEmails = async (
       err instanceof InternalServerError ||
       err instanceof ValidationError
     ) {
-      // Throwing error so that BullMQ retries job.
-      throw new Error(err.message);
+      // Throwing same error for job retry.
+      throw err;
     }
-    // Throwing error for job retry
+    // Throwing new error for job retry.
     throw new Error("Job failed due to unknown reasons");
+  }
+};
+
+export const processServiceInquiryEmail = async (
+  inquiryInfo: IServiceInquiry,
+  sendEmail: (data: IServiceInquiry) => Promise<SentMessageInfo>
+): Promise<void> => {
+  const email = await getOrCreateServiceInquiryEmail(inquiryInfo.email);
+
+  if (email instanceof Error) {
+    throw new Error(email.message);
+  }
+
+  if (email.status === "sent") return;
+
+  const acquired: Boolean = await markEmailSending(
+    serviceInquiryEmail,
+    email.id
+  );
+
+  if (!acquired) return;
+
+  try {
+    await sendEmail(inquiryInfo);
+
+    await markEmailSent(serviceInquiryEmail, email.id);
+  } catch (err: unknown) {
+    markEmailFailed(serviceInquiryEmail, email.id);
+    if (err instanceof Error) {
+      // Throwing error for job retry.
+      throw err;
+    }
+    // Throwing error for job retry.
+    throw new Error("Job failed: An error occured");
   }
 };
