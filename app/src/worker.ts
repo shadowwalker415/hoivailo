@@ -4,6 +4,7 @@ import config from "./utils/config";
 import mongoose from "mongoose";
 
 const startWorkerProcess = async () => {
+  // Connecting to the database
   await mongoose.connect(config.MONGODB_URI);
   console.log("Connected to MongoDB");
   console.log("Initializting Producer redis connection");

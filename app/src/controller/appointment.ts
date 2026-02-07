@@ -12,6 +12,7 @@ import EntityNotFoundError from "../errors/entityNotFoundError";
 import { getQueue } from "../queues/registry";
 import { APPOINTMENT_BOOKED_QUEUE } from "../queues/appointment-booked.queue";
 import { APPOINTMENT_CANCELLED_QUEUE } from "../queues/appointment-cancelled.queue";
+import { ICancelledAppointment } from "../model/appointment";
 
 const appointmentRouter: IRouter = Router();
 
@@ -96,12 +97,23 @@ appointmentRouter.post(
       } else {
         // Sending response to client
         // res.redirect(303, "tapaaminen/peruta/onnistuminen");
-        res.status(201).render("cancellationSuccess", { cancelledAppointment });
+        res.status(201).render("cancellationSuccess");
 
         // Adding background jobs to their respective queues
+
+        const backgroundJobPayLoad: ICancelledAppointment = {
+          appointmentId: cancelledAppointment.appointmentId as string,
+          startTime: cancelledAppointment.startTime,
+          name: cancelledAppointment.name,
+          service: cancelledAppointment.service,
+          email: cancelledAppointment.email,
+          phone: cancelledAppointment.phone,
+          reason: validatedBody.reason ? validatedBody.reason : ""
+        };
+
         getQueue(APPOINTMENT_CANCELLED_QUEUE).add(
           "appointment-cancelled",
-          cancelledAppointment
+          backgroundJobPayLoad
         );
       }
     } catch (err: unknown) {

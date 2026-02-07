@@ -1,4 +1,4 @@
-import { Document, Schema, model, Types } from "mongoose";
+import { Document, Schema, model } from "mongoose";
 import { Recipient } from "../types";
 // This means even fields that were sent but were not defined in our schema will be stored in the db.
 // setting strictQuery to true means only fields specified in the schema will be stored in the db.
@@ -8,15 +8,15 @@ type EmailStatus = "pending" | "sending" | "sent" | "failed";
 type AppointmentSatus = "booked" | "cancelled";
 
 export interface IAppointmentEmail extends Document {
-  appointmentId: Types.ObjectId;
+  appointmentId: string;
   status: EmailStatus;
   recipient: Recipient;
-  appointmentSatus: AppointmentSatus;
+  appointmentStatus: AppointmentSatus;
 }
 
 const appointmentEmailSchema: Schema = new Schema<IAppointmentEmail>({
   appointmentId: {
-    type: Schema.Types.ObjectId,
+    type: String,
     required: true,
     index: true
   },
@@ -31,7 +31,7 @@ const appointmentEmailSchema: Schema = new Schema<IAppointmentEmail>({
     enum: ["user", "admin"],
     required: true
   },
-  appointmentSatus: {
+  appointmentStatus: {
     type: String,
     enum: ["booked", "cancelled"],
     default: "booked",
@@ -41,10 +41,11 @@ const appointmentEmailSchema: Schema = new Schema<IAppointmentEmail>({
 });
 
 // Setting index for fast reads. Where unique, prevents duplicates.
-appointmentEmailSchema.index(
-  { appintmentId: 1, recipient: 1, appointmentStatus: 1 },
-  { unique: true }
-);
+appointmentEmailSchema.index({
+  appointmentId: 1,
+  recipient: 1,
+  appointmentStatus: 1
+});
 
 export const AppointmentEmail = model<IAppointmentEmail>(
   "AppointmentEmail",

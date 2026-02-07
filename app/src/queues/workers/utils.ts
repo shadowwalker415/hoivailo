@@ -12,6 +12,7 @@ import {
   IServiceInquiryEmail,
   serviceInquiryEmail
 } from "../../model/serviceInquiryEmail";
+import { instanceOfIAppointment } from "../../utils/parsers";
 
 export interface IProcessingData {
   appointmentId: string;
@@ -181,13 +182,11 @@ export const processAppointmentEmails = async (
 
   try {
     // Checking if the appointment email to be processed is that of a booked appointment.
-    if (appointmentStatus === "booked") {
-      // Checking if there's a reason field in the cancelled appointment object.
-      if ("reason" in emailData) {
-        await sendEmail(emailData, recipient, emailData.reason);
-      }
-    } else {
+    if (instanceOfIAppointment(emailData)) {
       await sendEmail(emailData, recipient);
+    } else {
+      // Checking if there's a reason field in the cancelled appointment object.
+      await sendEmail(emailData, recipient, emailData.reason);
     }
 
     await markEmailSent(AppointmentEmail, email.id);

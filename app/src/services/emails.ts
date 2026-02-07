@@ -13,7 +13,7 @@ import ValidationError from "../errors/validationError";
 
 // HTML template constructor funcion for sending appointment confirmation and cancellation emails
 const constructHtmlTemplate = (
-  appointment: IAppointment,
+  appointment: IAppointment | ICancelledAppointment,
   recipient: Recipient,
   emailType: EmailType,
   reason?: string
@@ -32,7 +32,7 @@ const constructHtmlTemplate = (
     date: getDateOfficial(appointment.startTime),
     time: getHourOfficial(appointment.startTime),
     service: appointment.service,
-    user: appointment.name,
+    name: appointment.name,
     phone: appointment.phone,
     email: appointment.email,
     id: appointment.appointmentId,
@@ -106,10 +106,10 @@ export const sendAppointmentBookedEmail = async (
 export const sendAppointmentCancelledEmail = async (
   appointmentInfo: ICancelledAppointment,
   recipient: Recipient,
-  reason?: string
+  reason: string
 ): Promise<SentMessageInfo | InternalServerError | ValidationError | Error> => {
   try {
-    // Message
+    // Constructing email template
     const html = constructHtmlTemplate(
       appointmentInfo,
       recipient,

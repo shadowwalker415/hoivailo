@@ -12,13 +12,16 @@ contactRouter.get("/", (_req: Request, res: Response) => {
 contactRouter.post("/", async (req: Request, res: Response) => {
   try {
     // Parsing and validating request body fields
-    validateContactBody(req.body);
+    const serviceInquiryDetails = validateContactBody(req.body);
 
     // We will redirect here instead of rendering here, to prevent form resubmition.
     res.status(201).render("contactSuccess");
 
     // Adding a message request job to the message request queue
-    getQueue(SERVICE_INQUIRY_QUEUE).add("service-inquiry", validateContactBody);
+    getQueue(SERVICE_INQUIRY_QUEUE).add(
+      "service-inquiry",
+      serviceInquiryDetails
+    );
   } catch (err: unknown) {
     if (err instanceof ValidationError) {
       throw new ValidationError(err);

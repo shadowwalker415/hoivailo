@@ -14,14 +14,11 @@ export const appointmentBookedWorker = async (job: Job<IAppointment>) => {
     recipient: "user",
     sendEmail: async (
       data: ICancelledAppointment | IAppointment,
-      recipient: Recipient,
-      _reason?: string | undefined
+      recipient: Recipient
     ) => sendAppointmentBookedEmail(data as IAppointment, recipient)
   };
-
   // Sending booked appointment email notification to user.
   await processAppointmentEmails(data);
-
   // Sending booked appointment email notification to admin.
   await processAppointmentEmails({ ...data, recipient: "admin" });
 };

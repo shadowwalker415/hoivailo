@@ -17,7 +17,13 @@ export interface IAppointment extends Document {
   toJSON(): IAppointment;
 }
 
-export interface ICancelledAppointment extends IAppointment {
+export interface ICancelledAppointment {
+  startTime: Date;
+  appointmentId: string;
+  name: string;
+  email: string;
+  phone: string;
+  service: string;
   reason: string;
 }
 

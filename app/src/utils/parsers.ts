@@ -41,6 +41,10 @@ const isDate = (date: string): date is string => {
   return dateRegex.test(date) && Boolean(Date.parse(date));
 };
 
+export const instanceOfIAppointment = (object: any): object is IAppointment => {
+  return "status" in object && object.status === "booked";
+};
+
 const isService = (service: string): service is AppointmentServices => {
   return Object.values(AppointmentServices)
     .map((v) => v.toString())
@@ -299,7 +303,7 @@ export const validateAppointmentCancellationBody = (
       appointmentId: parseAppointmentID(body.appointmentId),
       reason: parseText(body.reason)
     };
-    return newBody;
+    return newBody as IAppointmentCancel;
   }
   throw new ValidationError({
     message: "Request body missing some fields",

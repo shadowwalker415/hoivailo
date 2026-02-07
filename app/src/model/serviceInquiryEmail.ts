@@ -22,10 +22,7 @@ const serviceInquiryEmailSchema = new Schema<IServiceInquiryEmail>({
   }
 });
 
-serviceInquiryEmailSchema.index(
-  { status: 1, senderEmail: 1 },
-  { unique: true }
-);
+serviceInquiryEmailSchema.index({ status: 1, senderEmail: 1 });
 
 export const serviceInquiryEmail = model<IServiceInquiryEmail>(
   "ServiceInquiryEMail",

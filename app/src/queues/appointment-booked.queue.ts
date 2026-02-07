@@ -8,12 +8,9 @@ export const registerAppointmentBookedQueue = () => {
   registerQueue(APPOINTMENT_BOOKED_QUEUE, {
     worker: appointmentBookedWorker
   });
-
-  console.log(`${APPOINTMENT_BOOKED_QUEUE} queue has been registered`);
 };
 
 // Register appointment booked queue for API process.
 export const registerAppointmentBookedQueueAPI = () => {
   registerQueue(APPOINTMENT_BOOKED_QUEUE, {});
-  console.log(`${APPOINTMENT_BOOKED_QUEUE} queue has been registered`);
 };
