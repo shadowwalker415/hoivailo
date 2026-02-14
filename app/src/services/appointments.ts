@@ -4,9 +4,12 @@ import {
   SLOT_DURATION_MINUTES
 } from "../utils/availability.config";
 import { parse, isBefore, format, addMinutes } from "date-fns";
-import { convertToISO8601 } from "../utils/helpers";
+import {
+  convertDateStringTOISO8601,
+  convertDateTimeToISO8601,
+  getDateOfficial
+} from "../utils/helpers";
 import { IAppointment, Appointment } from "../model/appointment";
-// import { DateTime } from "luxon";
 import InternalServerError from "../errors/internalServerError";
 import EntityNotFoundError from "../errors/entityNotFoundError";
 
@@ -18,8 +21,8 @@ const isSlotAvailable = (
 ): boolean => {
   return !appointments.some((appt) => {
     return (
-      convertToISO8601(slotStart) < appt.endTime &&
-      convertToISO8601(slotEnd) > appt.startTime
+      convertDateTimeToISO8601(slotStart) < appt.endTime &&
+      convertDateTimeToISO8601(slotEnd) > appt.startTime
     );
   });
 };
@@ -65,28 +68,11 @@ const generateSlots = (
 
 // Gets existing appointments from database.
 const getExistingAppointments = async (
-  _selectedDate: string
+  appointmentDate: string
 ): Promise<IAppointment[] | Error | InternalServerError> => {
   try {
-    // const dateStr = selectedDate;
-
-    // const start = DateTime.fromISO(dateStr, {
-    //   zone: "Europe/Helsinki"
-    // }).startOf("day");
-    // const end = start.plus({ days: 1 });
-
-    // const startUTC = start.toUTC().toJSDate();
-    // const endUTC = end.toUTC().toJSDate();
-
-    // Quering the database for appointment documents created on requested date
-    // const appointments = await Appointment.find({
-    //   createdAt: {
-    //     $gte: startUTC,
-    //     $lt: endUTC
-    //   }
-    // });
-
-    const appointments = await Appointment.find({});
+    // Getting all existing appointments for selected date.
+    const appointments = await Appointment.find({ appointmentDate });
     return appointments;
   } catch (err: unknown) {
     if (err instanceof Error) {
@@ -105,14 +91,19 @@ export const generateAvailableSlots = async (
   date_string: string
 ): Promise<Slot[] | InternalServerError | Error> => {
   try {
+    // Generating time slots.
     const generatedSlots = generateSlots(
       date_string,
       WORKING_HOURS,
       SLOT_DURATION_MINUTES
     );
 
-    const existingAppointments = await getExistingAppointments(date_string);
+    // Getting existing appointments from the database.
+    const existingAppointments = await getExistingAppointments(
+      getDateOfficial(convertDateStringTOISO8601(date_string))
+    );
 
+    // Checking if database read operation failed.
     if (!existingAppointments) {
       throw new InternalServerError({
         message: "An error occured on the database server",
@@ -148,7 +139,10 @@ export const createNewAppointment = async (
   appointmentInfo: IAppointment
 ): Promise<IAppointment | InternalServerError | Error> => {
   try {
-    const newAppointment = new Appointment(appointmentInfo);
+    const newAppointment = new Appointment({
+      ...appointmentInfo,
+      appointmentDate: getDateOfficial(appointmentInfo.startTime)
+    });
     const savedAppointment = await newAppointment.save();
     if (!savedAppointment) {
       throw new InternalServerError({

@@ -17,8 +17,7 @@ export interface IAppointmentEmail extends Document {
 const appointmentEmailSchema: Schema = new Schema<IAppointmentEmail>({
   appointmentId: {
     type: String,
-    required: true,
-    index: true
+    required: true
   },
   status: {
     type: String,
@@ -40,7 +39,7 @@ const appointmentEmailSchema: Schema = new Schema<IAppointmentEmail>({
   }
 });
 
-// Setting index for fast reads. Where unique, prevents duplicates.
+// Setting index for fast reads.
 appointmentEmailSchema.index({
   appointmentId: 1,
   recipient: 1,

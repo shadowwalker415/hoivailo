@@ -3,6 +3,7 @@ import { Schema, Document, model } from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 
 export interface IAppointment extends Document {
+  appointmentDate?: string; // Important for finding booked appointment for a specific date.
   startTime: Date;
   endTime: Date;
   appointmentId?: string;
@@ -17,6 +18,7 @@ export interface IAppointment extends Document {
   toJSON(): IAppointment;
 }
 
+// Doesn't extend IAppointment because IAppointment extends Document.
 export interface ICancelledAppointment {
   startTime: Date;
   appointmentId: string;
@@ -29,6 +31,11 @@ export interface ICancelledAppointment {
 
 const appointmentSchema = new Schema<IAppointment>(
   {
+    appointmentDate: {
+      type: String,
+      required: true,
+      index: true
+    },
     startTime: {
       type: Date,
       required: true,
