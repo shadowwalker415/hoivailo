@@ -7,6 +7,17 @@ import {
   createNewAppointment,
   cancelAppointment
 } from "../services/appointments";
+import { CustomRequest } from "../types";
+import { getAppointmentDate } from "../middleware/availability";
+import {
+  isPastDate,
+  isWorkingDay,
+  getCurrentDate,
+  getDateOfficial,
+  getDifferenceInMonths
+} from "../utils/helpers";
+import { generateAvailableSlots } from "../services/appointments";
+import ValidationError from "../errors/validationError";
 import InternalServerError from "../errors/internalServerError";
 import EntityNotFoundError from "../errors/entityNotFoundError";
 // import { getQueue } from "../queues/registry";
@@ -23,6 +34,82 @@ appointmentRouter.get("/peruta", (_req: Request, res: Response) => {
 appointmentRouter.get("/valitse-paivamaara", (_req: Request, res: Response) => {
   res.status(200).render("selectDate");
 });
+
+// Appointment cancellation success route handler
+appointmentRouter.get(
+  "/peruta/onnistuminen",
+  (_req: Request, res: Response) => {
+    res.status(200).render("cancellationSuccess");
+  }
+);
+
+// Appointment booking success route handler
+appointmentRouter.get("/aika/onnistuminnen", (_req: Request, res: Response) => {
+  res.status(200).render("appointmentSuccess");
+});
+
+// Appointment available slots route handler
+appointmentRouter.get(
+  "/oleva-aikaa",
+  getAppointmentDate,
+  async (req: CustomRequest, res: Response, next: NextFunction) => {
+    try {
+      // Checking if the request has a query parameter.
+      if (!req.availabilityDate) {
+        throw new ValidationError({
+          message: "Request is missing query parameter",
+          statusCode: 400,
+          code: "VALIDATION_ERROR"
+        });
+      }
+      // Checking if requested date is a previous date.
+      if (isPastDate(req.availabilityDate)) {
+        res.status(200).render("noSlotsFound");
+        // Checking if requested date is a working day.
+      } else if (!isWorkingDay(req.availabilityDate)) {
+        res.status(200).render("noSlotsFound");
+        // Checking if requested date is the current date.
+      } else if (
+        getCurrentDate() === getDateOfficial(new Date(req.availabilityDate))
+      ) {
+        res.status(200).render("noSlotsFound");
+        // Checking if requested date is more than 3 months away.
+      } else if (getDifferenceInMonths(new Date(req.availabilityDate)) >= 3) {
+        res.status(200).render("noSlotsFound");
+      } else {
+        const availableSlots = await generateAvailableSlots(
+          req.availabilityDate
+        );
+        // Checking if the slot generation operation failed due to.
+        // Maybe an error with database query.
+        if (availableSlots instanceof Error) {
+          throw new InternalServerError({
+            message:
+              "An error occured on the database: Couldn't generate available slots",
+            statusCode: 500,
+            code: "INTERNAL_SERVER_ERROR"
+          });
+        }
+        // Checking if all slots have already been booked for selected date
+        if (availableSlots.length < 1) {
+          res.status(200).render("noSlotsFound");
+        } else {
+          res.status(200).render("appointment", { availableSlots });
+        }
+      }
+    } catch (err: unknown) {
+      if (
+        err instanceof Error ||
+        err instanceof ValidationError ||
+        err instanceof InternalServerError
+      ) {
+        next(err);
+      } else {
+        next(new Error("An unknown error occured"));
+      }
+    }
+  }
+);
 
 // Route handler for booking appointments
 appointmentRouter.post(
@@ -43,9 +130,8 @@ appointmentRouter.post(
           statusCode: 500
         });
       } else {
-        // We will redirect to the appointment success.
-        // res.redirect(303, "aika/onnistuminnen");
-        res.status(201).render("appointmentSuccess", { savedAppointment });
+        // Redirecting to appointment booked success page.
+        res.redirect(303, "/tapaaminen/aika/onnistuminnen");
       }
 
       // Adding email background jobs to their various queues
@@ -95,9 +181,8 @@ appointmentRouter.post(
           code: "INTERNAL_SERVER_ERROR"
         });
       } else {
-        // Sending response to client
-        // res.redirect(303, "tapaaminen/peruta/onnistuminen");
-        res.status(201).render("cancellationSuccess");
+        // Redirecting to appointment cancelled success page.
+        res.redirect(303, "/tapaaminen/peruta/onnistuminen");
 
         // const backgroundJobPayLoad: ICancelledAppointment = {
         //   appointmentId: cancelledAppointment.appointmentId as string,
@@ -123,18 +208,5 @@ appointmentRouter.post(
     }
   }
 );
-
-// Appointment cancellation success route handler
-appointmentRouter.get(
-  "/peruta/onnistuminen",
-  (_req: Request, res: Response) => {
-    res.status(200).render("cancellationSuccess");
-  }
-);
-
-// Appointment booking success route handler
-appointmentRouter.get("/aika/onnistuminnen", (_req: Request, res: Response) => {
-  res.status(200).render("appointmentSuccess");
-});
 
 export default appointmentRouter;

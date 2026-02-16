@@ -39,6 +39,7 @@ const appointmentSchema = new Schema<IAppointment>(
     startTime: {
       type: Date,
       required: true,
+      index: true,
       unique: true
     },
     endTime: {

@@ -38,9 +38,9 @@ export const databaseErrorHandler = (
     error instanceof Error &&
     error.message.startsWith("E11000 duplicate key error collection")
   ) {
-    res.status(500).send({
+    res.status(409).send({
       success: false,
-      status: 500,
+      status: 409,
       message: "Appoinment already exist"
     });
     // Checking if the error was raised due to error in field validation

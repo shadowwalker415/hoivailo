@@ -6,7 +6,7 @@ import helmet from "helmet";
 import hpp from "hpp";
 import { sanitizeParameters } from "./middleware/parameterSanitizer";
 import morgan from "morgan";
-import availabilityRouter from "./controller/availability";
+// import availabilityRouter from "./controller/availability";
 import appointmentRouter from "./controller/appointment";
 import contactRouter from "./controller/contact";
 import servicesRouter from "./controller/services";
@@ -53,7 +53,7 @@ app.use("/public", express.static(path.join(__dirname, "public"))); // Serving s
 app.use("/", homeRouter);
 app.use("/palvelu", servicesRouter);
 app.use("/tapaaminen", appointmentRouter);
-app.use("/oleva-aikaa", availabilityRouter);
+// app.use("/oleva-aikaa", availabilityRouter);
 app.use("/yhteistiedot", contactRouter);
 app.use(databaseErrorHandler);
 app.use(generalErrorHandler);

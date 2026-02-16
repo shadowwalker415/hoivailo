@@ -4,17 +4,17 @@ html(lang="en" data-bs-theme="light")
     meta(charset="UTF-8")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     block links 
-      link(rel="stylesheet", href="../public/dist/css/styles.css")
-      link(rel="icon" href="../public/assets/cropped-favicon.png")
+      link(rel="stylesheet", href="/public/dist/css/styles.css")
+      link(rel="icon" href="/public/assets/cropped-favicon.png")
     block scripts
-      script(defer src="../public/dist/js/index.main.js")
+      script(defer src="/public/dist/js/index.main.js")
     block title
   body
     header
       nav.navbar.navbar-expand-lg.navbar-light.px-4.shadow-sm
         .container-fluid
           a.navbar-brand(href="http://localhost:3001/")
-            img(src="../public/assets/hoivailo_logo.svg" alt="logo")
+            img(src="/public/assets/hoivailo_logo.svg" alt="logo")
           button.navbar-toggler(type="button", data-bs-toggle="collapse", data-bs-target="#navbarNav", aria-controls="navbarNav", aria-expanded="false", aria-label="Toggle navigation")
             span.navbar-toggler-icon
 
@@ -39,7 +39,7 @@ html(lang="en" data-bs-theme="light")
           .col.p-4(id="footer-logo")
             .container.mb-2
               a(href="#")
-                img(src="../public/assets/footer_logo.png" alt="footer logo" width="200px")
+                img(src="/public/assets/footer_logo.png" alt="footer logo" width="200px")
             .container
               p.fw-light Kotipalvelu Hoivailo tarjoaa tukipalveluita ikääntyneille, vammaisille ja toimintakykyrajoitteisille henkilöille sekä henkilökohtaista apua tarvitseville vaikeavammaisille henkilöille Helsingissä, Espoossa ja Vantaalla.
             

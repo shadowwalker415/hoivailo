@@ -4,7 +4,7 @@ import { isValidDate } from "../utils/helpers";
 import ValidationError from "../errors/validationError";
 import InternalServerError from "../errors/internalServerError";
 
-export const getAppointDate = async (
+export const getAppointmentDate = async (
   req: CustomRequest,
   _res: Response,
   next: NextFunction
