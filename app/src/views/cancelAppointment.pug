@@ -14,7 +14,7 @@ block content
   .container.d-flex.flex-column.align-items-center
     // Appointment cancellation form container
     .container.m-5.bg-primary-subtle.p-4
-      form.appointment-cancelling(action="http://localhost:3001/tapaaminen/peruta" method="post")
+      form.appointment-cancelling(action="/tapaaminen/peruta" method="post")
         .mb-3.name-group
           label.form-label(for="appointmentId") Ajan varauden koodi
           input.form-control(type="text" name="appointmentId" placeholder="Koodi" id="appointmentId" required)
