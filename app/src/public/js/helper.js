@@ -30,8 +30,7 @@ export const isAppointmentId = (id) => {
 
 export const sanitizeEmailAndId = (input) => {
   // Removing all HTML tags
-  const strippedHTML = input.replace(/<[^>]*>/g, "");
-  return strippedHTML;
+  return input.replace(/<[^>]*>/g, "");
 };
 
 export const sanitizeText = (input) => {

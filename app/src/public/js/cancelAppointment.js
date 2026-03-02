@@ -14,8 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   formElement.addEventListener("submit", (e) => {
     // Sanitizing form data
-    idElement.value = sanitizeEmailAndId(idElement.value);
-    reasonElement.value = sanitizeText(reasonElement.value);
+    // idElement.value = sanitizeEmailAndId(idElement.value);
+    // reasonElement.value = sanitizeText(reasonElement.value);
     if (!isAppointmentId(idElement.value)) {
       setErrorMessage("Koodi on vaarin");
       displayErrorMessage(errorElement);

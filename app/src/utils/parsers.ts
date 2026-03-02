@@ -18,21 +18,22 @@ import {
   isZeroMinutes
 } from "./helpers";
 import ValidationError from "../errors/validationError";
-import xss from "xss";
 
 const isString = (text: unknown): text is string => {
   return typeof text === "string" || text instanceof String;
 };
 
-// Helper function against Cross-Site-Scripting
-const filterTags = (input: string): string => {
-  const options = {
-    whiteList: {}, // No tags allowed
-    stripIgnoreTag: true, // This removes all tags that are not in the white list
-    stripIgnoreTagBody: ["script"] // This removes the <script> tag and it's contents
-  };
+export const sanitizeEmailAndId = (input: string): string => {
+  // Removing all HTML tags
+  return input.replace(/<[^>]*>/g, "");
+};
 
-  return xss(input, options);
+export const sanitizeText = (input: string): string => {
+  // Removing HTML and dangerous characters (except safe punctuation)
+  const strippedInjectionChars = input
+    .replace(/<[^>]*>/g, "")
+    .replace(/[${}[\]"'\\;]|--/g, "");
+  return strippedInjectionChars;
 };
 
 const isDate = (date: string): date is string => {
@@ -49,11 +50,6 @@ const isService = (service: string): service is AppointmentServices => {
   return Object.values(AppointmentServices)
     .map((v) => v.toString())
     .includes(service);
-};
-
-const isValidText = (text: string): boolean => {
-  const textRegex = /^(?!.*<.*?>)[^<>]{1,2000}$/;
-  return textRegex.test(text);
 };
 
 // Checking if phone number is a valid Finnish phone number for example +3584XXXXXXXX or +3585XXXXXXXX
@@ -97,11 +93,11 @@ const parseAppointmentID = (id: unknown): string => {
       code: "VALIDATION_ERROR"
     });
   }
-  return filterTags(id);
+  return id;
 };
 
 const parseText = (text: unknown): string => {
-  if (!isString(text) || !isValidText(text)) {
+  if (!isString(text)) {
     throw new ValidationError({
       message:
         "Text field must be a valid string and 2000 characters long at most",
@@ -109,7 +105,7 @@ const parseText = (text: unknown): string => {
       code: "VALIDATION_ERROR"
     });
   }
-  return filterTags(text);
+  return text;
 };
 
 const parseTime = (time: unknown): Date => {
@@ -173,7 +169,7 @@ const parseTime = (time: unknown): Date => {
       code: "VALIDATION_ERROR"
     });
   }
-  return new Date(filterTags(time));
+  return new Date(time);
 };
 
 const parseName = (name: unknown): string => {
@@ -184,7 +180,7 @@ const parseName = (name: unknown): string => {
       code: "VALIDATION_ERROR"
     });
   }
-  return filterTags(name);
+  return name;
 };
 
 const parseEmail = (email: unknown): string => {
@@ -195,7 +191,7 @@ const parseEmail = (email: unknown): string => {
       code: "VALIDATION_ERROR"
     });
   }
-  return filterTags(email);
+  return email;
 };
 
 const parsePhoneNumber = (phoneNumber: unknown) => {
@@ -206,7 +202,7 @@ const parsePhoneNumber = (phoneNumber: unknown) => {
       code: "VALIDATION_ERROR"
     });
   }
-  return filterTags(phoneNumber);
+  return phoneNumber;
 };
 
 export const parseService = (service_type: unknown): string => {
@@ -218,7 +214,7 @@ export const parseService = (service_type: unknown): string => {
       code: "VALIDATION_ERROR"
     });
   }
-  return filterTags(service_type);
+  return service_type;
 };
 
 export const validateAppointmentRequestBody = (
@@ -299,11 +295,12 @@ export const validateAppointmentCancellationBody = (
     });
   }
   if ("appointmentId" in body && "reason" in body) {
-    const newBody = {
+    const newBody: IAppointmentCancel = {
       appointmentId: parseAppointmentID(body.appointmentId),
       reason: parseText(body.reason)
     };
-    return newBody as IAppointmentCancel;
+
+    return newBody;
   }
   throw new ValidationError({
     message: "Request body missing some fields",

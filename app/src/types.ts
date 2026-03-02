@@ -1,4 +1,5 @@
 import { Request } from "express";
+import { IAppointment } from "./model/appointment";
 
 export type EmailType = "confirmation" | "cancellation";
 
@@ -12,16 +13,16 @@ export enum AppointmentServices {
   lastenhoito = "Lastenhoito"
 }
 
-export interface IAppointmentCancel {
-  appointmentId: string;
-  reason: string;
-}
-
 export interface IServiceInquiry {
   name: string;
   email: string;
   phone: string;
   message: string;
+}
+
+export interface IAppointmentCancel {
+  appointmentId: string;
+  reason: string;
 }
 
 export interface WorkingHours {
@@ -35,5 +36,6 @@ export interface Slot {
 }
 
 export interface CustomRequest extends Request {
-  availabilityDate?: string;
+  appointmentSlotDate?: string;
+  sanitizedBody?: IAppointment | IAppointmentCancel | IServiceInquiry;
 }

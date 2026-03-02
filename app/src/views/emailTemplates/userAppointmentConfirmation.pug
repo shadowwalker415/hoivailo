@@ -1,5 +1,6 @@
 extends baseEmail
 
+
 block title 
   | Ajanvaraus varattu
 block content
@@ -21,10 +22,10 @@ block content
               br
               | Peruutus koodi on: #{id}
               br
-              a(href="http://localhost:3001/tapaaminen/peruta") Klikkaa tähän peruuttamaan
+              a(href=baseUrl + '/tapaaminen/peruta') Klikkaa tähän peruuttamaan
               br
               br
               i Ei saa vastata tämään viestihiin. Jos sinä tarviisit liisää tietoa voisit laittaa viesti klikkaamalla likkiin
-              a(href="http://localhost:3001/yhteistiedot") Yhteystiedot
+              a(href=baseUrl + '/yhteistiedot') Yhteystiedot
               br
               | Kiitos.

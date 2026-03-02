@@ -8,7 +8,7 @@ import {
   cancelAppointment
 } from "../services/appointments";
 import { CustomRequest } from "../types";
-import { getAppointmentDate } from "../middleware/availability";
+import { getAppointmentDate } from "../middleware/availableSlotDate";
 import {
   isPastDate,
   isWorkingDay,
@@ -20,6 +20,7 @@ import { generateAvailableSlots } from "../services/appointments";
 import ValidationError from "../errors/validationError";
 import InternalServerError from "../errors/internalServerError";
 import EntityNotFoundError from "../errors/entityNotFoundError";
+import { sanitizeRequestBody } from "../middleware/requestBodySanitization";
 // import { getQueue } from "../queues/registry";
 // import { APPOINTMENT_BOOKED_QUEUE } from "../queues/appointment-booked.queue";
 // import { APPOINTMENT_CANCELLED_QUEUE } from "../queues/appointment-cancelled.queue";
@@ -27,10 +28,12 @@ import EntityNotFoundError from "../errors/entityNotFoundError";
 
 const appointmentRouter: IRouter = Router();
 
+// Appointment cancelation route
 appointmentRouter.get("/peruta", (_req: Request, res: Response) => {
   res.status(200).render("cancelAppointment");
 });
 
+// Available appointment slot date selection route
 appointmentRouter.get("/valitse-paivamaara", (_req: Request, res: Response) => {
   res.status(200).render("selectDate");
 });
@@ -50,35 +53,38 @@ appointmentRouter.get("/aika/onnistuminnen", (_req: Request, res: Response) => {
 
 // Appointment available slots route handler
 appointmentRouter.get(
-  "/oleva-aikaa",
+  "/oleva-aika",
   getAppointmentDate,
   async (req: CustomRequest, res: Response, next: NextFunction) => {
     try {
       // Checking if the request has a query parameter.
-      if (!req.availabilityDate) {
+      if (!req.appointmentSlotDate) {
         throw new ValidationError({
           message: "Request is missing query parameter",
           statusCode: 400,
           code: "VALIDATION_ERROR"
         });
       }
+
       // Checking if requested date is a previous date.
-      if (isPastDate(req.availabilityDate)) {
+      if (isPastDate(req.appointmentSlotDate)) {
         res.status(200).render("noSlotsFound");
         // Checking if requested date is a working day.
-      } else if (!isWorkingDay(req.availabilityDate)) {
+      } else if (!isWorkingDay(req.appointmentSlotDate)) {
         res.status(200).render("noSlotsFound");
         // Checking if requested date is the current date.
       } else if (
-        getCurrentDate() === getDateOfficial(new Date(req.availabilityDate))
+        getCurrentDate() === getDateOfficial(new Date(req.appointmentSlotDate))
       ) {
         res.status(200).render("noSlotsFound");
         // Checking if requested date is more than 3 months away.
-      } else if (getDifferenceInMonths(new Date(req.availabilityDate)) >= 3) {
+      } else if (
+        getDifferenceInMonths(new Date(req.appointmentSlotDate)) >= 3
+      ) {
         res.status(200).render("noSlotsFound");
       } else {
         const availableSlots = await generateAvailableSlots(
-          req.availabilityDate
+          req.appointmentSlotDate
         );
         // Checking if the slot generation operation failed due to.
         // Maybe an error with database query.
@@ -90,7 +96,7 @@ appointmentRouter.get(
             code: "INTERNAL_SERVER_ERROR"
           });
         }
-        // Checking if all slots have already been booked for selected date
+        // Checking if all slots are booked for selected date
         if (availableSlots.length < 1) {
           res.status(200).render("noSlotsFound");
         } else {
@@ -114,10 +120,13 @@ appointmentRouter.get(
 // Route handler for booking appointments
 appointmentRouter.post(
   "/aika",
-  async (req: Request, res: Response, next: NextFunction) => {
+  sanitizeRequestBody,
+  async (req: CustomRequest, res: Response, next: NextFunction) => {
     try {
       // Parsing and validating request body fields
-      const requestedAppointment = validateAppointmentRequestBody(req.body);
+      const requestedAppointment = validateAppointmentRequestBody(
+        req.sanitizedBody
+      );
 
       // Creating a new appointment document on the database
       const savedAppointment = await createNewAppointment(requestedAppointment);
@@ -134,7 +143,7 @@ appointmentRouter.post(
         res.redirect(303, "/tapaaminen/aika/onnistuminnen");
       }
 
-      // Adding email background jobs to their various queues
+      // Adding email background job to queue.
       // getQueue(APPOINTMENT_BOOKED_QUEUE).add(
       //   "appointment-booked",
       //   savedAppointment
@@ -152,10 +161,13 @@ appointmentRouter.post(
 // Route handler for cancelling appointments
 appointmentRouter.post(
   "/peruta",
-  async (req: Request, res: Response, next: NextFunction) => {
+  sanitizeRequestBody,
+  async (req: CustomRequest, res: Response, next: NextFunction) => {
     try {
       // Parsing and validating request body fields
-      const validatedBody = validateAppointmentCancellationBody(req.body);
+      const validatedBody = validateAppointmentCancellationBody(
+        req.sanitizedBody
+      );
 
       // Cancelling appointment
       const cancelledAppointment = await cancelAppointment(
@@ -194,13 +206,17 @@ appointmentRouter.post(
         //   reason: validatedBody.reason ? validatedBody.reason : ""
         // };
 
+        // Adding appointment cancelled email notification job to queue.
         // getQueue(APPOINTMENT_CANCELLED_QUEUE).add(
         //   "appointment-cancelled",
         //   backgroundJobPayLoad
         // );
       }
     } catch (err: unknown) {
-      if (err instanceof InternalServerError) {
+      if (
+        err instanceof InternalServerError ||
+        err instanceof ValidationError
+      ) {
         next(err);
       } else {
         next(new Error("An unknown error occured"));

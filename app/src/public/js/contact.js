@@ -17,10 +17,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   formElement.addEventListener("submit", (e) => {
     // Sanitizing form input data
-    nameElement.value = sanitizeText(nameElement.value);
-    phoneElement.value = sanitizeText(phoneElement.value);
-    emailElement.value = sanitizeEmailAndId(emailElement.value);
-    messageElement.value = sanitizeText(messageElement.value);
+    // nameElement.value = sanitizeText(nameElement.value);
+    // phoneElement.value = sanitizeText(phoneElement.value);
+    // emailElement.value = sanitizeEmailAndId(emailElement.value);
+    // messageElement.value = sanitizeText(messageElement.value);
 
     if (!isName(nameElement.value)) {
       setErrorMessage("Nimi pitä olla vahintä 3 kirjetä");

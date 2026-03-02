@@ -35,11 +35,12 @@ export const getAppointmentDate = async (
         code: "VALIDATION_ERROR"
       });
     }
-    // Setting the date query to the request availabilityDate property
-    req.availabilityDate = req.query.date;
+    // Setting the date query to the request appointment slot date property
+    req.appointmentSlotDate = req.query.date;
     next();
   } catch (err: unknown) {
-    if (err instanceof ValidationError) {
+    if (err instanceof ValidationError || err instanceof Error) {
+      console.log(err);
       next(err);
     } else {
       next(

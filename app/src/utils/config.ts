@@ -14,6 +14,10 @@ const SMTP_PORT = Number(process.env.SMTP_PORT);
 const REDIS_DEV_HOST = process.env.DEV_REDIS_HOST;
 const REDIS_DEV_TCP_PORT = Number(process.env.DEV_REDIS_TCP_PORT);
 const REDIS_DEV_PASSWORD = process.env.DEV_REDIS_PASSWORD;
+const BASE_URL =
+  process.env.NODE_ENV === "development"
+    ? process.env.DEV_BASE_URL
+    : process.env.PROD_URL;
 
 if (!MONGODB_URI) {
   throw new Error("Missing MongoDB URI in environment variable");
@@ -35,6 +39,10 @@ if (!REDIS_DEV_HOST || !REDIS_DEV_PASSWORD || !REDIS_DEV_TCP_PORT) {
   throw new Error(
     "There's an invalid enviroment variable value for redis cloud"
   );
+}
+
+if (!BASE_URL) {
+  throw new Error("invalid environment variable value for base url");
 }
 
 export const REDIS_DEV_CONFIG = {
@@ -59,5 +67,6 @@ export default {
   SMTP_HOST,
   SMTP_PORT,
   MAILTRAP_PASSWORD,
-  MAILTRAP_USERNAME
+  MAILTRAP_USERNAME,
+  BASE_URL
 };

@@ -36,7 +36,8 @@ const constructHtmlTemplate = (
     phone: appointment.phone,
     email: appointment.email,
     id: appointment.appointmentId,
-    reason
+    reason,
+    baseUrl: config.BASE_URL
   };
   if (recipient === "admin" && emailType === "confirmation") {
     // Admin appointment confirmation, notification html template.

@@ -4,7 +4,7 @@ import cors from "cors";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import hpp from "hpp";
-import { sanitizeParameters } from "./middleware/parameterSanitizer";
+// import { sanitizeParameters } from "./middleware/parameterSanitizer";
 import morgan from "morgan";
 // import availabilityRouter from "./controller/availability";
 import appointmentRouter from "./controller/appointment";
@@ -39,7 +39,7 @@ app.use("/api", limiter); // Setting a request rate limit on all /api routes.
 
 app.use(express.urlencoded()); // Parsing form data
 
-app.use(sanitizeParameters); // Preventing NoSQL injections
+// app.use(sanitizeParameters); // Preventing NoSQL injections
 
 app.use(
   hpp({
@@ -53,7 +53,6 @@ app.use("/public", express.static(path.join(__dirname, "public"))); // Serving s
 app.use("/", homeRouter);
 app.use("/palvelu", servicesRouter);
 app.use("/tapaaminen", appointmentRouter);
-// app.use("/oleva-aikaa", availabilityRouter);
 app.use("/yhteistiedot", contactRouter);
 app.use(databaseErrorHandler);
 app.use(generalErrorHandler);
