@@ -8,7 +8,7 @@ const startApp = async () => {
   try {
     console.log("Connecting to MongoDB");
     await mongoose.connect(config.MONGODB_URI);
-    // await redisConnection.connect();
+
     console.log("Connected to MongoDB");
 
     await initRedisAPI();

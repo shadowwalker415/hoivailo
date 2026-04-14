@@ -54,16 +54,18 @@ $colors: (
 
 .hero {
   height: 100vh;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.85)),
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.85)),
     url(../assets/hero_image.jpg);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
 
-.page-tittle {
+.page-title {
   height: 30vh;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.85)),
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.85)),
     url(../assets/kotihoito.jpg);
   background-size: cover;
   background-position: center;

@@ -92,3 +92,7 @@ export const convertDateTimeToISO8601 = (date_time: string): Date => {
 export const convertDateStringTOISO8601 = (date_string: string): Date => {
   return parse(`${date_string}`, "yyyy-MM-dd", new Date());
 };
+
+export const convertDateStringFromISO8601 = (date: Date): string => {
+  return format(date, "yyyy-MM-dd");
+};

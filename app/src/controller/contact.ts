@@ -1,5 +1,8 @@
-import { Router, IRouter, Request, Response } from "express";
-import { validateContactBody } from "../utils/parsers";
+import { Router, IRouter, Request, Response, NextFunction } from "express";
+import {
+  isIServiceInquiry,
+  validateServiceInquiryBody
+} from "../utils/parsers";
 import ValidationError from "../errors/validationError";
 import { sanitizeRequestBody } from "../middleware/requestBodySanitization";
 import { CustomRequest } from "../types";
@@ -14,29 +17,31 @@ contactRouter.get("/", (_req: Request, res: Response) => {
 contactRouter.post(
   "/",
   sanitizeRequestBody,
-  async (req: CustomRequest, res: Response) => {
+  async (req: CustomRequest, res: Response, next: NextFunction) => {
     try {
       // Parsing and validating request body fields
-      const serviceInquiryDetails = validateContactBody(req.sanitizedBody);
+      const validationResult = validateServiceInquiryBody(req.sanitizedBody);
 
-      console.log(
-        "This is the Service Inquiry controller and the request body looks like this"
-      );
-      console.log(serviceInquiryDetails);
+      if (!isIServiceInquiry(validationResult)) {
+        res.status(200).render("contactUs", {
+          formErrors: validationResult,
+          fieldValues: req.body
+        });
+      } else {
+        // We will redirect here instead of rendering here, to prevent form resubmition.
+        res.status(201).render("contactSuccess");
 
-      // We will redirect here instead of rendering here, to prevent form resubmition.
-      res.status(201).render("contactSuccess");
-
-      // Adding a message request job to the message request queue
-      // getQueue(SERVICE_INQUIRY_QUEUE).add(
-      //   "service-inquiry",
-      //   serviceInquiryDetails
-      // );
+        // Adding a message request job to the message request queue
+        // getQueue(SERVICE_INQUIRY_QUEUE).add(
+        //   "service-inquiry",
+        //   serviceInquiryDetails
+        // );
+      }
     } catch (err: unknown) {
       if (err instanceof ValidationError) {
-        throw new ValidationError(err);
+        next(err);
       } else {
-        throw new Error("An unknown error occured");
+        next(new Error("An unknown error occured. Check error stack trace."));
       }
     }
   }

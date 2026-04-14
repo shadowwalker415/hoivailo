@@ -1,12 +1,12 @@
 import {
-  IContactRequestEmail,
-  contactRequestEmail
-} from "../model/contactRequestEmail";
+  IServiceInquiryEmail,
+  serviceInquiryEmail
+} from "../model/serviceInquiryEmail";
 
 export async function getOrCreateContactRequestEmail(
   userEmail: string
-): Promise<IContactRequestEmail> {
-  return contactRequestEmail.findOneAndUpdate(
+): Promise<IServiceInquiryEmail> {
+  return serviceInquiryEmail.findOneAndUpdate(
     { userEmail },
     {
       $setOnInsert: {

@@ -32,11 +32,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   formElement.addEventListener("submit", (e) => {
     // Sanitizing form data
-    // nameElement.value = sanitizeText(nameElement.value);
-    // phoneElement.value = sanitizeText(phoneElement.value);
-    // emailElement.value = sanitizeEmailAndId(emailElement.value);
-    // serviceElement.value = sanitizeText(serviceElement.value);
-    // notesElement.value = sanitizeText(notesElement.value);
+    nameElement.value = sanitizeText(nameElement.value);
+    phoneElement.value = sanitizeText(phoneElement.value);
+    emailElement.value = sanitizeEmailAndId(emailElement.value);
+    serviceElement.value = sanitizeText(serviceElement.value);
+    notesElement.value = sanitizeText(notesElement.value);
 
     if (!isPhoneNumber(phoneElement.value)) {
       setErrorMessage("Puhelin numero ei se hyvä tyyppi");

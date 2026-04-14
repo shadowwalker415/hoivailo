@@ -1,8 +1,8 @@
-import { Schema, Document, model } from "mongoose";
+import { Schema, model } from "mongoose";
 
 import { v4 as uuidv4 } from "uuid";
 
-export interface IAppointment extends Document {
+export interface IAppointment {
   appointmentDate?: string; // Important for finding booked appointment for a specific date.
   startTime: Date;
   endTime: Date;
@@ -15,7 +15,6 @@ export interface IAppointment extends Document {
   status?: string;
   createdAt?: Date;
   updatedAt?: Date;
-  toJSON(): IAppointment;
 }
 
 // Doesn't extend IAppointment because IAppointment extends Document.
@@ -33,32 +32,33 @@ const appointmentSchema = new Schema<IAppointment>(
   {
     appointmentDate: {
       type: String,
-      required: true,
+      required: [true, "An appointment date is required"],
       index: true
     },
     startTime: {
       type: Date,
-      required: true,
+      required: [true, "An appointment start time is required"],
       index: true,
       unique: true
     },
     endTime: {
       type: Date,
-      required: true,
+      required: [true, "An appointment end time is required"],
       unique: true
     },
     name: {
       type: String,
-      required: true,
-      minlength: [3, "Name must be a least 3 characters long"]
+      required: [true, "A name is required for the appointment"],
+      minlength: [3, "Name must be a least 3 characters long"],
+      maxlength: [40, "Name is too long"]
     },
     email: {
       type: String,
-      required: true,
+      required: [true, "An email is required for the appointment"],
       lowercase: true,
       validate: {
-        validator: function (v: IAppointment["email"]) {
-          return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(v);
+        validator: function (value: IAppointment["email"]) {
+          return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value);
         }
       },
       trim: true
@@ -68,7 +68,7 @@ const appointmentSchema = new Schema<IAppointment>(
     },
     service: {
       type: String,
-      required: true,
+      required: [true, "A service is required for the appointment"],
       enum: [
         "Kotiapu",
         "Kotihoito",
@@ -79,17 +79,20 @@ const appointmentSchema = new Schema<IAppointment>(
     },
     notes: {
       type: String,
-      maxlength: 1000
+      maxlength: [
+        1000,
+        "Max number of characters for appointment notes is 1000."
+      ]
     },
     status: {
       type: String,
       enum: ["booked", "cancelled"],
       default: "booked",
-      required: true
+      required: [true, "The appointment status is required"]
     },
     appointmentId: {
       type: String,
-      required: true,
+      required: [true, "The appointment ID is required"],
       unique: true,
       default: () => uuidv4()
     }
@@ -107,6 +110,12 @@ appointmentSchema.set("toJSON", {
     return ret;
   }
 });
+
+// Compound index to avoid double booking/race condition.
+appointmentSchema.index(
+  { appointmentDate: 1, startTime: 1, endTime: 1 },
+  { unique: true }
+);
 
 export const Appointment = model<IAppointment>(
   "Appointment",

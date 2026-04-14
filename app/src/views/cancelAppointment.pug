@@ -2,11 +2,13 @@ extends baseLayout.pug
 
 block scripts 
   script(defer src="/public/dist/js/index.main.js")
-  script(defer src="/public/dist/js/cancelAppointment.main.js")
+  //- script(defer src="/public/dist/js/cancelAppointment.main.js")
 block title
   title Aika perutus | Hoivailo Oy
 
 block content
+  -const fields = fieldValues || {}
+  -const errors = errorValues || {}
   .page-tittle.d-flex.align-items-center.text-white.mb-6
     .container.text-center
       h1.display-3 AIKA PERUTUS
@@ -17,11 +19,16 @@ block content
       form.appointment-cancelling(action="/tapaaminen/peruta" method="post")
         .mb-3.name-group
           label.form-label(for="appointmentId") Ajan varauden koodi
-          input.form-control(type="text" name="appointmentId" placeholder="Koodi" id="appointmentId" required)
+          input.form-control(type="text" name="appointmentId" placeholder="Koodi" id="appointmentId" value=fields.appointmentId || "")
+          if errors
+            .text-danger= errors.id
         .mb-3.name-group
           label.form-label(for="reason") Syy
-          textarea.form-control(name="reason" id="reason")
+          textarea.form-control(name="reason" id="reason")= fields.reason || ""
+          if errors.text
+            .text-danger= errors.text
           p.text-body-tertiary.text-center Ethän lähetä lomakkeella arkaluonteisia tietoja, kuten terveystietoja.
+
           p.text-danger.mb-3.opacity-0.text-center(id="error-alert")
         .button-container.text-center
           button.btn.btn-primary(type="submit") Peruta ajanvaraus

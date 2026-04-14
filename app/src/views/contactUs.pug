@@ -1,15 +1,17 @@
 extends baseLayout.pug 
 
 block scripts 
-  script(defer src="../public/dist/js/contact.main.js")
+  //- script(defer src="../public/dist/js/contact.main.js")
   script(defer src="../public/dist/js/index.main.js")
 
 block title 
   title Yhteistiedot | Hoivailo Oy
 
 block content
+  - const fields = fieldValues || {}
+  - const errors = formErrors || {}
   // Where page title is a custom class for the background of the page title container
-  .page-tittle.d-flex.align-items-center.text-white.mb-6
+  .page-title.d-flex.align-items-center.text-white.mb-6
     .container.text-center
       h1.display-3 YHTEISTIEDOT
   .container.d-flex.flex-column.align-items-center
@@ -34,17 +36,25 @@ block content
       form.form-contact-us(action="/yhteistiedot" method="post")
         .mb-3
           label.form-label(for="name") Nimi
-          input.form-control(type="text" name="name" placeholder="Nimi" id="name" required)
+          input.form-control(type="text" name="name" placeholder="Nimi" id="name" value=fields.name || "")
+          if errors.name
+            .text-danger= errors.name
         .mb-3
           label.form-label(for="email") Sähköposti
-          input.form-control(type="email" name="email" placeholder="Sähköposti" id="email" required)
+          input.form-control(type="email" name="email" placeholder="Sähköposti" id="email" value=fields.email || "")
+          if errors.email 
+            .text-danger= errors.email
         .mb-3
           label.form-label(for="phone") Puhelin
-          input.form-control(type="text" name="phone" placeholder="esim +3584XXXXXXX +3585XXXXXXX" id="phone" required)
+          input.form-control(type="text" name="phone" placeholder="esim +3584XXXXXXX +3585XXXXXXX" id="phone" value=fields.phone || "")
+          if errors.phone
+            .text-danger= errors.phone
         .mb-3
           label.form-label(for="message") Viesti
-          textarea.form-control(name="message" id="message" required)
+          textarea.form-control(name="message" id="message")= fields.message || ""
           p.text-body-tertiary.text-center Ethän lähetä lomakkeella arkaluonteisia tietoja, kuten terveystietoja.
+          if errors.message
+            .text-danger= errors.message
         .text-center
           button.btn.btn-primary(type="submit") Lähetä viesti
       p.text-danger.mb-3.opacity-0(id="error-alert")

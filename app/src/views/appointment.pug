@@ -9,6 +9,8 @@ block title
   title Varaa aikaa | Hoivailo Oy
 
 block content
+  - const errors = errorValues || {}
+  - const fields = fieldValues || {}
   .page-tittle.d-flex.align-items-center.text-white.mb-6
     .container.text-center
       h1.display-3 VARAA AIKAA
@@ -34,25 +36,33 @@ block content
         input(type="hidden" name="endTime" id="endTimeField") 
         .mb-3.name-group
           label.form-label(for="name") Nimi
-          input.form-control(type="text" name="name" placeholder="Nimi" id="name" required)
+          input.form-control(type="text" name="name" placeholder="Nimi" id="name" value=fields.name || "")
+          if errors.name
+            .text-danger= errors.name
         .mb-3.email-group
           label.form-label(for="email") Sähköposti  
-          input.form-control(type="email" name="email" placeholder="esim@gmail.com" id="email" required)
+          input.form-control(type="email" name="email" placeholder="esim@gmail.com" id="email" value=fields.email || "")
+          if errors.email
+            .text-danger= errors.email
         .mb-3.phone-group
           label.form-label(for="phone") Puhelin  
-          input.form-control(type="text" name="phone" id="phone" placeholder="esim +3584XXXXXXX +3585XXXXXXX" required)
+          input.form-control(type="text" name="phone" id="phone" placeholder="esim +3584XXXXXXX +3585XXXXXXX" value=fields.phone || "")
+          if errors.phone
+            .text-danger= errors.phone
         .mb-3.service-group
-          select.form-select.form-select-sm(name="service" id="service" arial-label="Select appointment service" required)
+          select.form-select.form-select-sm(name="service" id="service" arial-label="Select appointment service")
             option(value="" selected) Valitse palvelu
             option(value="Kotiapu") Kotiapu
             option(value="Kotihoito") Kotihoito
             option(value="Lastenhoito") Lastenhoito
             option(value="Kotisiivous") Kotisiivous
             option(value="Yrityssiivous") Yrityssiivous
+          if errors.service 
+            .text-danger= errors.service
         .mb-3.notes-group
           label.form-label(for="notes") Teksti
           span.text-body-tertiary (Valinnainen)
-          textarea.form-control(name="notes" id="notes")
+          textarea.form-control(name="notes" id="notes")= fields.notes || ""
           p.text-body-tertiary.text-center Ethän lähetä lomakkeella arkaluonteisia tietoja, kuten terveystietoja.
         // button container
         .text-center

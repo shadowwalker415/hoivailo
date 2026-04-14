@@ -3,7 +3,7 @@ import { sendAppointmentCancelledEmail } from "../../services/emails";
 import { IAppointment, ICancelledAppointment } from "../../model/appointment";
 import { processAppointmentEmails, IProcessingData } from "./utils";
 import { Recipient } from "../../types";
-import { instanceOfIAppointment } from "../../utils/parsers";
+import { isIAppointment } from "../../utils/parsers";
 
 export const appointmentCancelledWorker = async (
   job: Job<ICancelledAppointment>
@@ -17,7 +17,7 @@ export const appointmentCancelledWorker = async (
       data: ICancelledAppointment | IAppointment,
       recipient: Recipient
     ) => {
-      if (!instanceOfIAppointment(data)) {
+      if (!isIAppointment(data)) {
         await sendAppointmentCancelledEmail(data, recipient, data.reason);
       }
     }

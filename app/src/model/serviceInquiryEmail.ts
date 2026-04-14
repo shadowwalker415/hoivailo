@@ -12,13 +12,11 @@ const serviceInquiryEmailSchema = new Schema<IServiceInquiryEmail>({
     type: String,
     enum: ["pending", "sending", "sent", "failed"],
     default: "pending",
-    required: true,
-    index: true
+    required: true
   },
   senderEmail: {
     type: String,
-    required: true,
-    index: true
+    required: true
   }
 });
 

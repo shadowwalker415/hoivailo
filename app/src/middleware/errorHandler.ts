@@ -38,6 +38,7 @@ export const databaseErrorHandler = (
     error instanceof Error &&
     error.message.startsWith("E11000 duplicate key error collection")
   ) {
+    // We will render an error page here
     res.status(409).send({
       success: false,
       status: 409,
@@ -48,13 +49,8 @@ export const databaseErrorHandler = (
     error instanceof Error &&
     error.message.startsWith("Appointment validation failed")
   ) {
-    next(
-      new ValidationError({
-        message: "Name must be at least 3 characters long",
-        statusCode: 400,
-        code: "VALIDATION_ERROR"
-      })
-    );
+    // We will render an internal serval error page here.
+    res.status(409).send("Validation error occured");
   } else {
     next(error);
   }
@@ -90,5 +86,6 @@ export const generalErrorHandler = (
 };
 
 export const unknownEndPoint = (_req: Request, res: Response) => {
-  res.status(404).send({ error: "Unknown endpoint" });
+  // We will render an page not found here.
+  res.status(404).send("<h1>THIS IS AN UNKNOWN ROUTE</h1>");
 };

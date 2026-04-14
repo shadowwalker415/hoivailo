@@ -19,6 +19,11 @@ import {
 } from "./helpers";
 import ValidationError from "../errors/validationError";
 
+// Used for collecting request body input errors
+export interface FieldErrors {
+  [key: string]: string;
+}
+
 const isString = (text: unknown): text is string => {
   return typeof text === "string" || text instanceof String;
 };
@@ -42,14 +47,44 @@ const isDate = (date: string): date is string => {
   return dateRegex.test(date) && Boolean(Date.parse(date));
 };
 
-export const instanceOfIAppointment = (object: any): object is IAppointment => {
-  return "status" in object && object.status === "booked";
+export const isBookedAppointment = (value: unknown): value is IAppointment => {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "status" in value &&
+    value.status === "booked"
+  );
+};
+
+export const isIAppointment = (value: unknown): value is IAppointment => {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "startTime" in value &&
+    "endTime" in value
+  );
+};
+
+export const isIAppoinmentCancel = (
+  value: unknown
+): value is IAppointmentCancel => {
+  return (
+    typeof value === "object" && value !== null && "appointmentId" in value
+  );
+};
+
+export const isIServiceInquiry = (value: unknown): value is IServiceInquiry => {
+  return typeof value === "object" && value !== null && "message" in value;
 };
 
 const isService = (service: string): service is AppointmentServices => {
   return Object.values(AppointmentServices)
     .map((v) => v.toString())
     .includes(service);
+};
+
+const hasErrors = (errors: FieldErrors): boolean => {
+  return Object.entries(errors).length > 0;
 };
 
 // Checking if phone number is a valid Finnish phone number for example +3584XXXXXXXX or +3585XXXXXXXX
@@ -77,149 +112,140 @@ export const isRecipient = (role: unknown): role is Recipient => {
   return role === "user" || role == "admin";
 };
 
-const parseAppointmentID = (id: unknown): string => {
+const parseAppointmentID = (
+  id: unknown,
+  error: FieldErrors
+): string | undefined => {
+  if (!id) {
+    error.id = "Appointment is required.";
+    return;
+  }
   if (!isString(id)) {
-    throw new ValidationError({
-      message: "Appointment Id must be string",
-      statusCode: 400,
-      code: "VALIDATION_ERROR"
-    });
+    error.id = "Invalid appointment id.";
+    return;
   }
 
   if (!isValidID(id)) {
-    throw new ValidationError({
-      message: "Appointment Id is of invalid format",
-      statusCode: 400,
-      code: "VALIDATION_ERROR"
-    });
+    error.id = "Invalid appointment id.";
+    return;
   }
   return id;
 };
 
-const parseText = (text: unknown): string => {
+const parseText = (text: unknown, error: FieldErrors): string | undefined => {
+  if (!text) {
+    error.text = "Text is required";
+    return;
+  }
   if (!isString(text)) {
-    throw new ValidationError({
-      message:
-        "Text field must be a valid string and 2000 characters long at most",
-      statusCode: 400,
-      code: "VALIDATION_ERROR"
-    });
+    error.text = "Text is invalid";
+    return;
   }
   return text;
 };
 
-const parseTime = (time: unknown): Date => {
+const parseTime = (time: unknown, error: FieldErrors): Date | undefined => {
+  if (!time) {
+    error.time = "Time is required";
+    return;
+  }
   // Checking if appointment date time is a valid ISO 8601 date time string.
-  if (!time || !isString(time) || !isDate(time)) {
-    throw new ValidationError({
-      message: "Start and End time must be a valid ISO 8601 date time string",
-      statusCode: 400,
-      code: "VALIDATION_ERROR"
-    });
+  if (!isString(time) || !isDate(time)) {
+    error.time = "TIme must be a valid ISO 8601 date time string.";
+    return;
   }
 
   // Checking if appointment date time is same as current date.
-  if (isCurrentDate(new Date(time)))
-    throw new ValidationError({
-      message: "An Appointment can't be booked on the same day",
-      statusCode: 400,
-      code: "VALIDATION_ERROR"
-    });
-
+  if (isCurrentDate(new Date(time))) {
+    error.time = "An appointment cannot be booked on the same day.";
+    return;
+  }
   // Checking if appointment date time is a previous date.
-  if (isPastDate(time))
-    throw new ValidationError({
-      message: "Appointment start or end time cannot be a past date",
-      statusCode: 400,
-      code: "VALIDATION_ERROR"
-    });
-
-  // Checking if appointment date time is not work day
-  if (!isWorkingDay(time)) {
-    throw new ValidationError({
-      message: "Start or end time date must be a working day",
-      statusCode: 400,
-      code: "VALIDATION_ERROR"
-    });
+  if (isPastDate(time)) {
+    error.time = "Appointment start or end time cannot be a past date.";
+    return;
   }
 
-  // Checking if appointment date time is more than 3 months away.
-  if (getDifferenceInMonths(new Date(time)) >= 3)
-    throw new ValidationError({
-      message: "Appointment start or end time cannot be a date 3 months away",
-      statusCode: 400,
-      code: "VALIDATION_ERROR"
-    });
+  // Checking if appointment date time is not week day
+  if (!isWorkingDay(time)) {
+    error.time = "Appointment start time must be on a week day.";
+    return;
+  }
+
+  // Checking if appointment date time is pver 3 months.
+  if (getDifferenceInMonths(new Date(time)) >= 3) {
+    error.time = "Appointment date time cannot be over 3 months.";
+    return;
+  }
 
   // Checking if appointment start or end time is before the official opening hour.
   if (isBeforeOpeningHour(time)) {
-    throw new ValidationError({
-      message:
-        "Appointment start or end time cannot be a time before official opening hour",
-      statusCode: 400,
-      code: "VALIDATION_ERROR"
-    });
+    error.time = "Appointment start or end time cannot be before opening hours";
+    return;
   }
+
   // Checking if appointment start or end time is after the official closing hour.
   if (isAfterClosingHour(time)) {
-    throw new ValidationError({
-      message:
-        "Appointment start or end time cannot be same as closing hour or after closing hour",
-      statusCode: 400,
-      code: "VALIDATION_ERROR"
-    });
+    error.time = "Appointment start or end time cannot be after closing hours.";
+    return;
   }
   return new Date(time);
 };
 
-const parseName = (name: unknown): string => {
+const parseName = (name: unknown, error: FieldErrors): string | undefined => {
   if (!name || !isString(name)) {
-    throw new ValidationError({
-      message: "Invalid name string",
-      statusCode: 400,
-      code: "VALIDATION_ERROR"
-    });
+    error.name = "Name is required";
+    return;
   }
   return name;
 };
 
-const parseEmail = (email: unknown): string => {
-  if (!email || !isString(email) || !isValidEmail(email)) {
-    throw new ValidationError({
-      message: "Invalid email address",
-      statusCode: 400,
-      code: "VALIDATION_ERROR"
-    });
+const parseEmail = (email: unknown, error: FieldErrors): string | undefined => {
+  if (!email) {
+    error.email = "Email is required";
+    return;
+  }
+  if (!isString(email) || !isValidEmail(email)) {
+    error.email = "Invalid email";
+    return;
   }
   return email;
 };
 
-const parsePhoneNumber = (phoneNumber: unknown) => {
-  if (!phoneNumber || !isString(phoneNumber) || !isValidPhone(phoneNumber)) {
-    throw new ValidationError({
-      message: "Invalid phone number",
-      statusCode: 400,
-      code: "VALIDATION_ERROR"
-    });
+const parsePhoneNumber = (
+  phoneNumber: unknown,
+  error: FieldErrors
+): string | undefined => {
+  if (!phoneNumber) {
+    error.phone = "Phone number is required";
+    return;
+  }
+  if (!isString(phoneNumber) || !isValidPhone(phoneNumber)) {
+    error.phone = "Invalid phone number.";
+    return;
   }
   return phoneNumber;
 };
 
-export const parseService = (service_type: unknown): string => {
-  if (!service_type || !isString(service_type) || !isService(service_type)) {
-    throw new ValidationError({
-      message:
-        "Service must be, either Yrityssiivous, Kotisiivous, Kotihoito, Kotiapu, Lastenhoito",
-      statusCode: 400,
-      code: "VALIDATION_ERROR"
-    });
+export const parseService = (
+  service: unknown,
+  error: FieldErrors
+): string | undefined => {
+  if (!service) {
+    error.service = "Service is required.";
+    return;
   }
-  return service_type;
+  if (!isString(service) || !isService(service)) {
+    error.service = "Invalid service.";
+    return;
+  }
+  return service;
 };
 
 export const validateAppointmentRequestBody = (
   requestBody: unknown
-): IAppointment => {
+): IAppointment | FieldErrors => {
+  const errors: FieldErrors = {};
   if (!requestBody || typeof requestBody !== "object") {
     throw new ValidationError({
       message: "Empty request body",
@@ -228,88 +254,75 @@ export const validateAppointmentRequestBody = (
     });
   }
 
-  if (
-    "startTime" in requestBody &&
-    "endTime" in requestBody &&
-    "name" in requestBody &&
-    "email" in requestBody &&
-    "phone" in requestBody &&
-    "service" in requestBody
-  ) {
-    const newReqBody = {
-      startTime: parseTime(requestBody.startTime),
-      endTime: parseTime(requestBody.endTime),
-      name: parseName(requestBody.name),
-      email: parseEmail(requestBody.email),
-      phone: parsePhoneNumber(requestBody.phone),
-      service: parseService(requestBody.service)
-    };
+  const body = requestBody as Record<string, unknown>;
+
+  const newReqBody = {
+    startTime: parseTime(body.startTime, errors),
+    endTime: parseTime(body.endTime, errors),
+    name: parseName(body.name, errors),
+    email: parseEmail(body.email, errors),
+    phone: parsePhoneNumber(body.phone, errors),
+    service: parseService(body.service, errors)
+  };
+
+  if (newReqBody.startTime && newReqBody.endTime) {
+    const duration = getDifference(newReqBody.startTime, newReqBody.endTime);
+
     // Checking if appointment duration is less than or more than 2 hours.
-    if (
-      getDifference(newReqBody.startTime, newReqBody.endTime) < 2 ||
-      getDifference(newReqBody.startTime, newReqBody.endTime) > 2
-    ) {
-      throw new ValidationError({
-        message:
-          "Appointment duration cannot be less than or more than 2 hours",
-        statusCode: 400,
-        code: "VALIDATION_ERROR"
-      });
+    if (duration !== 2) {
+      errors.time = "Appointment time must be 2 hours.";
     }
+
     // Checking if appointment start and end time are the same hour.
     if (isEven(newReqBody.startTime) || isEven(newReqBody.endTime)) {
-      throw new ValidationError({
-        message: "Appointment start and end time cannot be the same hour",
-        statusCode: 400,
-        code: "VALIDATION_ERROR"
-      });
+      errors.time =
+        "Appointment start time and end time cannot have the same hour.";
     }
     // Checking if appointment start or end time has any minute
     if (
       !isZeroMinutes(newReqBody.startTime) ||
       !isZeroMinutes(newReqBody.endTime)
     ) {
-      throw new ValidationError({
-        message: "Appointment start or end time must have 00 minutes",
-        statusCode: 400,
-        code: "VALIDATION_ERROR"
-      });
+      errors.time =
+        "Appointment start time or end time cannot have more than zero minute.";
     }
-    return newReqBody as IAppointment;
   }
-  throw new ValidationError({
-    message: "Missing fields in request body",
-    statusCode: 400,
-    code: "VALIDATION_ERROR"
-  });
+  if (hasErrors(errors)) {
+    return { ...errors };
+  }
+
+  return { ...newReqBody } as IAppointment;
 };
 
 export const validateAppointmentCancellationBody = (
-  body: unknown
-): IAppointmentCancel => {
-  if (!body || typeof body !== "object") {
+  requestBody: unknown
+): IAppointmentCancel | FieldErrors => {
+  const errors: FieldErrors = {};
+  if (!requestBody || typeof requestBody !== "object") {
     throw new ValidationError({
       message: "Empty request body",
       statusCode: 400,
       code: "VALIDATION_ERROR"
     });
   }
-  if ("appointmentId" in body && "reason" in body) {
-    const newBody: IAppointmentCancel = {
-      appointmentId: parseAppointmentID(body.appointmentId),
-      reason: parseText(body.reason)
-    };
+  const body = requestBody as Record<string, unknown>;
 
-    return newBody;
+  const newBody = {
+    appointmentId: parseAppointmentID(body.appointmentId, errors),
+    reason: parseText(body.reason, errors)
+  };
+
+  if (hasErrors(errors)) {
+    return { ...errors };
   }
-  throw new ValidationError({
-    message: "Request body missing some fields",
-    statusCode: 400,
-    code: "VALIDATION_ERROR"
-  });
+
+  return { ...newBody } as IAppointmentCancel;
 };
 
-export const validateContactBody = (contactObj: unknown): IServiceInquiry => {
+export const validateServiceInquiryBody = (
+  contactObj: unknown
+): IServiceInquiry | FieldErrors => {
+  const errors: FieldErrors = {};
   if (!contactObj || typeof contactObj !== "object") {
     throw new ValidationError({
       message: "Empty request body",
@@ -317,23 +330,19 @@ export const validateContactBody = (contactObj: unknown): IServiceInquiry => {
       code: "VALIDATION_ERROR"
     });
   }
-  if (
-    "name" in contactObj &&
-    "phone" in contactObj &&
-    "email" in contactObj &&
-    "message" in contactObj
-  ) {
-    const newBody = {
-      name: parseName(contactObj.name),
-      phone: parsePhoneNumber(contactObj.phone),
-      email: parseEmail(contactObj.email),
-      message: parseText(contactObj.message)
-    };
-    return newBody;
+
+  const TempBody = contactObj as Record<string, unknown>;
+
+  const newBody = {
+    name: parseName(TempBody.name, errors),
+    phone: parsePhoneNumber(TempBody.phone, errors),
+    email: parseEmail(TempBody.email, errors),
+    message: parseText(TempBody.message, errors)
+  };
+
+  if (hasErrors(errors)) {
+    return { ...errors };
   }
-  throw new ValidationError({
-    message: "Request body missing some fields",
-    statusCode: 400,
-    code: "VALIDATION_ERROR"
-  });
+
+  return { ...newBody } as IServiceInquiry;
 };

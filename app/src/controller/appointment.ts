@@ -1,5 +1,7 @@
 import { Router, IRouter, Request, Response, NextFunction } from "express";
 import {
+  isIAppoinmentCancel,
+  isIAppointment,
   validateAppointmentCancellationBody,
   validateAppointmentRequestBody
 } from "../utils/parsers";
@@ -14,7 +16,8 @@ import {
   isWorkingDay,
   getCurrentDate,
   getDateOfficial,
-  getDifferenceInMonths
+  getDifferenceInMonths,
+  convertDateStringFromISO8601
 } from "../utils/helpers";
 import { generateAvailableSlots } from "../services/appointments";
 import ValidationError from "../errors/validationError";
@@ -122,37 +125,67 @@ appointmentRouter.post(
   "/aika",
   sanitizeRequestBody,
   async (req: CustomRequest, res: Response, next: NextFunction) => {
+    console.log(req.body);
     try {
       // Parsing and validating request body fields
-      const requestedAppointment = validateAppointmentRequestBody(
+      const validationResult = validateAppointmentRequestBody(
         req.sanitizedBody
       );
 
-      // Creating a new appointment document on the database
-      const savedAppointment = await createNewAppointment(requestedAppointment);
-      if (
-        savedAppointment instanceof Error ||
-        savedAppointment instanceof InternalServerError
-      ) {
-        throw new InternalServerError({
-          message: savedAppointment.message,
-          statusCode: 500
+      // Checking if request body was empty
+
+      // Checking if validation had field errors
+      if (!isIAppointment(validationResult)) {
+        const appointmentDate = convertDateStringFromISO8601(
+          req.body.startTime
+        );
+        // Regenerating available slots
+        const availableSlots = await generateAvailableSlots(appointmentDate);
+
+        // Checking if database read operation failed.
+        if (
+          availableSlots instanceof Error ||
+          availableSlots instanceof InternalServerError
+        ) {
+          throw new Error(availableSlots.message);
+        }
+        console.log(validationResult);
+        res.status(200).render("appointment", {
+          errorValues: validationResult,
+          fieldValues: req.body,
+          availableSlots
         });
       } else {
-        // Redirecting to appointment booked success page.
-        res.redirect(303, "/tapaaminen/aika/onnistuminnen");
-      }
+        const savedAppointment = await createNewAppointment(validationResult);
+        if (
+          savedAppointment instanceof Error ||
+          savedAppointment instanceof InternalServerError
+        ) {
+          throw new InternalServerError({
+            message: savedAppointment.message,
+            statusCode: 500
+          });
+        } else {
+          // Redirecting to appointment booked success page.
+          res.redirect(303, "/tapaaminen/aika/onnistuminnen");
 
-      // Adding email background job to queue.
-      // getQueue(APPOINTMENT_BOOKED_QUEUE).add(
-      //   "appointment-booked",
-      //   savedAppointment
-      // );
+          // Adding email background job to queue.
+          // getQueue(APPOINTMENT_BOOKED_QUEUE).add(
+          //   "appointment-booked",
+          //   savedAppointment
+          // );
+        }
+      }
     } catch (err: unknown) {
-      if (err instanceof Error || err instanceof InternalServerError) {
-        next(err);
+      // Checking if request body was empty.
+      if (
+        err instanceof ValidationError &&
+        err.message === "Empty request body"
+      ) {
+        // This is a place holder. We will render the same page with errors later.
+        res.status(200).render("selectDate");
       } else {
-        next(new Error("An unknown error occured"));
+        next(err);
       }
     }
   }
@@ -169,57 +202,54 @@ appointmentRouter.post(
         req.sanitizedBody
       );
 
-      // Cancelling appointment
-      const cancelledAppointment = await cancelAppointment(
-        validatedBody.appointmentId
-      );
-
-      // Checking if the appointment was not found
-      if (cancelledAppointment instanceof EntityNotFoundError) {
-        res.status(404).render("404NotFound", { validatedBody });
-        // Checking if the appointment had already been cancelled
-      } else if (
-        cancelledAppointment instanceof InternalServerError &&
-        cancelledAppointment.message === "Appointment already cancelled"
-      ) {
-        // We will redirect here instead of rendering
-        res.status(201).render("alreadyCancelled", { validatedBody });
-        // Checking if the database operation failed
-      } else if (cancelledAppointment instanceof Error) {
-        throw new InternalServerError({
-          message:
-            "An error occured on the database, couldn't cancel appointment",
-          statusCode: 500,
-          code: "INTERNAL_SERVER_ERROR"
+      if (!isIAppoinmentCancel(validatedBody)) {
+        console.log(validatedBody);
+        res.status(200).render("cancelAppointment", {
+          errorValues: validatedBody,
+          fieldValues: req.body
         });
       } else {
-        // Redirecting to appointment cancelled success page.
-        res.redirect(303, "/tapaaminen/peruta/onnistuminen");
+        // Cancelling appointment
+        const cancelledAppointment = await cancelAppointment(
+          validatedBody.appointmentId
+        );
 
-        // const backgroundJobPayLoad: ICancelledAppointment = {
-        //   appointmentId: cancelledAppointment.appointmentId as string,
-        //   startTime: cancelledAppointment.startTime,
-        //   name: cancelledAppointment.name,
-        //   service: cancelledAppointment.service,
-        //   email: cancelledAppointment.email,
-        //   phone: cancelledAppointment.phone,
-        //   reason: validatedBody.reason ? validatedBody.reason : ""
-        // };
+        if (
+          cancelledAppointment instanceof EntityNotFoundError ||
+          cancelledAppointment instanceof Error
+        ) {
+          throw new Error(cancelledAppointment.message);
+        } else {
+          // Redirecting to appointment cancelled success page.
+          res.redirect(303, "/tapaaminen/peruta/onnistuminen");
 
-        // Adding appointment cancelled email notification job to queue.
-        // getQueue(APPOINTMENT_CANCELLED_QUEUE).add(
-        //   "appointment-cancelled",
-        //   backgroundJobPayLoad
-        // );
+          // const backgroundJobPayLoad: ICancelledAppointment = {
+          //   appointmentId: cancelledAppointment.appointmentId as string,
+          //   startTime: cancelledAppointment.startTime,
+          //   name: cancelledAppointment.name,
+          //   service: cancelledAppointment.service,
+          //   email: cancelledAppointment.email,
+          //   phone: cancelledAppointment.phone,
+          //   reason: validatedBody.reason ? validatedBody.reason : ""
+          // };
+
+          // Adding appointment cancelled email notification job to queue.
+          // getQueue(APPOINTMENT_CANCELLED_QUEUE).add(
+          //   "appointment-cancelled",
+          //   backgroundJobPayLoad
+          // );
+        }
       }
     } catch (err: unknown) {
-      if (
-        err instanceof InternalServerError ||
-        err instanceof ValidationError
-      ) {
-        next(err);
+      if (err instanceof ValidationError) {
+        res.status(200).render("cancelAppointment", {
+          errorValues: {
+            id: "Appointment ID required",
+            text: "Reason required"
+          }
+        });
       } else {
-        next(new Error("An unknown error occured"));
+        next(err);
       }
     }
   }
