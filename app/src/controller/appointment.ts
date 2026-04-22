@@ -24,8 +24,8 @@ import ValidationError from "../errors/validationError";
 import InternalServerError from "../errors/internalServerError";
 import EntityNotFoundError from "../errors/entityNotFoundError";
 import { sanitizeRequestBody } from "../middleware/requestBodySanitization";
-// import { getQueue } from "../queues/registry";
-// import { APPOINTMENT_BOOKED_QUEUE } from "../queues/appointment-booked.queue";
+import { getQueue } from "../queues/registry";
+import { APPOINTMENT_BOOKED_QUEUE } from "../queues/appointment-booked.queue";
 // import { APPOINTMENT_CANCELLED_QUEUE } from "../queues/appointment-cancelled.queue";
 // import { ICancelledAppointment } from "../model/appointment";
 
@@ -63,7 +63,7 @@ appointmentRouter.get(
       // Checking if the request has a query parameter.
       if (!req.appointmentSlotDate) {
         throw new ValidationError({
-          message: "Request is missing query parameter",
+          message: "Appointment date is required",
           statusCode: 400,
           code: "VALIDATION_ERROR"
         });
@@ -89,12 +89,11 @@ appointmentRouter.get(
         const availableSlots = await generateAvailableSlots(
           req.appointmentSlotDate
         );
-        // Checking if the slot generation operation failed due to.
-        // Maybe an error with database query.
+        // Checking if the slot generation operation failed due to
+        // maybe an error with database query.
         if (availableSlots instanceof Error) {
           throw new InternalServerError({
-            message:
-              "An error occured on the database: Couldn't generate available slots",
+            message: availableSlots.message,
             statusCode: 500,
             code: "INTERNAL_SERVER_ERROR"
           });
@@ -125,14 +124,11 @@ appointmentRouter.post(
   "/aika",
   sanitizeRequestBody,
   async (req: CustomRequest, res: Response, next: NextFunction) => {
-    console.log(req.body);
     try {
       // Parsing and validating request body fields
       const validationResult = validateAppointmentRequestBody(
         req.sanitizedBody
       );
-
-      // Checking if request body was empty
 
       // Checking if validation had field errors
       if (!isIAppointment(validationResult)) {
@@ -170,10 +166,17 @@ appointmentRouter.post(
           res.redirect(303, "/tapaaminen/aika/onnistuminnen");
 
           // Adding email background job to queue.
-          // getQueue(APPOINTMENT_BOOKED_QUEUE).add(
-          //   "appointment-booked",
-          //   savedAppointment
-          // );
+          getQueue(APPOINTMENT_BOOKED_QUEUE).add(
+            "appointment-booked",
+            savedAppointment,
+            {
+              attempts: 3,
+              backoff: {
+                type: "exponential",
+                delay: 1000 // Delay in milliseconds
+              }
+            }
+          );
         }
       }
     } catch (err: unknown) {
@@ -223,7 +226,7 @@ appointmentRouter.post(
           // Redirecting to appointment cancelled success page.
           res.redirect(303, "/tapaaminen/peruta/onnistuminen");
 
-          // const backgroundJobPayLoad: ICancelledAppointment = {
+          // const cancelledAppointmentData: ICancelledAppointment = {
           //   appointmentId: cancelledAppointment.appointmentId as string,
           //   startTime: cancelledAppointment.startTime,
           //   name: cancelledAppointment.name,
@@ -236,7 +239,11 @@ appointmentRouter.post(
           // Adding appointment cancelled email notification job to queue.
           // getQueue(APPOINTMENT_CANCELLED_QUEUE).add(
           //   "appointment-cancelled",
-          //   backgroundJobPayLoad
+          //   cancelledAppointmentData,
+          //   {
+          //     attempts: 3,
+          //     backoff: { type: "exponential", delay: 1000 }
+          //   }
           // );
         }
       }

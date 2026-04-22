@@ -1,4 +1,6 @@
 import express from "express";
+import dotenv from "dotenv";
+dotenv.config();
 import path from "path";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
@@ -14,9 +16,13 @@ import {
   generalErrorHandler,
   databaseErrorHandler
 } from "./middleware/errorHandler";
+import requestLogger from "./middleware/requestLogger";
 
 const app = express();
 app.set("view engine", "pug"); // Setting pug as our rendering template engine.
+if (process.env.NODE_ENV === "development") {
+  app.locals.compileDebug = true;
+}
 app.set("views", path.join(__dirname, "views"));
 app.use(helmet()); // Adding security to HTTP request headers.
 
@@ -32,6 +38,8 @@ app.use(cors());
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
+
+app.use(requestLogger); // Logging http request
 
 app.use("/api", limiter); // Setting a request rate limit on all /api routes.
 

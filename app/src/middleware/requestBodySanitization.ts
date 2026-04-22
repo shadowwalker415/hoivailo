@@ -37,8 +37,6 @@ export const sanitizeRequestBody = (
     req.sanitizedBody = sanitized;
     // Checking if request body is that service inquiry.
   } else if ("message" in req.body) {
-    console.log("Before sanitization");
-    console.log(req.body);
     const sanitized: IServiceInquiry = {
       name: stripHTML(req.body.name),
       phone: stripHTML(req.body.phone),

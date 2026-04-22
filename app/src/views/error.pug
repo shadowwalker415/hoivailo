@@ -1,0 +1,16 @@
+extends baseLayout.pug
+
+
+block title 
+  title Error | Hoivailo Oy
+
+block content 
+  - const error = errorValues || {}
+  - const message = error.message || "An error occured on the server."
+
+  h1= message 
+
+  if error && error.stack 
+    pre=error.stack
+
+

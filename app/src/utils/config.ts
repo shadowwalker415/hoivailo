@@ -3,7 +3,9 @@ dotenv.config();
 const MONGODB_URI =
   process.env.NODE_ENV === "test"
     ? process.env.MONGODB_TEST
-    : process.env.MONGODB_URI;
+    : process.env.NODE_ENV === "development"
+      ? process.env.MONGODB_DEV
+      : process.env.MONGODB_URI;
 
 const PORT = process.env.PORT;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
@@ -17,7 +19,17 @@ const REDIS_DEV_PASSWORD = process.env.DEV_REDIS_PASSWORD;
 const BASE_URL =
   process.env.NODE_ENV === "development"
     ? process.env.DEV_BASE_URL
-    : process.env.PROD_URL;
+    : process.env.PROD_BASE_URL;
+
+const RETRY_ATTEMPTS =
+  process.env.NODE_ENV === "production"
+    ? Number(process.env.RETRY_ATTEMPTS)
+    : 3;
+
+const RETRY_DELAY =
+  process.env.NODE_ENV === "production"
+    ? Number(process.env.RETRY_DELAY)
+    : 2000;
 
 if (!MONGODB_URI) {
   throw new Error("Missing MongoDB URI in environment variable");
@@ -45,6 +57,14 @@ if (!BASE_URL) {
   throw new Error("invalid environment variable value for base url");
 }
 
+if (!RETRY_ATTEMPTS) {
+  throw new Error("Invalid retry attempts settings");
+}
+
+if (!RETRY_DELAY) {
+  throw new Error("Invalid retry attempts delay settings");
+}
+
 export const REDIS_DEV_CONFIG = {
   port: REDIS_DEV_TCP_PORT,
   host: REDIS_DEV_HOST,
@@ -68,5 +88,7 @@ export default {
   SMTP_PORT,
   MAILTRAP_PASSWORD,
   MAILTRAP_USERNAME,
-  BASE_URL
+  BASE_URL,
+  RETRY_ATTEMPTS,
+  RETRY_DELAY
 };
