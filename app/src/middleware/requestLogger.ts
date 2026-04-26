@@ -6,10 +6,10 @@ const requestLogger = (req: Request, res: Response, next: NextFunction) => {
 
   res.on("finish", () => {
     const duration = Date.now() - start;
-    logger.http({
+    logger.http("HTTP request", {
       method: req.method,
       url: req.originalUrl,
-      status: req.statusCode,
+      status: res.statusCode,
       duration: `${duration}ms`,
       ip: req.ip
     });

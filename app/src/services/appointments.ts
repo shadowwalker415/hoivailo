@@ -103,15 +103,6 @@ export const generateAvailableSlots = async (
       getDateOfficial(convertDateStringTOISO8601(date_string))
     );
 
-    // Checking if database read operation failed.
-    if (!existingAppointments) {
-      throw new InternalServerError({
-        message: "An error occured on the database server",
-        statusCode: 500,
-        code: "INTERNAL_SERVER_ERROR"
-      });
-    }
-
     if (
       existingAppointments instanceof Error ||
       existingAppointments instanceof InternalServerError

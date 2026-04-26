@@ -39,8 +39,6 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-app.use(requestLogger); // Logging http request
-
 app.use("/api", limiter); // Setting a request rate limit on all /api routes.
 
 app.use(
@@ -61,7 +59,7 @@ app.use(
 
 app.use("/public", express.static(path.join(__dirname, "public"))); // Serving static files
 // app.use("/assets", express.static(path.join(__dirname, "public/assets"))); // Serving images or videos
-
+app.use(requestLogger);
 app.use("/", homeRouter);
 app.use("/palvelu", servicesRouter);
 app.use("/tapaaminen", appointmentRouter);

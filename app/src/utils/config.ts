@@ -3,9 +3,7 @@ dotenv.config();
 const MONGODB_URI =
   process.env.NODE_ENV === "test"
     ? process.env.MONGODB_TEST
-    : process.env.NODE_ENV === "development"
-      ? process.env.MONGODB_DEV
-      : process.env.MONGODB_URI;
+    : process.env.MONGODB_URI;
 
 const PORT = process.env.PORT;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
@@ -32,6 +30,7 @@ const RETRY_DELAY =
     : 2000;
 
 if (!MONGODB_URI) {
+  console.log(MONGODB_URI);
   throw new Error("Missing MongoDB URI in environment variable");
 }
 

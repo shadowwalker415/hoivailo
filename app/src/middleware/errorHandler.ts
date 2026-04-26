@@ -68,7 +68,7 @@ export const generalErrorHandler = (
       .render("error", { errorValues: { message: getErrorMessage(error) } });
   } else if (error instanceof Error) {
     res.status(500).render("error", {
-      errorValues: { message: "An unknown error occured" }
+      errorValues: { message: `${error.message}` }
     });
   } else if (error instanceof InternalServerError) {
     res.status(error.statusCode).render("error", {

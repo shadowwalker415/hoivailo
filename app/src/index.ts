@@ -21,6 +21,7 @@ const startApp = async () => {
     });
   } catch (err: unknown) {
     if (err instanceof Error) {
+      console.error(err);
       console.error("App startup failed:", err.message);
       process.exit(1);
     }
