@@ -62,7 +62,9 @@ const getOrCreateAppointmentEmail = async (
     if (err instanceof Error) {
       return err;
     }
-    return new Error("An unkown error occured");
+    return new Error(
+      "An unkown error occured getting or creating appointment email on the database"
+    );
   }
 };
 
@@ -96,7 +98,9 @@ const getOrCreateServiceInquiryEmail = async (
     if (err instanceof Error) {
       return err;
     }
-    return new Error("An unknown error occured on the database");
+    return new Error(
+      "An unknown error occured getting or creating a service inquiry email on the database"
+    );
   }
 };
 
@@ -200,8 +204,6 @@ export const processAppointmentEmails = async (
       // Throwing same error for job retry.
       throw err;
     }
-    // Throwing new error for job retry.
-    throw new Error("Job failed due to unknown reasons");
   }
 };
 
@@ -234,7 +236,5 @@ export const processServiceInquiryEmail = async (
       // Throwing error for job retry.
       throw err;
     }
-    // Throwing error for job retry.
-    throw new Error("Job failed: An error occured");
   }
 };

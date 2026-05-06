@@ -6,8 +6,8 @@ const MAIL_OPTIONS = smtpTransport({
   host: config.SMTP_HOST,
   port: config.SMTP_PORT,
   auth: {
-    user: config.MAILTRAP_USERNAME,
-    pass: config.MAILTRAP_PASSWORD
+    user: config.SMTP_USERNAME,
+    pass: config.SMTP_PASSWORD
   }
 });
 

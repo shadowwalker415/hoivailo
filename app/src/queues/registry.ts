@@ -1,6 +1,7 @@
 import { Queue, Worker, Processor } from "bullmq";
 import { Redis } from "ioredis";
-import { REDIS_DEV_CONFIG } from "../utils/config";
+import { REDIS_CONFIG } from "../utils/config";
+import logger from "../utils/logger";
 
 export interface QueueBundle {
   queue: Queue;
@@ -14,12 +15,12 @@ let redisConnectionWorker: Redis | null = null;
 const registry = new Map<string, QueueBundle>();
 
 export const initRedisAPI = async () => {
-  redisConnectionAPI = new Redis(REDIS_DEV_CONFIG);
+  redisConnectionAPI = new Redis(REDIS_CONFIG);
   await redisConnectionAPI.connect();
 };
 
 export const initRedisWorker = async () => {
-  redisConnectionWorker = new Redis(REDIS_DEV_CONFIG);
+  redisConnectionWorker = new Redis(REDIS_CONFIG);
   await redisConnectionWorker.connect();
 };
 
@@ -55,7 +56,33 @@ export const registerQueue = (
     });
 
     bundle.worker.on("failed", (job, err) => {
-      console.log(`Job with id ${job?.id} failed, ${err}`);
+      if (!job) {
+        return;
+      }
+
+      const attemptsMade = job.attemptsMade;
+      const maxAttempts = job.opts.attempts ?? 1;
+      if (attemptsMade >= maxAttempts) {
+        logger.error("Job retries exhausted", {
+          jobId: job.id,
+          attemptsMade,
+          maxAttempts,
+          error: err.message,
+          stack: err
+        });
+      } else {
+        logger.warn("Job failed, retrying", {
+          jobId: job.id,
+          attemptsMade,
+          maxAttempts,
+          error: err.message,
+          stack: err
+        });
+      }
+    });
+
+    bundle.worker.on("completed", (job) => {
+      logger.info("Job completed", { id: job.id });
     });
   }
 

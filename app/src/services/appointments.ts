@@ -27,7 +27,6 @@ const isSlotAvailable = (
   });
 };
 
-// We have to refactor this function
 // Generating available appointment time slots in ISO 8601 date format.
 const generateSlots = (
   date_string: string,
@@ -69,7 +68,7 @@ const generateSlots = (
 // Gets existing appointments from database.
 const getExistingAppointments = async (
   appointmentDate: string
-): Promise<IAppointment[] | Error | InternalServerError> => {
+): Promise<IAppointment[] | InternalServerError> => {
   try {
     // Getting all existing appointments for selected date.
     const appointments = await Appointment.find({ appointmentDate });
@@ -78,11 +77,14 @@ const getExistingAppointments = async (
     if (err instanceof Error) {
       // If we get an error that means an error occured on the database.
       return new InternalServerError({
-        message: "An error occured on the database server",
+        message: err.message,
         statusCode: 500
       });
     }
-    return new Error("An unknown error occured");
+    return new InternalServerError({
+      message: "An unknown error occured getting existing appointments",
+      statusCode: 500
+    });
   }
 };
 
@@ -103,12 +105,10 @@ export const generateAvailableSlots = async (
       getDateOfficial(convertDateStringTOISO8601(date_string))
     );
 
-    if (
-      existingAppointments instanceof Error ||
-      existingAppointments instanceof InternalServerError
-    )
+    // Checking if getting existing appointments from the database resulted in an error.
+    if (existingAppointments instanceof InternalServerError)
       return new InternalServerError({
-        message: "An error occured on the database server",
+        message: existingAppointments.message,
         statusCode: 500,
         code: "INTERNAL_SERVER_ERROR"
       });
@@ -122,7 +122,7 @@ export const generateAvailableSlots = async (
     if (err instanceof InternalServerError || err instanceof Error) {
       return err;
     }
-    return new Error("An unknown error occured");
+    return new Error("An unknown error occured generating available slots");
   }
 };
 
@@ -135,19 +135,17 @@ export const createNewAppointment = async (
       appointmentDate: getDateOfficial(appointmentInfo.startTime)
     });
     const savedAppointment = await newAppointment.save();
-    if (!savedAppointment) {
-      throw new InternalServerError({
-        message: "Failed to create new appointment document",
-        statusCode: 500,
-        code: "INTERNAL_SERVER_ERROR"
-      });
-    }
+
     return savedAppointment;
   } catch (err: unknown) {
-    if (err instanceof InternalServerError || err instanceof Error) {
+    if (err instanceof Error) {
       return err;
     }
-    return new Error("An unknown error occured");
+    return new InternalServerError({
+      message:
+        "An unknown error occured creating a new appointment document on the database",
+      statusCode: 500
+    });
   }
 };
 
@@ -171,8 +169,6 @@ export const cancelAppointment = async (
       });
 
     // Checking if the appointment had already been cancelled.
-    // In a scenario where the user attempts to cancel an appointment.
-    // But didn't get a UI update maybe due to loss of internet connection.
     if (appointment.status === "cancelled") {
       return new InternalServerError({
         message: "Appointment already cancelled",
@@ -183,15 +179,7 @@ export const cancelAppointment = async (
     // Updating appointment satus.
     appointment.status = "cancelled";
     const cancelledAppointment = await appointment.save();
-    // Checking if update was successful.
-    if (!cancelAppointment) {
-      throw new InternalServerError({
-        message:
-          "An error occured on database server: Couldn't cancel appointment",
-        statusCode: 500,
-        code: "INTERNAL_SERVER_ERROR"
-      });
-    }
+
     return cancelledAppointment;
   } catch (err: unknown) {
     if (
@@ -201,6 +189,10 @@ export const cancelAppointment = async (
     ) {
       return err;
     }
-    return new Error("An unknown error occurred");
+    return new InternalServerError({
+      message:
+        "An unknown error occured canceling booked appointment on the database",
+      statusCode: 500
+    });
   }
 };

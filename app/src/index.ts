@@ -3,26 +3,29 @@ import app from "./app";
 import mongoose from "mongoose";
 import { initRedisAPI } from "./queues/registry";
 import { initQueusForAPI } from "./queues";
+import logger from "./utils/logger";
 
 const startApp = async () => {
   try {
-    console.log("Connecting to MongoDB");
+    logger.info("Connecting to MongoDB");
+
     await mongoose.connect(config.MONGODB_URI);
 
-    console.log("Connected to MongoDB");
+    logger.info("Successfully Connected to MongoDB");
+    logger.info("Connecting to Redis");
 
     await initRedisAPI();
-    console.log("Connected to Redis");
+    logger.info("Successfully connected to Redis");
 
     initQueusForAPI();
 
     app.listen(config.PORT, () => {
-      console.log(`Server running on port ${config.PORT}`);
+      logger.info(`Server running on port ${config.PORT}`);
     });
   } catch (err: unknown) {
     if (err instanceof Error) {
-      console.error(err);
-      console.error("App startup failed:", err.message);
+      logger.error("App startup failed:", { error: err.message, stack: err });
+      logger.info("Exiting server process");
       process.exit(1);
     }
   }

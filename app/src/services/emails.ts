@@ -17,11 +17,11 @@ const constructHtmlTemplate = (
   recipient: Recipient,
   emailType: EmailType,
   reason?: string
-): string => {
+): string | Error => {
   // Checking if role is a valid role or if the email purpose is a valid purpose
   if (!isRecipient(recipient) || !isEmailType(emailType)) {
     throw new ValidationError({
-      message: "Parameters recipient or purpose was invalid",
+      message: "Recipient or purpose is invalid",
       statusCode: 400,
       code: "VALIDATION_ERROR"
     });
@@ -39,39 +39,48 @@ const constructHtmlTemplate = (
     reason,
     baseUrl: config.BASE_URL
   };
-  if (recipient === "admin" && emailType === "confirmation") {
-    // Admin appointment confirmation, notification html template.
-    template = pug.compileFile(
-      `${__dirname}/../views/emailTemplates/adminAppointmentNotification.pug`
-    );
-    html = template(locals);
-  } else if (recipient === "user" && emailType === "confirmation") {
-    // User appointment confirmation notification html template.
-    template = pug.compileFile(
-      `${__dirname}/../views/emailTemplates/userAppointmentConfirmation.pug`
-    );
-    html = template(locals);
-  } else if (recipient === "admin" && emailType === "cancellation") {
-    // Admin appointment cancellation notification html template.
-    template = pug.compileFile(
-      `${__dirname}/../views/emailTemplates/adminAppointmentCancellation.pug`
-    );
-    html = template(locals);
-  } else {
-    // User appointment cancellation notification html template.
-    template = pug.compileFile(
-      `${__dirname}/../views/emailTemplates/userCancellationNotification.pug`
-    );
-    html = template(locals);
+
+  try {
+    if (recipient === "admin" && emailType === "confirmation") {
+      // Admin appointment confirmation, notification html template.
+      template = pug.compileFile(
+        `${__dirname}/../views/emailTemplates/adminAppointmentNotification.pug`
+      );
+      html = template(locals);
+    } else if (recipient === "user" && emailType === "confirmation") {
+      // User appointment confirmation notification html template.
+      template = pug.compileFile(
+        `${__dirname}/../views/emailTemplates/userAppointmentConfirmation.pug`
+      );
+      html = template(locals);
+    } else if (recipient === "admin" && emailType === "cancellation") {
+      // Admin appointment cancellation notification html template.
+      template = pug.compileFile(
+        `${__dirname}/../views/emailTemplates/adminAppointmentCancellation.pug`
+      );
+      html = template(locals);
+    } else {
+      // User appointment cancellation notification html template.
+      template = pug.compileFile(
+        `${__dirname}/../views/emailTemplates/userCancellationNotification.pug`
+      );
+      html = template(locals);
+    }
+    return html;
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      return new Error(err.message);
+    } else {
+      return new Error("An unknown Pug compilation error occured");
+    }
   }
-  return html;
 };
 
 // Admin confirmation email helper function
 export const sendAppointmentBookedEmail = async (
   appointmentInfo: IAppointment,
   recipient: Recipient
-): Promise<SentMessageInfo | InternalServerError | ValidationError | Error> => {
+): Promise<SentMessageInfo | ValidationError | Error> => {
   try {
     // Message sample
     const html = constructHtmlTemplate(
@@ -79,6 +88,11 @@ export const sendAppointmentBookedEmail = async (
       recipient,
       "confirmation"
     );
+
+    // Checking if Pug file compilation resulted in an error.
+    if (html instanceof Error) {
+      throw new Error(html.message);
+    }
 
     // Mail options
     const mailOptions = {
@@ -92,14 +106,10 @@ export const sendAppointmentBookedEmail = async (
     // Sending email
     await transporter.sendMail(mailOptions);
   } catch (err: unknown) {
-    if (
-      err instanceof InternalServerError ||
-      err instanceof ValidationError ||
-      err instanceof Error
-    ) {
+    if (err instanceof ValidationError || err instanceof Error) {
       return err;
     }
-    return new Error("An unknown error occured");
+    return new Error("An error occured sending appointment booked email");
   }
 };
 
@@ -117,6 +127,12 @@ export const sendAppointmentCancelledEmail = async (
       "cancellation",
       reason
     );
+
+    // Checking if Pug file compilation resulted in an error.
+    if (html instanceof Error) {
+      throw new Error(html.message);
+    }
+
     // Mail options
     const mailOptions: SendMailOptions = {
       from: "noreply@hoivailo.fi",
@@ -132,14 +148,12 @@ export const sendAppointmentCancelledEmail = async (
     // Sending email
     await transporter.sendMail(mailOptions);
   } catch (err: unknown) {
-    if (
-      err instanceof InternalServerError ||
-      err instanceof ValidationError ||
-      err instanceof Error
-    ) {
+    if (err instanceof ValidationError || err instanceof Error) {
       return err;
     }
-    return new Error("An unknown error occured");
+    return new Error(
+      "An unknown error occured sending appointment cancelled email"
+    );
   }
 };
 
@@ -165,13 +179,9 @@ export const sendServiceInquiryEmail = async (
     // Sending email
     await transporter.sendMail(mailOptions);
   } catch (err: unknown) {
-    if (
-      err instanceof InternalServerError ||
-      err instanceof ValidationError ||
-      err instanceof Error
-    ) {
+    if (err instanceof ValidationError || err instanceof Error) {
       return err;
     }
-    return new Error("An unknown error occured");
+    return new Error("An uknown error occured sending service inquiry email");
   }
 };

@@ -4,6 +4,7 @@
     "module": "CommonJS", // For Node.js module system
     "lib": ["ES2020"], // Latest language features
     "moduleResolution": "node", // Standard Node.js resolution
+    "ignoreDeprecations": "6.0",
     "esModuleInterop": true, // Support default imports from CommonJS modules
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true, // Allow importing JSON files

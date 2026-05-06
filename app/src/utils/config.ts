@@ -1,93 +1,90 @@
 import dotenv from "dotenv";
+import logger from "./logger";
 dotenv.config();
-const MONGODB_URI =
-  process.env.NODE_ENV === "test"
-    ? process.env.MONGODB_TEST
-    : process.env.MONGODB_URI;
 
-const PORT = process.env.PORT;
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
-const MAILTRAP_USERNAME = process.env.MAILTRAP_USERNAME;
-const MAILTRAP_PASSWORD = process.env.MAILTRAP_PASSWORD;
-const SMTP_HOST = process.env.SMTP_HOST;
-const SMTP_PORT = Number(process.env.SMTP_PORT);
-const REDIS_DEV_HOST = process.env.DEV_REDIS_HOST;
-const REDIS_DEV_TCP_PORT = Number(process.env.DEV_REDIS_TCP_PORT);
-const REDIS_DEV_PASSWORD = process.env.DEV_REDIS_PASSWORD;
-const BASE_URL =
-  process.env.NODE_ENV === "development"
-    ? process.env.DEV_BASE_URL
-    : process.env.PROD_BASE_URL;
+function requireENV(name: string): string {
+  const value = process.env[name];
+  if (!value || value.trim() === "") {
+    logger.error(`Missing required environment variable: ${name}`);
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
 
-const RETRY_ATTEMPTS =
-  process.env.NODE_ENV === "production"
-    ? Number(process.env.RETRY_ATTEMPTS)
-    : 3;
-
-const RETRY_DELAY =
-  process.env.NODE_ENV === "production"
-    ? Number(process.env.RETRY_DELAY)
-    : 2000;
-
-if (!MONGODB_URI) {
-  console.log(MONGODB_URI);
-  throw new Error("Missing MongoDB URI in environment variable");
+  return value;
 }
 
-if (!PORT) {
-  throw new Error("Missing PORT in environment variable");
+function requireNumberENV(name: string): number {
+  const value = process.env[name];
+  const parsedValue = Number(value);
+
+  if (isNaN(parsedValue)) {
+    logger.warn(`Invalid number for environment variable: ${name}`);
+    throw new Error(`Invalid number for environment variable: ${name}`);
+  }
+
+  return parsedValue;
 }
 
-if (!ADMIN_EMAIL) {
-  throw new Error("Missing ADMIN_EMAIL in environmnet viarable");
+function optionalENV(name: string, defaultValue: string): string {
+  const value = process.env[name];
+
+  if (!value) {
+    logger.warn(
+      `Environment variable ${name} not set. Using default: ${defaultValue}`
+    );
+    // This is only for development purposes. Where we have a dev env file.
+    if (!process.env[defaultValue]) {
+      return defaultValue;
+    }
+    return process.env[defaultValue];
+  }
+  return value;
 }
 
-if (!MAILTRAP_PASSWORD || !MAILTRAP_USERNAME || !SMTP_HOST || !SMTP_PORT) {
-  throw new Error("There's an invalid environment variable value for Mailtrap");
-}
-
-if (!REDIS_DEV_HOST || !REDIS_DEV_PASSWORD || !REDIS_DEV_TCP_PORT) {
-  throw new Error(
-    "There's an invalid enviroment variable value for redis cloud"
-  );
-}
-
-if (!BASE_URL) {
-  throw new Error("invalid environment variable value for base url");
-}
-
-if (!RETRY_ATTEMPTS) {
-  throw new Error("Invalid retry attempts settings");
-}
-
-if (!RETRY_DELAY) {
-  throw new Error("Invalid retry attempts delay settings");
-}
-
-export const REDIS_DEV_CONFIG = {
-  port: REDIS_DEV_TCP_PORT,
-  host: REDIS_DEV_HOST,
+export const REDIS_CONFIG = {
+  port:
+    process.env.NODE_ENV === "production"
+      ? requireNumberENV("REDIS_PORT")
+      : requireNumberENV("REDIS_DEV_PORT"),
+  host:
+    process.env.NODE_ENV === "production"
+      ? requireENV("REDIS_HOST")
+      : requireENV("REDIS_DEV_HOST"),
   username: "default",
-  password: REDIS_DEV_PASSWORD,
+  password:
+    process.env.NODE_ENV === "production"
+      ? requireENV("REDIS_PASSWORD")
+      : optionalENV("REDIS_PASSWORD", "REDIS_DEV_PASSWORD"),
   maxRetriesPerRequest: null,
   enableReadyCheck: false,
   lazyConnect: true
 };
 
-export const JOB_OPTIONS = {
+export const QUEUE_JOB_OPTIONS = {
   removeOnComplete: false,
   removeOnFail: { age: 24 * 3600 } // Keeping failed jobs for up to 24 hours
 };
 
 export default {
-  MONGODB_URI,
-  PORT,
-  ADMIN_EMAIL,
-  SMTP_HOST,
-  SMTP_PORT,
-  MAILTRAP_PASSWORD,
-  MAILTRAP_USERNAME,
-  BASE_URL,
-  RETRY_ATTEMPTS,
-  RETRY_DELAY
+  MONGODB_URI:
+    process.env.NODE_ENV === "production"
+      ? requireENV("MONGODB_URI")
+      : optionalENV("MONGODB_URI", "MONGODB_DEV_URI"),
+  PORT: parseInt(optionalENV("PORT", "3001"), 10),
+  ADMIN_EMAIL: optionalENV("ADMIN_EMAIL", "exampleadmin@gmail.com"),
+  SMTP_HOST: optionalENV("SMTP_HOST", "SMTP_DEV_HOST"),
+  SMTP_PORT:
+    process.env.NODE_ENV === "production"
+      ? requireNumberENV("SMTP_PORT")
+      : requireNumberENV("SMTP_DEV_PORT"),
+  SMTP_PASSWORD:
+    process.env.NODE_ENV === "production"
+      ? requireENV("SENDGRID_PASSWORD")
+      : optionalENV("SENDGRID_PASSWORD", "MAILTRAP_PASSWORD"),
+  SMTP_USERNAME:
+    process.env.NODE_ENV === "production"
+      ? requireENV("SENDGRID_USERNAME")
+      : optionalENV("SENDGRID_USERNAME", "MAILTRAP_USERNAME"),
+  BASE_URL: optionalENV("BASE_URL", "BASE_DEV_URL"),
+  RETRY_ATTEMPTS: parseInt(optionalENV("RETRY_ATTEMPTS", "3"), 10),
+  RETRY_DELAY: parseInt(optionalENV("RETRY_DELAY", "2000"))
 };
