@@ -86,5 +86,7 @@ export default {
       : optionalENV("SENDGRID_USERNAME", "MAILTRAP_USERNAME"),
   BASE_URL: optionalENV("BASE_URL", "BASE_DEV_URL"),
   RETRY_ATTEMPTS: parseInt(optionalENV("RETRY_ATTEMPTS", "3"), 10),
-  RETRY_DELAY: parseInt(optionalENV("RETRY_DELAY", "2000"))
+  RETRY_DELAY: parseInt(optionalENV("RETRY_DELAY", "2000")),
+  OPENING_HOUR: requireNumberENV("OPENING_HOUR"),
+  CLOSING_HOUR: requireNumberENV("CLOSING_HOUR")
 };

@@ -10,7 +10,7 @@ import {
   isCurrentDate,
   isWorkingDay,
   isPastDate,
-  getDifferenceInMonths,
+  isOverThreeMonths,
   isBeforeOpeningHour,
   isAfterClosingHour,
   getDifference,
@@ -149,14 +149,17 @@ const parseTime = (time: unknown, error: FieldErrors): Date | undefined => {
     error.time = "Time is required";
     return;
   }
+
   // Checking if appointment date time is a valid ISO 8601 date time string.
   if (!isString(time) || !isDate(time)) {
     error.time = "TIme must be a valid ISO 8601 date time string.";
     return;
   }
 
+  const date = new Date(time);
+
   // Checking if appointment date time is same as current date.
-  if (isCurrentDate(new Date(time))) {
+  if (isCurrentDate(date)) {
     error.time = "An appointment cannot be booked on the same day.";
     return;
   }
@@ -173,7 +176,7 @@ const parseTime = (time: unknown, error: FieldErrors): Date | undefined => {
   }
 
   // Checking if appointment date time is pver 3 months.
-  if (getDifferenceInMonths(new Date(time)) >= 3) {
+  if (isOverThreeMonths(date)) {
     error.time = "Appointment date time cannot be over 3 months.";
     return;
   }
@@ -189,7 +192,7 @@ const parseTime = (time: unknown, error: FieldErrors): Date | undefined => {
     error.time = "Appointment start or end time cannot be after closing hours.";
     return;
   }
-  return new Date(time);
+  return date;
 };
 
 const parseName = (name: unknown, error: FieldErrors): string | undefined => {

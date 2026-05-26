@@ -4,9 +4,10 @@
   "description": "Backend server for Hoivailo Oy",
   "main": "index.js",
   "scripts": {
-    "test:appointment": "cross-env NODE_ENV=test mocha -g 'Appointments' ",
-    "test:slots": "cross-env NODE_ENV=test mocha -g 'Slots'",
-    "test:contact": "cross-env NODE_ENV=test mocha -g 'Contact'",
+    "test:appointment": "cross-env NODE_ENV=test mocha ./src/test/appointment.test.ts",
+    "test:slots": "cross-env NODE_ENV=test mocha ./src/availableSlots.test.ts",
+    "test:contact": "cross-env NODE_ENV=test mocha ./src/test/contact.test.ts",
+    "test:validation": "cross-env NODE_ENV=test mocha ./src/test/validation.test.ts",
     "tsc": "tsc",
     "lint": "eslint .",
     "dev": "cross-env NODE_ENV=development ts-node-dev ./src/index.ts",

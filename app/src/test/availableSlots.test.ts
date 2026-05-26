@@ -2,7 +2,7 @@ import app from "../app";
 import supertest from "supertest";
 import config from "../utils/config";
 import mongoose from "mongoose";
-import Appointment from "../model/appointment";
+import { Appointment } from "../model/appointment";
 import { describe, it } from "mocha";
 import assert from "assert";
 
