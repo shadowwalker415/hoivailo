@@ -1,4 +1,4 @@
-import app from "../app";
+import app from "../../app";
 import supertest from "supertest";
 import { describe, it } from "mocha";
 import assert from "assert";

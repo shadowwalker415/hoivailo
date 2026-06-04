@@ -62,11 +62,23 @@ export const isBeforeOpeningHour = (dateString: string): boolean => {
 };
 
 // Checking if appointment start time is after closing hours(18:00 in this case)
+// Note: This function and isBeforeOpeningHour will be refactored into one unified function isWithinWorkHours()
 export const isAfterClosingHour = (dateString: string): boolean => {
-  if (!isValidDate(dateString)) {
+  const date = dateString.split(" ")[0];
+  if (!isValidDate(date)) {
     throw new Error("Date string format is invalid");
   }
-  return Number(format(new Date(dateString), "H")) > config.CLOSING_HOUR;
+
+  if (!isValidTime(dateString)) {
+    throw new Error("Time is invalid");
+  }
+
+  const hour = Number(format(new Date(dateString), "H"));
+
+  if (hour > config.CLOSING_HOUR || hour < config.OPENING_HOUR) {
+    return true;
+  }
+  return false;
 };
 
 // Checking if the date of the appointment start or end time is the current date.
@@ -122,7 +134,7 @@ export const isOverThreeMonths = (startTime: Date): boolean => {
   }
   const numberOfMonths = differenceInMonths(startTime, new Date());
 
-  if (numberOfMonths > 3 || numberOfMonths < 0) {
+  if (numberOfMonths > 3) {
     return true;
   }
   return false;

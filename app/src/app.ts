@@ -68,4 +68,4 @@ app.use(databaseErrorHandler);
 app.use(generalErrorHandler);
 app.use(unknownEndPoint);
 
-export default app;
+export { app };

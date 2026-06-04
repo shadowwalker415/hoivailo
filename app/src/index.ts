@@ -1,5 +1,5 @@
 import config from "./utils/config";
-import app from "./app";
+import { app } from "./app";
 import mongoose from "mongoose";
 import { initRedisAPI } from "./queues/registry";
 import { initQueusForAPI } from "./queues";

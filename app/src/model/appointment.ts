@@ -103,8 +103,8 @@ const appointmentSchema = new Schema<IAppointment>(
 );
 
 appointmentSchema.set("toJSON", {
-  transform: function (_doc, ret) {
-    ret.id = ret._id;
+  transform: function (_doc, ret: any) {
+    ret.id = ret._id.toString();
     delete ret._id;
     delete ret.__v;
     return ret;

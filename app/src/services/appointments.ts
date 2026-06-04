@@ -14,15 +14,15 @@ import InternalServerError from "../errors/internalServerError";
 import EntityNotFoundError from "../errors/entityNotFoundError";
 
 // Helper function for filtering already booked appointments.
-const isSlotAvailable = (
-  slotStart: string,
-  slotEnd: string,
+export const isSlotAvailable = (
+  startTime: string,
+  endTime: string,
   appointments: IAppointment[]
 ): boolean => {
-  return !appointments.some((appt) => {
+  return !appointments.some((appointment) => {
     return (
-      convertDateTimeToISO8601(slotStart) < appt.endTime &&
-      convertDateTimeToISO8601(slotEnd) > appt.startTime
+      convertDateTimeToISO8601(startTime) < appointment.endTime &&
+      convertDateTimeToISO8601(endTime) > appointment.startTime
     );
   });
 };

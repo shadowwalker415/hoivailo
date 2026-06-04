@@ -1,18 +1,18 @@
-import app from "../app";
+import app from "../../app";
 import supertest from "supertest";
-import config from "../utils/config";
+import config from "../../utils/config";
 import mongoose from "mongoose";
-import { Appointment } from "../model/appointment";
+import { Appointment } from "../../model/appointment";
 import { describe, it } from "mocha";
 import assert from "assert";
 
 import {
   wasYesterday,
-  isToday,
+  currentDay,
   getNextWeekend,
-  overThreeMonths,
+  overThreeMonthsDate,
   getNextWorkingDay
-} from "./testHelpers";
+} from "../testHelpers";
 
 const server = supertest(app);
 
@@ -32,7 +32,7 @@ describe("Available Slots:", () => {
     it("Returns an empty slot", async () => {
       const response = await server
         .get("/api/v1/availability")
-        .query({ date: isToday() })
+        .query({ date: currentDay() })
         .expect("Content-Type", "application/json; charset=utf-8")
         .expect(200);
       let resBody;
@@ -112,7 +112,7 @@ describe("Available Slots:", () => {
     it("Returns an empty slot array", async () => {
       const response = await server
         .get("/api/v1/availability")
-        .query({ date: overThreeMonths() })
+        .query({ date: overThreeMonthsDate() })
         .expect("Content-Type", "application/json; charset=utf-8")
         .expect(200);
       let resBody;

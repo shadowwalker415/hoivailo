@@ -40,6 +40,8 @@ function optionalENV(name: string, defaultValue: string): string {
   return value;
 }
 
+export const getInMemoryMongoUri = async () => {};
+
 export const REDIS_CONFIG = {
   port:
     process.env.NODE_ENV === "production"

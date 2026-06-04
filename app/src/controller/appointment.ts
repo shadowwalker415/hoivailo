@@ -16,7 +16,7 @@ import {
   isWorkingDay,
   getCurrentDate,
   getDateOfficial,
-  getDifferenceInMonths,
+  isOverThreeMonths,
   convertDateStringFromISO8601
 } from "../utils/helpers";
 import { generateAvailableSlots } from "../services/appointments";
@@ -81,9 +81,7 @@ appointmentRouter.get(
       ) {
         res.status(200).render("noSlotsFound");
         // Checking if requested date is more than 3 months away.
-      } else if (
-        getDifferenceInMonths(new Date(req.appointmentSlotDate)) >= 3
-      ) {
+      } else if (isOverThreeMonths(new Date(req.appointmentSlotDate))) {
         res.status(200).render("noSlotsFound");
       } else {
         const availableSlots = await generateAvailableSlots(

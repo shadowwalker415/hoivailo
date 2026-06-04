@@ -40,7 +40,6 @@ export const getAppointmentDate = async (
     next();
   } catch (err: unknown) {
     if (err instanceof ValidationError || err instanceof Error) {
-      console.log(err);
       next(err);
     } else {
       next(

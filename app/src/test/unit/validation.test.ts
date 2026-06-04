@@ -4,8 +4,9 @@ import {
   isPastDate,
   isValidDate,
   isBeforeOpeningHour,
-  isOverThreeMonths
-} from "../utils/helpers";
+  isOverThreeMonths,
+  isAfterClosingHour
+} from "../../utils/helpers";
 import {
   getNextWorkingDay,
   wasYesterday,
@@ -14,7 +15,7 @@ import {
   getNextWeekend,
   getNextPublicHoliday,
   overThreeMonthsDate
-} from "./testHelpers";
+} from "../testHelpers";
 import { format } from "date-fns";
 
 describe("isWorkingDay()", () => {
@@ -123,6 +124,32 @@ describe("isOverThreeMonths()", () => {
   it("Returns true for past dates", () => {
     const dateString = wasYesterday();
     const result = isOverThreeMonths(new Date(dateString));
+    assert.strictEqual(result, true);
+  });
+
+  it("Returns false for date not over three months from current date", () => {
+    const dateString = currentDay();
+    const result = isOverThreeMonths(new Date(dateString));
+    assert.strictEqual(result, false);
+  });
+});
+
+describe("isAfterClosingHour()", () => {
+  it("Returns false for date time strings that are within work hours", () => {
+    const time = "2025-04-12 10:00";
+    const result = isAfterClosingHour(time);
+    assert.strictEqual(result, false);
+  });
+
+  it("Returns true for date time strings that are over closing hour", () => {
+    const time = "2025-04-12 19:00";
+    const result = isAfterClosingHour(time);
+    assert.strictEqual(result, true);
+  });
+
+  it("Returns true for date time strings that are before opening hours", () => {
+    const time = "2025-04-12 07:00";
+    const result = isAfterClosingHour(time);
     assert.strictEqual(result, true);
   });
 });
