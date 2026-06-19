@@ -151,26 +151,26 @@ export const createNewAppointment = async (
 
 // Appointment cancellation helper function.
 export const cancelAppointment = async (
-  appointmentID: string
+  appointmentId: string
 ): Promise<
   IAppointment | EntityNotFoundError | InternalServerError | Error
 > => {
   try {
     const appointment = await Appointment.findOne({
-      appointmentId: appointmentID
+      appointmentId
     });
     // Checking if the appointment exist.
     if (!appointment)
       // This is a place holder. We will redirect to a not found page if appointment was not found.
       throw new EntityNotFoundError({
-        message: `Appointment with appointment ID (${appointmentID}) not found`,
+        message: `Appointment with this ID was not found`,
         statusCode: 404,
         code: "NOT_FOUND"
       });
 
     // Checking if the appointment had already been cancelled.
     if (appointment.status === "cancelled") {
-      return new InternalServerError({
+      throw new InternalServerError({
         message: "Appointment already cancelled",
         statusCode: 500,
         code: "INTERNAL_SERVER_ERROR"

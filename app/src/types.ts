@@ -37,5 +37,9 @@ export interface Slot {
 
 export interface CustomRequest extends Request {
   appointmentSlotDate?: string;
-  sanitizedBody?: IAppointment | IAppointmentCancel | IServiceInquiry;
+  sanitizedBody?:
+    | IAppointment
+    | IAppointmentCancel
+    | IServiceInquiry
+    | undefined;
 }

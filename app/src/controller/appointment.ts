@@ -24,8 +24,8 @@ import ValidationError from "../errors/validationError";
 import InternalServerError from "../errors/internalServerError";
 import EntityNotFoundError from "../errors/entityNotFoundError";
 import { sanitizeRequestBody } from "../middleware/requestBodySanitization";
-import { getQueue } from "../queues/registry";
-import { APPOINTMENT_BOOKED_QUEUE } from "../queues/appointment-booked.queue";
+// import { getQueue } from "../queues/registry";
+// import { APPOINTMENT_BOOKED_QUEUE } from "../queues/appointment-booked.queue";
 // import { APPOINTMENT_CANCELLED_QUEUE } from "../queues/appointment-cancelled.queue";
 // import { ICancelledAppointment } from "../model/appointment";
 
@@ -143,7 +143,6 @@ appointmentRouter.post(
         ) {
           throw new Error(availableSlots.message);
         }
-        console.log(validationResult);
         res.status(200).render("appointment", {
           errorValues: validationResult,
           fieldValues: req.body,
@@ -164,17 +163,17 @@ appointmentRouter.post(
           res.redirect(303, "/tapaaminen/aika/onnistuminnen");
 
           // Adding email background job to queue.
-          getQueue(APPOINTMENT_BOOKED_QUEUE).add(
-            "appointment-booked",
-            savedAppointment,
-            {
-              attempts: 3,
-              backoff: {
-                type: "exponential",
-                delay: 1000 // Delay in milliseconds
-              }
-            }
-          );
+          // getQueue(APPOINTMENT_BOOKED_QUEUE).add(
+          //   "appointment-booked",
+          //   savedAppointment,
+          //   {
+          //     attempts: 3,
+          //     backoff: {
+          //       type: "exponential",
+          //       delay: 1000 // Delay in milliseconds
+          //     }
+          //   }
+          // );
         }
       }
     } catch (err: unknown) {
@@ -204,22 +203,39 @@ appointmentRouter.post(
       );
 
       if (!isIAppoinmentCancel(validatedBody)) {
-        console.log(validatedBody);
         res.status(200).render("cancelAppointment", {
           errorValues: validatedBody,
           fieldValues: req.body
         });
       } else {
         // Cancelling appointment
-        const cancelledAppointment = await cancelAppointment(
+        const queryResult = await cancelAppointment(
           validatedBody.appointmentId
         );
 
-        if (
-          cancelledAppointment instanceof EntityNotFoundError ||
-          cancelledAppointment instanceof Error
-        ) {
-          throw new Error(cancelledAppointment.message);
+        // Checking if appointment was not found.
+        if (queryResult instanceof EntityNotFoundError) {
+          res.status(200).render("cancelAppointment", {
+            errorValues: {
+              id: queryResult.message
+            },
+            fieldValues: {
+              appointmentId: req.body.appointmentId,
+              reason: req.body.reason
+            }
+          });
+
+          // Checking if appointment had already been cancelled.
+        } else if (queryResult instanceof InternalServerError) {
+          res.status(200).render("cancelAppointment", {
+            errorValues: {
+              id: queryResult.message
+            },
+            fieldValues: {
+              appointmentId: req.body.appointmentId,
+              reason: req.body.reason
+            }
+          });
         } else {
           // Redirecting to appointment cancelled success page.
           res.redirect(303, "/tapaaminen/peruta/onnistuminen");

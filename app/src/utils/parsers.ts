@@ -117,16 +117,16 @@ const parseAppointmentID = (
   error: FieldErrors
 ): string | undefined => {
   if (!id) {
-    error.id = "Appointment is required.";
+    error.id = "Appointment ID is required";
     return;
   }
   if (!isString(id)) {
-    error.id = "Invalid appointment id.";
+    error.id = "Invalid appointment ID";
     return;
   }
 
   if (!isValidID(id)) {
-    error.id = "Invalid appointment id.";
+    error.id = "Invalid appointment ID";
     return;
   }
   return id;

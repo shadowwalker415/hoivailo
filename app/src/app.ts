@@ -8,7 +8,7 @@ import helmet from "helmet";
 import hpp from "hpp";
 import morgan from "morgan";
 import appointmentRouter from "./controller/appointment";
-import contactRouter from "./controller/contact";
+import serviceInquiryRouter from "./controller/serviceInquiry";
 import servicesRouter from "./controller/services";
 import homeRouter from "./controller/home";
 import {
@@ -59,11 +59,17 @@ app.use(
 
 app.use("/public", express.static(path.join(__dirname, "public"))); // Serving static files
 // app.use("/assets", express.static(path.join(__dirname, "public/assets"))); // Serving images or videos
-app.use(requestLogger);
+
+if (
+  process.env.NODE_ENV === "production" ||
+  process.env.NODE_ENV === "development"
+) {
+  app.use(requestLogger);
+}
 app.use("/", homeRouter);
 app.use("/palvelu", servicesRouter);
 app.use("/tapaaminen", appointmentRouter);
-app.use("/yhteistiedot", contactRouter);
+app.use("/yhteistiedot", serviceInquiryRouter);
 app.use(databaseErrorHandler);
 app.use(generalErrorHandler);
 app.use(unknownEndPoint);

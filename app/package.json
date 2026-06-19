@@ -10,6 +10,7 @@
     "test:validation": "cross-env NODE_ENV=test mocha ./src/test/unit/validation.test.ts",
     "test:unit.appointment": "cross-env NODE_ENV=test mocha ./src/test/unit/appointment.test.ts",
     "test:integration.appointment": "cross-env NODE_ENV=test mocha ./src/test/integration/appointment.test.ts",
+    "test:integration.serviceInquiry": "cross-env NODE_ENV=test mocha ./src/test/integration/serviceInquiry.test.ts",
     "tsc": "tsc",
     "lint": "eslint .",
     "dev": "cross-env NODE_ENV=development ts-node-dev ./src/index.ts",

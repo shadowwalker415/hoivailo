@@ -16,6 +16,10 @@ export const sanitizeRequestBody = (
   _res: Response,
   next: NextFunction
 ) => {
+  if (!req.body) {
+    req.sanitizedBody = undefined;
+    return next();
+  }
   // Checking if request body is that of appointment booking.
   if ("startTime" in req.body && "endTime" in req.body) {
     const sanitized: IAppointment = {
@@ -28,8 +32,6 @@ export const sanitizeRequestBody = (
     req.sanitizedBody = sanitized;
     // Checking if request body is that of appointment cancelation.
   } else if ("appointmentId" in req.body && "reason" in req.body) {
-    console.log("Without sanitization");
-    console.log(req.body);
     const sanitized: IAppointmentCancel = {
       appointmentId: stripHTML(req.body.appointmentId),
       reason: stripHTML(req.body.reason)

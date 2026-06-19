@@ -67,7 +67,7 @@ export const generalErrorHandler = (
       .status(error.statusCode)
       .render("error", { errorValues: { message: getErrorMessage(error) } });
   } else if (error instanceof Error) {
-    res.status(500).render("error", {
+    res.status(400).render("error", {
       errorValues: { message: `${error.message}` }
     });
   } else if (error instanceof InternalServerError) {
